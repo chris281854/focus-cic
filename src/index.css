@@ -1,15 +1,17 @@
 :root {
-  --primary-color: #011129;
-  --third-color: rgb(30, 242, 10);
-  --second-color: rgb(0, 122, 255);
+--text: #eef1f4;
+--background: #000910;
+--primary: #041028;
+--secondary: #3099FF;
+--accent: #07ed2a;
 
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  font-family: poppins, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  /* background-color: var(--primary-color); */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
