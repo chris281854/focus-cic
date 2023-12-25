@@ -5,14 +5,15 @@
 --secondary: #09039c;
 --accent: #07ed2a;
 } */
-
-
+#root {
+    height: 100%;
+    min-height: 100%;
+}
 
 .welcome-container {
     background-color: var(--background);
     display: flex;
     width: 100%;
-    height: fit-content;
     justify-content: center;
     align-items: center;
 }
@@ -33,7 +34,6 @@
 }
 .header-welcome a {
     color: white;
-    border: solid 1px black;
     height: 2rem;
     width: auto;
     padding: 1rem;
@@ -44,10 +44,9 @@
 .tittle-header {
     display: flex;
     color: white;
-    border: solid 1px black;
     padding: 1rem;
     height: 5vh;
-    width: 20rem;
+    width: fit-content;
     align-items: center;
     align-self: center;
     flex-direction: row;
@@ -56,34 +55,66 @@
     height: 50px;
 }
 .container {
-    height: 100%;
+    display: flex;
+    padding-top: 20vh;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: fit-content;
+    margin-bottom: 10vh;
+}
+.start-div {
+    width: 100%;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('Wallpaper4.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    justify-content: center;
+    align-items: center;
 }
 .box {
     display: flex;
     padding: 3rem;
-    border-radius: 5%;
-    height: 10;
-    box-sizing: border-box;
+    margin: 1rem;
+    border-radius: 20px;
+    height: fit-content;
+    width: fit-content;
+    box-sizing: content-box;
     background-color: var(--primary);
 }
 
 .cards {
     display: flex;
+    width: 90%;
+    height: 100%;
     flex-wrap: wrap;
-
+    justify-content: center;
+    align-items: center;
+    position: static;
+    padding: 1rem;
 }
 .card {
     display: flex;
-    padding: 3rem;
-    border-radius: 5%;
-    height: 10;
-    box-sizing: border-box;
+    /* min-width: 40%; */
+    width: 500px;
+    height: 400px;
+    padding: 1rem;
+    border-radius: 20px;
     background-color: var(--primary);
+    margin: 1rem;
+    align-items: center;
+    justify-content: center;
+}
+.card img {
+    size: 100%;
+    
 }
 
 .footer-welcome {
     display: flex;
-    position: absolute;
+    position: static;
     bottom: 0;
     height: fit-content;
     width: 100%;
@@ -105,22 +136,19 @@
 
 }
 
-
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    height: 100%;
-}
-
 .text-block {
     display: flex;
     color: white;
-    border: solid 1px black;
     padding: 1rem;
     width: 80%;
     align-items: center;
     align-self: center;
     flex-direction: row;
+    font-size: larger;
+    font-family: 'Sen';
+}
+mark {
+    background-color: transparent;
+    color: var(--accent);
+    text-shadow: 10px 10px 30px;
 }
