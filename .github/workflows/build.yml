@@ -5,10 +5,10 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: 
-      main
+      [main,test]
   pull_request: 
     branches: 
-        main
+        [main,test]
     types: 
       - closed
 
