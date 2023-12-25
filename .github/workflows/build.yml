@@ -1,37 +1,60 @@
-name: Deploy react app on github pages
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
 on:
+  # Runs on pushes targeting the default branch
   push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+    branches: 
+      main
+  pull_request: 
+    branches: 
+        main
+    types: 
+      - closed
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref}}-${{ inputs.aws-env }}-${{ inputs.github-env }}
+    cancel-in-progress: true
+
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - name: Set up Node.js
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 18.16.1
-            - name: Cache node modules
-              uses: actions/cache@v2
-              with:
-                  path: ~/.npm
-                  key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.os }}-node-
-            - name: Install dependencies
-              run: npm ci
-            - name: Build
-              run: npm run build --if-present
-            - name: Deploy
-              uses: JamesIves/github-pages-deploy-action@4.1.0
-              with:
-                  branch: gh-pages
-                  folder: build
-                  clean: true
-                  token: ${{ secrets.GITHUB_TOKEN }}
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetches all history for all tags and branches
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+      - name: Install dependencies
+        run: |
+          npm install
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload entire repository
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3
