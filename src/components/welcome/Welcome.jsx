@@ -1,60 +1,130 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import "./Welcome.css"
-import Wallpaper from "./Wallpaper.jpg"
 
 export default function Wellcome() {
+  const [scrollY, setScrollY] = useState(0)
+
+  //Sombreado de header
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
+
+  //Barra de separación de texto
+  const ColoredLine = ({ color, height, width }) => (
+    <hr
+      style={{
+        color: color,
+        backgroundColor: color,
+        height: height,
+        width: width,
+        border: "none",
+      }}
+    />
+  )
+
   return (
     <>
       <div className="welcome-container">
-        <header className="header-welcome">
+        <header
+          className={`${
+            scrollY > 0 ? "header-welcome scrolled-header" : "header-welcome"
+          }`}>
           <div className="tittle-header">
             <img src="/Focus Logo Vector Large.png" alt="Logo" />
             <h2>Focus</h2>
           </div>
           <div>
-            <a href="">log in</a>
+            <a href="">About Us</a>
+            <a href="">log In</a>
             <a href="">Register</a>
           </div>
         </header>
         <div className="container">
           <div className="start-div">
-          <div className="box">
-            <h1>Esto, es <mark>Focus</mark></h1>
+            <div className="box">
+              <h1>
+                Esto, es <mark>Focus</mark>
+              </h1>
+            </div>
           </div>
-          </div>
-          <br />
           <div className="text-block">
-            Focus Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-            Quibusdam repellendus quae ea et, officiis dolores nihil asperiores
-            est, sapiente dignissimos laudantium. Quod temporibus deleniti quae
-            impedit expedita ex et earum? Lorem ipsum dolor, sit amet
-            consectetur adipisicing elit. Reiciendis odit expedita optio?
-            Quibusdam, quae explicabo neque nihil architecto eligendi distinctio
-            id, dolore nostrum inventore unde! Voluptatibus iure ipsam illo
-            dignissimos. Obcaecati dignissimos pariatur, ducimus iure ipsa vero
-            optio corrupti numquam vitae reiciendis vel ex temporibus, sapiente
-            placeat atque alias quam quod maxime perspiciatis inventore nostrum
-            repellendus ut! Culpa, doloremque veniam. Voluptates, laborum?
-            Molestiae dicta voluptate quasi laudantium tempora commodi est
-            labore quidem? Blanditiis voluptas cupiditate in! Possimus adipisci
-            velit omnis temporibus provident illo vero eaque dolorem ratione
-            recusandae. Sint, quas? Quasi reiciendis rem tempore tempora nobis,
-            ipsum qui dignissimos aliquid iste, fuga dolore, doloribus quam
-            quis. Quaerat ipsum molestiae laborum. Earum velit neque pariatur
-            libero provident dignissimos porro a eius? Sit tempore facilis qui
-            nihil fugit quod ex reprehenderit ea totam nemo. Sit quam, sunt
-            soluta mollitia explicabo ullam cumque fugiat, minus perferendis
-            corrupti doloremque suscipit perspiciatis ad sapiente voluptatem.
+            <h1>The Focus Project</h1>
+            <ColoredLine color="white" height="2px" width="600px" />
+            <br />
+            <p>
+              Focus es tu aliado definitivo para dirigir todos los
+              aspectos de tu vida hacia la estabilidad y el éxito. Nuestra
+              plataforma te proporciona las herramientas esenciales para
+              organizar tu estilo de vida, desarrollar hábitos sólidos y
+              embarcarte en un viaje de superación personal.
+              <br /><br />
+              Enfoque: En la vertiginosa era moderna, las distracciones
+              interminables nos impiden concentrarnos en lo que realmente
+              importa. The Focus Project te ayuda a dirigir tu atención hacia lo
+              correcto: tu futuro, tus relaciones, tu salud física, mental y
+              espiritual, tu bienestar general.
+              <br /><br />
+              Control: Recupera el control de tu vida al rechazar la distracción
+              del entretenimiento instantáneo. Construye tu fuerza de voluntad,
+              elige tu propio camino y conviértete en la mejor versión de ti
+              mismo.
+              <br /><br />
+              Herramientas de organización, planificación,
+              seguimiento y desarrollo de hábitos que necesitas para tomar el
+              control de tu vida. 
+              <br /><br />
+              <mark>Organiza tus tareas diarias:</mark> A través de
+              listas de tareas y recordatorios, mantente en la cima de tus
+              responsabilidades diarias.
+              <br /><br />
+              <mark>Planifica tu agenda:</mark> Crea y organiza tu
+              futuro con una planificación efectiva.
+              <br /><br />
+              <mark>Enfócate en lo que importa:</mark>
+              Trabaja en las áreas realmente importantes de tu vida. 
+              <br /><br />
+              <mark>Recordatorios</mark>: Nuestra plataforma se encargará de planificar,
+              organizar y recordarte todo de la manera más eficiente posible.
+            </p>
           </div>
           <div className="cards">
-            <div className="card">Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga nisi laborum, nobis alias assumenda in ullam quis iste veritatis recusandae aliquid delectus cupiditate, quo tenetur pariatur omnis soluta quidem temporibus!</div>
-            <div className="card"><img src="https://placebear.com/g/300/300" alt="Test img" /></div>
-            <div className="card"><img src="https://placebear.com/g/300/300" alt="Test img" /></div>
-            <div className="card">Lorem ipsum dolor sit amet consectetur adipisicing elit. A distinctio placeat quae voluptatibus nobis odit impedit enim neque sint tempore, eligendi hic non molestias perspiciatis aut nesciunt, recusandae et necessitatibus?</div>
+            <div className="card">
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
+                nisi laborum, nobis alias assumenda in ullam quis iste veritatis
+                recusandae aliquid delectus cupiditate, quo tenetur pariatur
+                omnis soluta quidem temporibus!
+              </p>
+            </div>
+            <div className="img-div">
+              <img src="https://placebear.com/g/300/300" alt="Test img" />
+            </div>
+            <div className="img-div">
+              <img src="https://placebear.com/g/300/300" alt="Test img" />
+            </div>
+            <div className="card">
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. A
+                distinctio placeat quae voluptatibus nobis odit impedit enim
+                neque sint tempore, eligendi hic non molestias perspiciatis aut
+                nesciunt, recusandae et necessitatibus?
+              </p>
+            </div>
           </div>
           <div className="text-box">
-            <h1>Empieza a tomar el <mark>Control</mark></h1>
-            <button className="subscribe-button">¡Suscríbete ahora!<br />(Es gratis)</button>
+            <h1>
+              Empieza a tomar el <mark>Control</mark>
+            </h1>
+            <button className="subscribe-button">
+              <h2>¡Suscríbete ahora!</h2>
+              <br />
+            </button>
           </div>
         </div>
       </div>
