@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 /* {
 --text: #eef1f4;
 --background: #000910;
@@ -36,6 +41,7 @@
 }
 .scrolled-header {
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
 }
 
 .header-welcome a {
@@ -145,7 +151,7 @@
 }
 
 .text-block {
-    color: white;
+    /* color: white; */
     padding: 3rem;
     width: 80%;
     align-items: center;
