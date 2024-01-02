@@ -5,8 +5,15 @@ export default {
     "./index.html",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'text-main-color': '#eef1f4',
+        'bg-main-color': '#000910',
+        'primary': '#041028',
+        'secondary': '#3099FF',
+        'accent': '#07ed2a',
+      }
+    },
   },
   plugins: [],
 }
-

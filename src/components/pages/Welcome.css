@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* {
---text: #eef1f4;
---background: #000910;
---primary: #78bbfc;
---secondary: #09039c;
---accent: #07ed2a;
-} */
 #root {
     height: 100%;
     min-height: 100%;
@@ -23,22 +15,6 @@
     align-items: center;
 }
 
-.header-welcome {
-    display: flex;
-    position: fixed;
-    top: 0;
-    height: 5vh;
-    width: 100%;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    background-color: var(--primary);
-    justify-content: space-between;
-    flex-direction: row;
-    border-radius: 0 0 30px 30px;
-    align-items: center;
-    z-index: 999;
-    transition: all 1s;
-}
 .scrolled-header {
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
@@ -71,6 +47,7 @@
     text-align: center;
     height: fit-content;
     margin-bottom: 10vh;
+    width: 100%;
 }
 .start-div {
     position: relative;
@@ -78,7 +55,7 @@
     height: 90vh;
     display: flex;
     justify-content: center;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('Wallpaper 6.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('Wallpaper.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -124,21 +101,6 @@
     padding: 1rem;
     size: 100%;
 }
-
-
-.footer-welcome {
-    display: flex;
-    position: static;
-    bottom: 0;
-    height: fit-content;
-    width: 100%;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    background-color: var(--primary);
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
-}
 #footer-links {
     width: 100%;
     display: flex;
@@ -155,6 +117,7 @@
     padding: 3rem;
     width: 80%;
     align-items: center;
+    justify-content: center;
     align-self: center;
     flex-direction: row;
 }
