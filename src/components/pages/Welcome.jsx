@@ -6,8 +6,6 @@ import SplitLine from "../SplitLine.jsx"
 
 export default function Welcome() {
 
-
-
   return (
     <>
       <div className="welcome-container">
