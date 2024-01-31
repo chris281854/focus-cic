@@ -9,7 +9,7 @@ export default function Panel() {
   const CalendarMatch = useMatch("/home/calendar")
 
   return (
-      <nav className="flex bg-bg-main-color flex-col w-52 h-full content-between border-solid border-2">
+      <nav className="flex fixed top-0 pt-24 flex-grow h-full bg-bg-main-color flex-col w-52 border-solid border-2 z-0">
         <NavLink
           to="/home"
           className={homeMatch ? wtActiveLinks : wtInactiveLinks}>

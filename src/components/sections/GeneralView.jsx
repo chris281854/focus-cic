@@ -1,21 +1,26 @@
-import { React } from "react"
+import { React, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import NewEvent from "../NewEvent"
+import NewTask from "../newTask"
+import NewReminder from "../NewReminder"
 
 export default function GeneralView() {
-  // const { sectionId } = useParams()
-  // const navigate = useNavigate()
 
-  // const handleCloseSection = () => {
-  //   // Redirigir de nuevo a la página principal cuando se cierra la sección
-  //   navigate("/")
-  // }
-  return(
+  return (
     <>
-    <div>
-      <h2>Vista Principal</h2>
-      <p>Contenido de la vista principal</p>
-      <Link to="/home">Volver a la página principal</Link>
-    </div>
-    </>  
-  ) 
+      <div className="flex relative p-5 flex-col w-fit">
+        <h2>Tareas y Eventos</h2>
+        <div className="flex p-4">
+          <button>+</button>
+          <NewEvent></NewEvent>
+          <NewTask></NewTask>
+          <NewReminder></NewReminder>
+        </div>
+        <h2>Hoy</h2>
+        <div>Task list</div>
+        <h2>Mañana</h2>
+        <h2>Semana</h2>
+      </div>
+    </>
+  )
 }

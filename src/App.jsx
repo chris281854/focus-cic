@@ -21,7 +21,7 @@ function App() {
             <Route path="calendar" element={<Calendar />} />
           </Route>
           <Route path="/about-us" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/contact-us" element={<Contact />} />
         </Routes>
       </BrowserRouter>
     </>

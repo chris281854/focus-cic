@@ -5,22 +5,23 @@ import Footer from "../Footer"
 import SplitLine from "../SplitLine.jsx"
 
 export default function Welcome() {
-
   return (
     <>
-      <div className="welcome-container">
+      <div className="welcome-container flex items-center content-center flex-col bg-white text-primary dark:bg-bg-main-color dark:text-white pb-8">
         <Header></Header>
-        <div className="container">
-          <div className="start-div">
-            <div className="box">
-              <h1>
-                Esto, es <mark>Focus</mark>
-              </h1>
-            </div>
+        <div className="start-div flex top-0 static w-full content-center items-center">
+          <div className="box">
+            <h1 className="text-white">
+              Esto, es <mark>Focus</mark>
+            </h1>
           </div>
-          <div className="text-block">
+        </div>
+        <div className="container static flex content-center items-center flex-col border-solid border-2 p-8 pb-12 w-11/12 mt-8 rounded-xl dark:border-0">
+          <div className="text-block text-center text-2xl">
             <h1>The Focus Project</h1>
-            <SplitLine color="white" height="2px" width="600px" />
+            <br />
+            {/* <SplitLine color="white" height="2px" /> */}
+            <hr className="border-primary border-2 rounded-full dark:border-white" />
             <br />
             <p>
               Focus es tu aliado definitivo para dirigir todos los aspectos de
@@ -31,29 +32,32 @@ export default function Welcome() {
             </p>
             <br />
             <br />
+            <h2>Enfoque:</h2>
+            <br />
             <p>
-              <h2>Enfoque:</h2> En la vertiginosa era moderna, las distracciones
-              interminables nos impiden concentrarnos en lo que realmente
-              importa. The Focus Project te ayuda a dirigir tu atención hacia lo
-              correcto: tu futuro, tus relaciones, tu salud física, mental y
-              espiritual, tu bienestar general.
+              En la vertiginosa era moderna, las distracciones interminables nos
+              impiden concentrarnos en lo que realmente importa. The Focus
+              Project te ayuda a dirigir tu atención hacia lo correcto: tu
+              futuro, tus relaciones, tu salud física, mental y espiritual, tu
+              bienestar general.
             </p>
             <br />
             <br />
-            <p>
-              <h2>Control:</h2> Recupera el control de tu vida al rechazar la
-              distracción del entretenimiento instantáneo. Construye tu fuerza
-              de voluntad, elige tu propio camino y conviértete en la mejor
-              versión de ti mismo.
-            </p>
-            <br />
+            <h2>Control:</h2>
             <br />
             <p>
-              Herramientas de organización, planificación, seguimiento y
-              desarrollo de hábitos que necesitas para tomar el control de tu
-              vida.
+              Recupera el control de tu vida al rechazar la distracción del
+              entretenimiento instantáneo. Construye tu fuerza de voluntad,
+              elige tu propio camino y conviértete en la mejor versión de ti
+              mismo.
             </p>
-            <br />
+          </div>
+          <div className="text-block text-left text-2xl mt-10">
+            <p>
+              <mark>Agenda:</mark> Con herramientas de organización,
+              planificación, seguimiento y desarrollo de hábitos que necesitas
+              para tomar el control de tu vida.
+            </p>
             <br />
             <p>
               <mark>Organiza tus tareas diarias:</mark> A través de listas de
@@ -61,14 +65,15 @@ export default function Welcome() {
               responsabilidades diarias.
             </p>
             <br />
+            <p>
+              <mark>Planifica tu agenda:</mark> Crea y organiza tu futuro con
+              una planificación efectiva.
+            </p>
             <br />
-            <mark>Planifica tu agenda:</mark> Crea y organiza tu futuro con una
-            planificación efectiva.
-            <br />
-            <br />
-            <mark>Enfócate en lo que importa:</mark>
-            Trabaja en las áreas realmente importantes de tu vida.
-            <br />
+            <p>
+              <mark>Enfócate en lo que importa:</mark>
+              Trabaja en las áreas realmente importantes de tu vida.
+            </p>
             <br />
             <p>
               <mark>Recordatorios</mark>: Nuestra plataforma se encargará de
@@ -76,8 +81,8 @@ export default function Welcome() {
               posible.
             </p>
           </div>
-          <div className="cards">
-            <div className="card">
+          <div className="cards flex">
+            <div className="card bg-primary text-white dark:text-white">
               <p>
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
                 nisi laborum, nobis alias assumenda in ullam quis iste veritatis
@@ -91,7 +96,7 @@ export default function Welcome() {
             <div className="img-div">
               <img src="https://placebear.com/g/300/300" alt="Test img" />
             </div>
-            <div className="card">
+            <div className="card bg-primary text-white dark:text-white">
               <p>
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. A
                 distinctio placeat quae voluptatibus nobis odit impedit enim
@@ -100,7 +105,7 @@ export default function Welcome() {
               </p>
             </div>
           </div>
-          <div className="text-box">
+          <div className="text-box flex items-center flex-col mt-4">
             <h1>
               Empieza a tomar el <mark>Control</mark>
             </h1>

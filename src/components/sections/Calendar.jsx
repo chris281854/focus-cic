@@ -1,15 +1,17 @@
-import { React } from "react"
+import { React, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import MonthView from "../calendarViews/MonthView"
+import WeekView from "../calendarViews/WeekView"
 
 export default function Calendar() {
 
   return (
     <>
-      <div>
-        <h2>Sección Calendario</h2>
-        <p>Contenido de la sección Calendario</p>
-        <Link to="/home">Volver a la página principal</Link>
-      </div>
+    <div className="">
+      <MonthView></MonthView>
+      <WeekView></WeekView>
+    </div>
+      {/* <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> */}
     </>
   )
 }

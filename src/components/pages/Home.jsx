@@ -3,15 +3,15 @@ import { Route, Outlet, Link } from "react-router-dom"
 import Header from "../Header"
 import Footer from "../Footer"
 import Panel from "../Panel"
-import GeneralView from "../sections/GeneralView"
+
 
 export default function Home() {
   return (
     <>
-      <Header></Header>
-      <div className="container h-screen w-full right-0 mr-0 flex pt-16 relative mb-0 bottom-0 bg-bg-main-color flex-row">
+      <div className="container static flex h-fit min-h-full w-full max-w-full right-0 pt-20 bg-white dark:bg-bg-main-color">
+        <Header></Header>
         <Panel></Panel>
-        <div className="section relative flex self-start">
+        <div className="section static flex-grow ml-52 flex border-solid border-2 p-4">
           <Outlet />
         </div>
       </div>
