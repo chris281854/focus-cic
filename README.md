@@ -1,8 +1,18 @@
-# React + Vite
+# ❄The Focus Project🔥
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🗂Introducción
+###### ¿O "descripción" suena mejor? Como sea...
 
-Currently, two official plugins are available:
+The Focus Proyect es un sistema holístico de herramientas de gestión de tareas, organización de agenda y tracker de hábitos. 
+***
+*Desarrollado como parte del mini-proyecto final del programa de Cincinnatus Institute of Craftsmanship.* 🌿
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 👀Estado:
+En desarrollo - **Alpha**
+
+## 👾Tecnologías usadas
+* Vite React
+* Tailwind
+
+### E'lir and Chris 🔮
+![Focus Logo](<public/Focus Logo Vector Large.png>)

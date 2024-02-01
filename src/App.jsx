@@ -1,20 +1,29 @@
-import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-import {BrowserRouter, Routes, Route} from "react-router-dom"
-import './App.css'
-import Welcome from './components/pages/Welcome'
-import Mainpage from './components/pages/Mainpage'
+// import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import "./App.css"
+import Welcome from "./components/pages/Welcome"
+import Home from "./components/pages/Home"
+import About from "./components/pages/About"
+import Contact from "./components/pages/Contact"
+import GeneralView from "./components/sections/GeneralView"
+import Calendar from "./components/sections/Calendar"
 
 function App() {
   return (
     <>
-    <BrowserRouter>
-    <Routes>
-      <Route path='/home' element={<Welcome />} />
-      <Route path='/main' element={<Mainpage />} />
-    </Routes>
-    </BrowserRouter>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Welcome />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/home/*" element={<Home />}>
+            {/* Rutas secundarias dentro de /home */}
+            <Route index element={<GeneralView />} />
+            <Route path="calendar" element={<Calendar />} />
+          </Route>
+          <Route path="/about-us" element={<About />} />
+          <Route path="/contact-us" element={<Contact />} />
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }
