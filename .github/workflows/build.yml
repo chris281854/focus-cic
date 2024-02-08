@@ -1,4 +1,4 @@
-# Simple workflow for deploying static content to GitHub Pages
+ # Simple workflow for deploying static content to GitHub Pages
 name: Deploy content 
 
 on:
@@ -46,9 +46,13 @@ jobs:
       - name: Install dependencies
         run:  npm install
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload entire repository
+          path: '.'
+
       - name: Build Reac App
         run: npm run build    
       - name: Deploy to GitHub Pages
