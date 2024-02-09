@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
-import { Route, Outlet, Link } from "react-router-dom"
+import React from "react"
+import { Outlet } from "react-router-dom"
 import Header from "../Header"
 import Footer from "../Footer"
 import Panel from "../Panel"
