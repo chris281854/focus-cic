@@ -5,10 +5,10 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: 
-      [main,test]
+      [main,test,devops]
   pull_request: 
     branches: 
-        [main,test]
+        [main,test,devops]
     types: 
       - closed
 
@@ -39,13 +39,17 @@ jobs:
           # Fetches all history for all tags and branches
           fetch-depth: 0
           persist-credentials: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
+
       - name: Install dependencies
         run:  npm install
 
+      - name: Lint
+        run: npm run lint
      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
