@@ -106,7 +106,6 @@ export default function MonthView() {
         {/* Aquí puedes agregar tu lógica para las listas de tareas */}
       </div>
     )
-    console.log(month)
   }
   // Días del mes actual:
   for (let i = 1; i <= getTotalDays(month); i++) {

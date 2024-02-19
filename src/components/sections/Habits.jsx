@@ -1,7 +1,5 @@
 import { React } from "react"
-import NewEvent from "../NewEvent"
-import NewTask from "../NewTask"
-import NewReminder from "../NewReminder"
+
 
 export default function GeneralView() {
 
@@ -11,9 +9,6 @@ export default function GeneralView() {
         <h2>Tareas y Eventos</h2>
         <div className="flex p-4">
           <button>+</button>
-          <NewEvent></NewEvent>
-          <NewTask></NewTask>
-          <NewReminder></NewReminder>
         </div>
         <h2>Hoy</h2>
         <div>Task list</div>

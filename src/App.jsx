@@ -7,6 +7,7 @@ import About from "./components/pages/About"
 import Contact from "./components/pages/Contact"
 import GeneralView from "./components/sections/GeneralView"
 import Calendar from "./components/sections/Calendar"
+import Settings from "./components/pages/Settings"
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
             {/* Rutas secundarias dentro de /home */}
             <Route index element={<GeneralView />} />
             <Route path="calendar" element={<Calendar />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="habits" element={<Settings />} />
           </Route>
           <Route path="/about-us" element={<About />} />
           <Route path="/contact-us" element={<Contact />} />

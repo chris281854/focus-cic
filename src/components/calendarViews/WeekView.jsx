@@ -130,21 +130,23 @@ export default function MonthView() {
 
   //Días del mes siguiente
   const daysInNextMonth = (() => {
-    return 7 * 6 - monthDayCalList.length
+    return 7 * 5 - monthDayCalList.length
   })()
 
-  for (let i = 1; i <= daysInNextMonth; i++) {
-    const dataDate = `${year}-${month + 1}-${i}`
+  if (daysInNextMonth >= 0) {
+    for (let i = 1; i <= daysInNextMonth; i++) {
+      const dataDate = `${year}-${month + 1}-${i}`
 
-    monthDayCalList.push(
-      <div
-        key={`next-${i}`}
-        data-date={dataDate}
-        className={`celda row-span-1 col-span-1 border p-2 next-month-day opacity-50`}>
-        <p>{i}</p>
-        {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-      </div>
-    )
+      monthDayCalList.push(
+        <div
+          key={`next-${i}`}
+          data-date={dataDate}
+          className={`celda row-span-1 col-span-1 border p-2 next-month-day opacity-50`}>
+          <p>{i}</p>
+          {/* Aquí puedes agregar tu lógica para las listas de tareas */}
+        </div>
+      )
+    }
   }
 
   //Manejar semanas
@@ -154,15 +156,15 @@ export default function MonthView() {
     monthDayCalList.slice(14, 21),
     monthDayCalList.slice(21, 28),
     monthDayCalList.slice(28, 35),
-    monthDayCalList.slice(35, 42),
+    // monthDayCalList.slice(35, 42),
   ]
   const [week, setWeek] = useState([])
 
   //Cambiar el mes actualizará a la primera semana del mes
-    useEffect(() => {
-      setWeek(weekOfMonth[0])
-    }, [month])
-    
+  useEffect(() => {
+    setWeek(weekOfMonth[0])
+  }, [month])
+
   //Semana correspondiente con la fecha actual, establecida por defecto
   useEffect(() => {
     const currentWeekIndex = weekOfMonth.findIndex((week) =>
@@ -204,6 +206,10 @@ export default function MonthView() {
     }
   }
 
+  //Selector de fecha sobre el calendario
+  function selectDate() {
+
+  }
 
   return (
     <>
@@ -249,9 +255,15 @@ export default function MonthView() {
             <button id="last_week" onClick={getPrevWeek}>
               &lt;
             </button>
-            <div>
+            <div className="date-picker" onClick={selectDate}>
               <span id="text_month_02"> {textMonth} </span>
               <span id="text_year"> {textYear} </span>
+              <input
+                type="date"
+                name="date-input"
+                id="date-input"
+                className="border-none outline-none bg-transparent text-white"
+              />
             </div>
             <button id="next_week" onClick={getNextWeek}>
               &gt;
