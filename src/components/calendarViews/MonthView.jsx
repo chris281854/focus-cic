@@ -154,12 +154,12 @@ export default function MonthView() {
   // console.log(monthDayCalList)
   return (
     <>
-      <div className="container_calendar w-fit h-fit">
+      <div className="container_calendar">
         <div className="header_calendar">
           <h1 id="text_day">{textDay}</h1>
           <h5 id="text_month">{currentTextMonth}</h5>
         </div>
-        <div className="body_calendar w-fit border-2 h-fit">
+        <div className="body_calendar border-2">
           <div className="container_details">
             <div className="detail_1">
               <div className="detail">
@@ -204,7 +204,7 @@ export default function MonthView() {
               &gt;
             </button>
           </div>
-          <div className="container_weedays flex justify-between">
+          <div className="container_weedays grid grid-rows-1 grid-cols-7 text-center">
             <span className="week_days_item">DOM</span>
             <span className="week_days_item">LUN</span>
             <span className="week_days_item">MAR</span>
@@ -213,7 +213,7 @@ export default function MonthView() {
             <span className="week_days_item">VIE</span>
             <span className="week_days_item">SÁB</span>
           </div>
-          <div className="container_days grid grid-rows-5 grid-cols-7 grid-flow-row w-fit border-2 text-xs">
+          <div className="container_days grid grid-rows-5 grid-cols-7 grid-flow-row border-2 text-xs">
             {monthDayCalList}
           </div>
         </div>

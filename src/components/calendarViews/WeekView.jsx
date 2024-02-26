@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from "react"
 
-export default function MonthView() {
+export default function WeekView() {
   const monthName = [
     "Enero",
     "Febrero",

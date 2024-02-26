@@ -16,7 +16,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
   return (
     <nav
       className={
-        "flex sticky whitespace-nowrap top-0 h-full max-h-screen flex-col transition-all duration-300 overflow-y-scroll overflow-x-hidden justify-items-start text-left scrollbar-none " +
+        "bg-bg-main-color flex sticky whitespace-nowrap top-0 h-full max-h-screen flex-col transition-all duration-300 overflow-y-scroll overflow-x-hidden justify-items-start text-left scrollbar-none " +
         (panelVisibility
           ? "w-56 min-w-56"
           : "w-14 min-w-14")
