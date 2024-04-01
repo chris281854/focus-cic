@@ -6,6 +6,7 @@ import Panel from "../Panel"
 import { useState } from "react"
 
 export default function Home() {
+
   const [panelVisibility, setPanelVisibility] = useState(true)
 
   return (

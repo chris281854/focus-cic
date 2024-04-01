@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from "react"
 
-export default function WeekView() {
+export default function DayView() {
   const monthName = [
     "Enero",
     "Febrero",
@@ -28,6 +28,7 @@ export default function WeekView() {
   const currentDate = `${currentYear}-${currentMonth}-${day}`
   const monthDayCalList = []
   const monthDays = []
+  const [visibleDay, setVisibleDay] = useState()
 
   // Fechas en encabezados
   let textMonth = monthName[month]
@@ -90,20 +91,21 @@ export default function WeekView() {
     else return leapYear() ? 29 : 28
   }
 
-  // Días del mes pasado
-  for (let i = startDay(); i > 0; i--) {
-    const dayOfPrevMonth = getTotalDays(month - 1) - (i - 1)
+  // // Días del mes pasado
+  // for (let i = startDay(); i > 0; i--) {
+  //   const dayOfPrevMonth = getTotalDays(month - 1) - (i - 1)
 
-    monthDayCalList.push(
-      <div
-        key={`prev-${dayOfPrevMonth}`}
-        className="celda row-span-1 col-span-1 border p-2 opacity-50">
-        <p> {dayOfPrevMonth} </p>
-        {/* <p>{content}</p> */}
-        {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-      </div>
-    )
-  }
+  //   monthDayCalList.push(
+  //     <div
+  //       key={`prev-${dayOfPrevMonth}`}
+  //       className="celda row-span-1 col-span-1 border p-2 opacity-50">
+  //       <p> {dayOfPrevMonth} </p>
+  //       {/* <p>{content}</p> */}
+  //       {/* Aquí puedes agregar tu lógica para las listas de tareas */}
+  //     </div>
+  //   )
+  // }
+
   // Días del mes actual:
   for (let i = 1; i <= getTotalDays(month); i++) {
     //Y determinar el día actual
@@ -113,6 +115,7 @@ export default function WeekView() {
   for (let i = 0; i < monthDays.length; i++) {
     const { id, content } = monthDays[i]
     const dataDate = `${year}-${month}-${id}`
+    const weekDay = dataDate.getDay()
 
     monthDayCalList.push(
       <div
@@ -168,25 +171,25 @@ export default function WeekView() {
   }
 
   //Días del mes siguiente
-  const daysInNextMonth = (() => {
-    return 7 * 5 - monthDayCalList.length
-  })()
+  // const daysInNextMonth = (() => {
+  //   return 7 * 5 - monthDayCalList.length
+  // })()
 
-  if (daysInNextMonth >= 0) {
-    for (let i = 1; i <= daysInNextMonth; i++) {
-      const dataDate = `${year}-${month + 1}-${i}`
+  // if (daysInNextMonth >= 0) {
+  //   for (let i = 1; i <= daysInNextMonth; i++) {
+  //     const dataDate = `${year}-${month + 1}-${i}`
 
-      monthDayCalList.push(
-        <div
-          key={`next-${i}`}
-          data-date={dataDate}
-          className={`celda row-span-1 col-span-1 border p-2 next-month-day opacity-50`}>
-          <p>{i}</p>
-          {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-        </div>
-      )
-    }
-  }
+  //     monthDayCalList.push(
+  //       <div
+  //         key={`next-${i}`}
+  //         data-date={dataDate}
+  //         className={`celda row-span-1 col-span-1 border p-2 next-month-day opacity-50`}>
+  //         <p>{i}</p>
+  //         {/* Aquí puedes agregar tu lógica para las listas de tareas */}
+  //       </div>
+  //     )
+  //   }
+  // }
 
   //Manejar semanas
   const weekOfMonth = [
@@ -195,11 +198,10 @@ export default function WeekView() {
     monthDayCalList.slice(14, 21),
     monthDayCalList.slice(21, 28),
     monthDayCalList.slice(28, 35),
-    // monthDayCalList.slice(35, 42),
   ]
   const [week, setWeek] = useState([])
 
-  //Cambiar el mes actualizará a la primera semana del mes
+  //(need to fix) => Cambiar el mes actualizará a la primera semana del mes actualizado
   useEffect(() => {
     setWeek(weekOfMonth[0])
   }, [month])
@@ -245,8 +247,13 @@ export default function WeekView() {
     }
   }
 
+  //manejar días
+  visibleDay.push(week[0])
+
   //Selector de fecha sobre el calendario
   function selectDate() {}
+
+
 
   return (
     <>
@@ -316,17 +323,11 @@ export default function WeekView() {
               &gt;
             </button>
           </div>
-          <div className="container_weedays grid grid-rows-1 grid-cols-7 text-center">
+          <div className="container_weedays grid grid-rows-1 grid-cols-1 text-center">
             <span className="week_days_item">DOM</span>
-            <span className="week_days_item">LUN</span>
-            <span className="week_days_item">MAR</span>
-            <span className="week_days_item">MIÉ</span>
-            <span className="week_days_item">JUE</span>
-            <span className="week_days_item">VIE</span>
-            <span className="week_days_item">SÁB</span>
           </div>
-          <div className="container_days grid grid-rows-5 grid-cols-7 grid-flow-row w-full border-2">
-            {week}
+          <div className="container_days grid grid-rows-1 grid-cols-1 grid-flow-row w-full border-2">
+            {visibleDay}
           </div>
         </div>
       </div>

@@ -89,18 +89,18 @@ export default function MonthView() {
   const monthDayCalList = []
   const monthDays = []
   const divClassname = {
-    actualDays: 'celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden',
-    prevDays: "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
-    nextDays: "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
+    actualDays: "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden",
+    prevDays:
+      "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
+    nextDays:
+      "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
   }
   // Días del mes pasado
   for (let i = startDay(); i > 0; i--) {
     const dayOfPrevMonth = getTotalDays(month - 1) - (i - 1)
 
     monthDayCalList.push(
-      <div
-        key={`prev-${dayOfPrevMonth}`}
-        className={divClassname.prevDays}>
+      <div key={`prev-${dayOfPrevMonth}`} className={divClassname.prevDays}>
         <p> {dayOfPrevMonth} </p>
         {/* <p>{content}</p> */}
         {/* Aquí puedes agregar tu lógica para las listas de tareas */}
@@ -150,57 +150,41 @@ export default function MonthView() {
     )
   }
 
-  // console.log(currentDate)
-  // console.log(monthDayCalList)
   return (
     <>
       <div className="container_calendar">
-        <div className="header_calendar">
-          <h1 id="text_day">{textDay}</h1>
-          <h5 id="text_month">{currentTextMonth}</h5>
+        <div className="header_calendar flex">
+          <h1 id="text_day" className="font-bold">
+            {textDay}
+          </h1>
+          <h5 id="text_month" className="flex self-center pl-4 text-xl">
+            {currentTextMonth} {currentYear}
+          </h5>
         </div>
         <div className="body_calendar border-2">
-          <div className="container_details">
-            <div className="detail_1">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-            </div>
-            <div className="detail_2">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-            </div>
-          </div>
           <div className="container_change_date flex items-center justify-center">
-            <button className="last_year self-start" onClick={getPrevYear}>
+            <button
+              className="last_year rounded-full bg-transparent selection:outline-none m-1 focus:outline-none"
+              onClick={getPrevYear}>
               &lt;
             </button>
-            <button className="last_month self-start" onClick={getPrevMonth}>
+            <button
+              className="last_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+              onClick={getPrevMonth}>
               &lt;
             </button>
             <div className="min-w-40 text-center">
               <span id="text_month_02"> {textMonth} </span>
               <span id="text_year"> {textYear} </span>
             </div>
-            <button className="next_month" onClick={getNextMonth}>
+            <button
+              className="next_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+              onClick={getNextMonth}>
               &gt;
             </button>
-            <button className="next_year" onClick={getNextYear}>
+            <button
+              className="next_year rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+              onClick={getNextYear}>
               &gt;
             </button>
           </div>
