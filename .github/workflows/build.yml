@@ -1,14 +1,14 @@
- # Simple workflow for deploying static content to GitHub Pages
-name: Deploy content 
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
     branches: 
-      [main,test,devops]
+      [main,test]
   pull_request: 
     branches: 
-        [main,test,devops]
+        [main,test]
     types: 
       - closed
 
@@ -30,7 +30,9 @@ concurrency:
 jobs:
   # Single deploy job since we're just deploying
   deploy:
-  
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,28 +41,20 @@ jobs:
           # Fetches all history for all tags and branches
           fetch-depth: 0
           persist-credentials: false
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-
       - name: Install dependencies
-        run:  npm install
-
-      - name: Lint
-        run: npm run lint
-     
+        run: |
+          npm install
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload entire repository
           path: '.'
-
-      - name: Build Reac App
-        run: npm run build    
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+        id: deployment
+        uses: actions/deploy-pages@v3
