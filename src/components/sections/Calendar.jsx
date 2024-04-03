@@ -4,7 +4,7 @@ import WeekView from "../calendarViews/WeekView"
 import DayView from "../calendarViews/DayView"
 
 export default function Calendar() {
-  const [viewSelector, setViewSelector] = useState("semana")
+  const [viewSelector, setViewSelector] = useState("mes")
 
   const handleSelectView = (e) => {
     setViewSelector(e.target.value)
@@ -23,9 +23,9 @@ export default function Calendar() {
           <option value="dia">Día</option>
         </select>
         <div className="">
-          {viewSelector === "mes" && <MonthView></MonthView>}
-          {viewSelector === "semana" && <WeekView></WeekView>}
-          {viewSelector === "dia" && <DayView></DayView>}
+          {viewSelector === "mes" && <MonthView />}
+          {viewSelector === "semana" && <WeekView />}
+          {viewSelector === "dia" && <DayView />}
         </div>
         {/* <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> */}
       </div>

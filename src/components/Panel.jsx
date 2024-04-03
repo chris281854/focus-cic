@@ -49,7 +49,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
           className={
             (panelVisibility ? "opacity-100 mr-2 overflow-hidden" : "opacity-0 transition-all duration-200")
           }>
-          Caldendario
+          Calendario
         </div>
       </NavLink>
       <NavLink

@@ -1,4 +1,4 @@
-import { React, useState } from "react"
+import { React, useState, useEffect } from "react"
 
 export default function MonthView() {
   const monthName = [
@@ -16,13 +16,21 @@ export default function MonthView() {
     "Diciembre",
   ]
 
+  //Variables de fecha
   const now = new Date()
-  let [month, setMonth] = useState(now.getMonth())
-  let [year, setYear] = useState(now.getFullYear())
-  let day = now.getDate()
-  let currentMonth = now.getMonth()
-  let currentYear = now.getFullYear()
-  const currentDate = `${currentYear}-${currentMonth}-${day}`
+  const currentDay = now.getDate()
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
+
+  const [day, setDay] = useState(currentDay)
+  const [month, setMonth] = useState(now.getMonth())
+  const [year, setYear] = useState(now.getFullYear())
+
+  //Datos de la Tabla
+  const currentDate = `${currentYear}-${currentMonth}-${currentDay}`
+  const [selectedDate, setSelectedDate] = useState(
+    new Date(`${year}-${month + 1}-${day}`)
+  )
 
   // Fechas en encabezados
   let textMonth = monthName[month]
@@ -30,11 +38,18 @@ export default function MonthView() {
   let textDay = day
   let textYear = year
 
+  //UseEffect para la actualización de los valores de selectedDate:
+  useEffect(() => {
+    const newDate = new Date(`${year}-${month + 1}-${day}`)
+    setSelectedDate(newDate)
+    setDatePickValue(newDate)
+  }, [year, month, day])
+
   function getNextMonth() {
     if (month !== 11) setMonth(month + 1)
     else {
       setYear(year + 1)
-      setMonth((month = 0))
+      setMonth(0)
     }
     //se deben actualizar fechas en encabezados
   }
@@ -42,7 +57,7 @@ export default function MonthView() {
     if (month !== 0) setMonth(month - 1)
     else {
       setYear(year - 1)
-      setMonth((month = 11))
+      setMonth(11)
     }
     //se deben actualizar fechas en encabezados
   }
@@ -56,7 +71,6 @@ export default function MonthView() {
   function startDay() {
     let start = new Date(year, month, 1)
     return start.getDate() - 1 === -1 ? 6 : start.getDay()
-    // return start.getDate() === 1 ? start.getDay() : (start.getDay() + 1) % 7;
   }
 
   function leapYear() {
@@ -94,7 +108,9 @@ export default function MonthView() {
       "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
     nextDays:
       "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
+    selectedDay: "",
   }
+
   // Días del mes pasado
   for (let i = startDay(); i > 0; i--) {
     const dayOfPrevMonth = getTotalDays(month - 1) - (i - 1)
@@ -121,9 +137,10 @@ export default function MonthView() {
     monthDayCalList.push(
       <div
         key={id}
+        onClick={handleSelectedDate}
         data-date={dataDate}
         className={`${divClassname.actualDays} ${
-          dataDate == currentDate ? "bg-green-400" : ""
+          dataDate === currentDate ? "bg-green-400" : ""
         }`}>
         <p>{id}</p>
         <p>{content}</p>
@@ -148,6 +165,26 @@ export default function MonthView() {
         {/* Aquí puedes agregar tu lógica para las listas de tareas */}
       </div>
     )
+  }
+
+  //Date picker:
+  const [datePickValue, setDatePickValue] = useState(selectedDate)
+  const handleDatePickChange = (event) => {
+    const date = event.target.value
+
+    //parsear para obtener año, mes y día por separado
+    const parsedDate = new Date(date)
+    const parsedYear = parsedDate.getFullYear()
+    const parsedMonth = parsedDate.getMonth()
+    const parsedDay = parsedDate.getDate() + 1
+
+    setYear(parsedYear)
+    setMonth(parsedMonth)
+    setDay(parsedDay)
+  }
+  const [clickedDate, setClickedDate] = useState(null)
+  function handleSelectedDate(event) {
+    setClickedDate(event.target.getAttribute("data-date"))
   }
 
   return (
@@ -176,6 +213,14 @@ export default function MonthView() {
             <div className="min-w-40 text-center">
               <span id="text_month_02"> {textMonth} </span>
               <span id="text_year"> {textYear} </span>
+              <input
+                value={datePickValue.toISOString().split("T")[0]}
+                onChange={handleDatePickChange}
+                type="date"
+                name="date-input"
+                id="date-input"
+                className="border-none outline-none bg-transparent text-white"
+              />
             </div>
             <button
               className="next_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
