@@ -1,4 +1,5 @@
 import { React, useState, useEffect } from "react"
+import DayDiv from "./DayDiv"
 
 export default function MonthView() {
   const monthName = [
@@ -31,11 +32,23 @@ export default function MonthView() {
   const [selectedDate, setSelectedDate] = useState(
     new Date(`${year}-${month + 1}-${day}`)
   )
+  const [selectedDiv, setSelectedDiv] = useState(null)
+  const handleSelectedDiv = (dataDate) => {
+    setSelectedDiv(() => {
+      if (dataDate === selectedDiv) {
+        return null
+      } else {
+        setDay(() => parseInt(dataDate.split("-")[2]))
+        console.log(day)
+        return dataDate
+      }
+    })
+  }
 
   // Fechas en encabezados
   let textMonth = monthName[month]
   let currentTextMonth = monthName[currentMonth]
-  let textDay = day
+  let textDay = currentDay
   let textYear = year
 
   //UseEffect para la actualización de los valores de selectedDate:
@@ -51,7 +64,6 @@ export default function MonthView() {
       setYear(year + 1)
       setMonth(0)
     }
-    //se deben actualizar fechas en encabezados
   }
   function getPrevMonth() {
     if (month !== 0) setMonth(month - 1)
@@ -123,10 +135,9 @@ export default function MonthView() {
       </div>
     )
   }
+
   // Días del mes actual:
   for (let i = 1; i <= getTotalDays(month); i++) {
-    //Y determinar el día actual
-
     monthDays.push({ id: i, content: `Descripción para el día ${i}` })
   }
 
@@ -135,17 +146,15 @@ export default function MonthView() {
     const dataDate = `${year}-${month}-${id}`
 
     monthDayCalList.push(
-      <div
+      <DayDiv
         key={id}
-        onClick={handleSelectedDate}
-        data-date={dataDate}
-        className={`${divClassname.actualDays} ${
-          dataDate === currentDate ? "bg-green-400" : ""
-        }`}>
-        <p>{id}</p>
-        <p>{content}</p>
-        {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-      </div>
+        id={id}
+        content={content}
+        dataDate={dataDate}
+        currentDate={currentDate}
+        selectedDiv={selectedDiv}
+        handleSelectedDiv={handleSelectedDiv}
+      />
     )
   }
   //Días del mes siguiente
@@ -182,15 +191,12 @@ export default function MonthView() {
     setMonth(parsedMonth)
     setDay(parsedDay)
   }
-  const [clickedDate, setClickedDate] = useState(null)
-  function handleSelectedDate(event) {
-    setClickedDate(event.target.getAttribute("data-date"))
-  }
 
   return (
     <>
       <div className="container_calendar">
         <div className="header_calendar flex">
+          <p className="text-xl flex self-center pr-3">Today:</p>
           <h1 id="text_day" className="font-bold">
             {textDay}
           </h1>
@@ -199,6 +205,10 @@ export default function MonthView() {
           </h5>
         </div>
         <div className="body_calendar border-2">
+          <div className="spans-div flex justify-center content-center">
+            <span className="p-2"> {textMonth} </span>
+            <span className="p-2"> {textYear} </span>
+          </div>
           <div className="container_change_date flex items-center justify-center">
             <button
               className="last_year rounded-full bg-transparent selection:outline-none m-1 focus:outline-none"
@@ -211,8 +221,6 @@ export default function MonthView() {
               &lt;
             </button>
             <div className="min-w-40 text-center">
-              <span id="text_month_02"> {textMonth} </span>
-              <span id="text_year"> {textYear} </span>
               <input
                 value={datePickValue.toISOString().split("T")[0]}
                 onChange={handleDatePickChange}
@@ -242,7 +250,7 @@ export default function MonthView() {
             <span className="week_days_item">VIE</span>
             <span className="week_days_item">SÁB</span>
           </div>
-          <div className="container_days grid grid-rows-5 grid-cols-7 grid-flow-row border-2 text-xs">
+          <div className="grid grid-rows-5 grid-cols-7 grid-flow-row border-2 text-xs">
             {monthDayCalList}
           </div>
         </div>

@@ -39,6 +39,7 @@ export default function WeekView() {
         return null
       } else {
         setDay(() => parseInt(dataDate.split("-")[2]))
+        console.log(day)
         return dataDate
       }
     })
@@ -58,6 +59,7 @@ export default function WeekView() {
     const newDate = new Date(`${year}-${month + 1}-${day}`)
     setSelectedDate(newDate)
     setDatePickValue(newDate)
+    console.log(week)
   }, [year, month, day])
 
   function getNextMonth() {
@@ -66,10 +68,8 @@ export default function WeekView() {
       setYear(year + 1)
       setMonth(0)
     }
-    setWeek(weekOfMonth.primera)
-    setSelectedWeek(1)
+    //se deben actualizar fechas en encabezados
   }
-
   function getPrevMonth() {
     if (month !== 0) setMonth(month - 1)
     else {
@@ -88,6 +88,7 @@ export default function WeekView() {
   function startDay() {
     let start = new Date(year, month, 1)
     return start.getDate() - 1 === -1 ? 6 : start.getDay()
+    // return start.getDate() === 1 ? start.getDay() : (start.getDay() + 1) % 7;
   }
 
   function leapYear() {
@@ -132,6 +133,8 @@ export default function WeekView() {
   }
   // Días del mes actual:
   for (let i = 1; i <= getTotalDays(month); i++) {
+    //Y determinar el día actual
+
     monthDays.push({ id: i, content: `Descripción para el día ${i}` })
   }
   for (let i = 0; i < monthDays.length; i++) {
@@ -180,14 +183,15 @@ export default function WeekView() {
     cuarta: monthDayCalList.slice(21, 28),
     quinta: monthDayCalList.slice(28, 35),
   }
+  
   const [week, setWeek] = useState([])
 
-  // //Primera render
+  //Cambiar el mes actualizará a la primera semana del mes
   useEffect(() => {
     setWeek(weekOfMonth.primera)
-  }, [])
+  }, [month])
 
-  // Semana correspondiente con la fecha actual, establecida por defecto
+  //Semana correspondiente con la fecha actual, establecida por defecto
   // useEffect(() => {
   //   const currentWeekKey = Object.keys(weekOfMonth).find((key) =>
   //     weekOfMonth[key].some((day) => day.props["data-date"] === currentDate)
@@ -195,57 +199,36 @@ export default function WeekView() {
   //   setWeek(weekOfMonth[currentWeekKey])
   // }, [])
   
-  const [selectedWeek, setSelectedWeek] = useState(1)
 
-  async function getPrevWeek() {
-    if (selectedWeek > 1) {
-      switch (selectedWeek) {
-        case 5:
-          setWeek(weekOfMonth.cuarta)
-          setSelectedWeek(4)
-          break
-        case 4:
-          setWeek(weekOfMonth.tercera)
-          setSelectedWeek(3)
-          break
-        case 3:
-          setWeek(weekOfMonth.segunda)
-          setSelectedWeek(2)
-          break
-        case 2:
-          setWeek(weekOfMonth.primera)
-          setSelectedWeek(1)
-          break
-      }
+  function getPrevWeek() {
+    const currentWeekKeys = Object.keys(weekOfMonth)
+    const currentWeekIndex = currentWeekKeys.findIndex(
+      (key) => weekOfMonth[key][0].props["data-date"] === week[0].props["data-date"]
+    )
+    if (currentWeekIndex > 0) {
+      setWeek(weekOfMonth[currentWeekKeys[currentWeekIndex - 1]])
     } else {
-      await getPrevMonth()
-      setWeek(weekOfMonth.quinta)
-      setSelectedWeek(5)
+      if (month === 0) {
+        getPrevYear()
+        setMonth(11)
+      } else {
+        getPrevMonth()
+      }
     }
   }
 
   function getNextWeek() {
-    if (selectedWeek <= 4) {
-      switch (selectedWeek) {
-        case 1:
-          setWeek(weekOfMonth.segunda)
-          setSelectedWeek(2)
-          break
-        case 2:
-          setWeek(weekOfMonth.tercera)
-          setSelectedWeek(3)
-          break
-        case 3:
-          setWeek(weekOfMonth.cuarta)
-          setSelectedWeek(4)
-          break
-        case 4:
-          setWeek(weekOfMonth.quinta)
-          setSelectedWeek(5)
-          break
-      }
+    const currentWeekKeys = Object.keys(weekOfMonth);
+    const currentWeekIndex = currentWeekKeys.findIndex(
+      (key) => weekOfMonth[key][0].props["data-date"] === week[0].props["data-date"]
+    );
+  
+    if (currentWeekIndex < currentWeekKeys.length - 1) {
+      setWeek(weekOfMonth[currentWeekKeys[currentWeekIndex + 1]]);
+      console.log(weekOfMonth[currentWeekKeys[currentWeekIndex + 1]])
     } else {
-      getNextMonth()
+      // Manejo para ir a la semana siguiente o al mes/año siguiente si corresponde
+      setMonth(month + 1)
     }
   }
 
@@ -354,7 +337,7 @@ export default function WeekView() {
             <span className="week_days_item">VIE</span>
             <span className="week_days_item">SÁB</span>
           </div>
-          <div className="grid grid-rows-5 grid-cols-7 grid-flow-row w-full border-2">
+          <div className="container_days grid grid-rows-5 grid-cols-7 grid-flow-row w-full border-2">
             {week}
           </div>
         </div>

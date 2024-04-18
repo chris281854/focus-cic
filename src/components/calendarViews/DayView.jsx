@@ -262,7 +262,7 @@ export default function DayView() {
           <div className="container_weedays grid grid-rows-1 grid-cols-1 text-center">
             <span className="week_days_item">{weekDayName[dataWeekDay]}</span>
           </div>
-          <div className="container_days grid grid-rows-1 grid-cols-1 grid-flow-row w-full border-2">
+          <div className="grid grid-rows-1 grid-cols-1 grid-flow-row w-full border-2">
             {dayBox}
           </div>
         </div>
