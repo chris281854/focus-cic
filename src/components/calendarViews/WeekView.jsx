@@ -187,14 +187,14 @@ export default function WeekView() {
     setWeek(weekOfMonth.primera)
   }, [])
 
-  // Semana correspondiente con la fecha actual, establecida por defecto
+  // Semana correspondiente con la fecha actual, establecida por defecto (no funciona)
   // useEffect(() => {
   //   const currentWeekKey = Object.keys(weekOfMonth).find((key) =>
   //     weekOfMonth[key].some((day) => day.props["data-date"] === currentDate)
   //   )
   //   setWeek(weekOfMonth[currentWeekKey])
   // }, [])
-  
+
   const [selectedWeek, setSelectedWeek] = useState(1)
 
   async function getPrevWeek() {
@@ -359,7 +359,6 @@ export default function WeekView() {
           </div>
         </div>
       </div>
-      {/* <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> */}
     </>
   )
 }

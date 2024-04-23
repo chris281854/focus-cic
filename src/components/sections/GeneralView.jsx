@@ -1,9 +1,47 @@
-import { React } from "react"
+import { React, useState } from "react"
 import NewEvent from "../NewEvent"
 import NewTask from "../NewTask"
 import NewReminder from "../NewReminder"
+import ToDoItem from "../ToDoItem"
 
 export default function GeneralView() {
+  //Estructura de tareas provisional (debe vincularse la base de datos)
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      text: "Doctor Appointment",
+      completed: true,
+    },
+    {
+      id: 2,
+      text: "Meeting at School",
+      completed: false,
+    },
+  ])
+  const [text, setText] = useState("")
+  function addTask(text) {
+    const newTask = {
+      id: Date.now(),
+      text,
+      completed: false,
+    }
+    setTasks([...tasks, newTask])
+    setText("")
+  }
+  function deleteTask(id) {
+    setTasks(tasks.filter((task) => task.id !== id))
+  }
+  function toggleCompleted(id) {
+    setTasks(
+      tasks.map((task) => {
+        if (task.id === id) {
+          return { ...task, completed: !task.completed }
+        } else {
+          return task
+        }
+      })
+    )
+  }
 
   return (
     <>
@@ -15,10 +53,18 @@ export default function GeneralView() {
           <NewTask></NewTask>
           <NewReminder></NewReminder>
         </div>
-        <h2>Hoy</h2>
-        <div>Task list</div>
-        <h2>Mañana</h2>
-        <h2>Semana</h2>
+        <div className="todo-list">
+          {tasks.map((task) => (
+            <ToDoItem
+              key={task.id}
+              task={task}
+              deleteTask={deleteTask}
+              toggleCompleted={toggleCompleted}
+            />
+          ))}
+          <input value={text} onChange={(e) => setText(e.target.value)} />
+          <button onClick={() => addTask(text)}>Add</button>
+        </div>
       </div>
     </>
   )
