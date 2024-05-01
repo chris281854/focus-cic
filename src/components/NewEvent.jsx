@@ -1,11 +1,15 @@
+
 import React from "react"
 import { useState } from "react"
 
-export default function NewEvent() {
+export default function NewEvent({ task, deleteTask, toggleCompleted }) {
   const [openNewEvent, setOpenNewEvent] = useState(false)
 
   const toggleNewEvent = () => {
     setOpenNewEvent(!openNewEvent)
+  }
+  function handleChange() {
+    toggleCompleted(task.id)
   }
 
   return (
