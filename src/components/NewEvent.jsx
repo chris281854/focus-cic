@@ -3,11 +3,14 @@ import { useState } from "react"
 import axios from "axios"
 
 export default function NewEvent() {
+  const [reminderID, setReminderID] = useState("")
+  const [state, setState] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [eventName, setEventName] = useState("")
-  const [eventNote, setEventNote] = useState("")
+  const [eventCategory, setEventCategory] = useState("")
   const [eventDate, setEventDate] = useState("")
-  const [reminder, setReminder] = useState(false)
-  const [reminderDate, setReminderDate] = useState("")
+  const [eventPriority, setEventPriority] = useState("")
+  const [eventDescription, setEventDescription] = useState("")
 
   const [openNewEvent, setOpenNewEvent] = useState(false)
   const toggleNewEvent = () => {
@@ -17,13 +20,19 @@ export default function NewEvent() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     try {
-      const response = await axios.post("http://localhost:3001/api/events", {
-        eventName,
-        eventNote,
-        eventDate,
-        // reminder,
-        // reminderDate,
-      })
+      const response = await axios.post(
+        "http://localhost:3001/api/post/events",
+        {
+          reminderID,
+          state,
+          endDate,
+          eventName,
+          eventCategory,
+          eventDate,
+          eventPriority,
+          eventDescription,
+        }
+      )
       console.log("Evento creado: ", response.data)
       //Lógica de cerrar el form aquí
     } catch (error) {

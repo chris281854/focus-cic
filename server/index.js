@@ -1,8 +1,6 @@
 const express = require("express")
 const cors = require("cors")
 const { Pool } = require("pg")
-const { v4: uuidv4 } = require('uuid');
-
 
 const app = express()
 
@@ -20,11 +18,10 @@ const pool = new Pool({
 })
 
 //ROUTES
-
 // Endpoint para obtener datos de PostgreSQL
-app.get("/api/data", async (req, res) => {
+app.get("/api/get/events", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM eventos")
+    const result = await pool.query('SELECT * FROM "Events"')
     res.json(result.rows)
   } catch (err) {
     console.error(err)
@@ -33,18 +30,39 @@ app.get("/api/data", async (req, res) => {
 })
 
 //Insertar eventos
-app.post('/api/events', async (req, res) => {
+app.post("/api/post/events", async (req, res) => {
   try {
-    const randomId = uuidv4()
-    const { eventName, eventNote, eventDate } = req.body;
+    const {
+      reminderID,
+      state,
+      endDate,
+      eventName,
+      eventCategory,
+      eventDate,
+      eventPriority,
+      eventDescription,
+    } = req.body
     // Insertar los datos del nuevo evento en la base de datos utilizando el cliente PostgreSQL
-    await pool.query('INSERT INTO eventos (id_evento, nombre, nota, fecha) VALUES ($1, $2, $3, $4)', [randomId, eventName, eventNote, eventDate]);
-    res.status(201).json({ message: 'Evento creado correctamente' });
+    await pool.query(
+      'INSERT INTO "Events" (state, end_date, name, category, date, priority_level, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      [
+        state,
+        endDate,
+        eventName,
+        eventCategory,
+        eventDate,
+        eventPriority,
+        eventDescription,
+      ]
+    )
+    res.status(201).json({ message: "Evento creado correctamente" })
   } catch (error) {
-    console.error('Error al crear el evento:', error);
-    res.status(500).json({ error: 'Error al crear el evento' });
+    console.error("Error al crear el evento:", error)
+    res.status(500).json({ error: "Error al crear el evento" })
   }
-});
+})
+
+
 
 
 const port = process.env.PORT || 3001

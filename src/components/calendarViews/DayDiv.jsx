@@ -17,7 +17,7 @@ export default function DayDiv({
     if (selectedDiv === dataDate) {
       divClass = divClass + " " + divClassnames.selectedDay
     } 
-    console.log(selectedDiv," ",dataDate)
+    // console.log(selectedDiv," ",dataDate)
     return divClass
   }
 

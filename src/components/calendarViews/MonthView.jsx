@@ -39,7 +39,7 @@ export default function MonthView() {
         return null
       } else {
         setDay(() => parseInt(dataDate.split("-")[2]))
-        console.log(day)
+        // console.log(day)
         return dataDate
       }
     })

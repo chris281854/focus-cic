@@ -27,7 +27,7 @@ export default function GeneralView() {
     // Función para obtener los eventos desde el servidor
     const fetchEvents = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/data")
+        const response = await axios.get("http://localhost:3001/api/get/events")
         setEvents(response.data)
       } catch (error) {
         console.error("Error al obtener los eventos: ", error)
@@ -47,13 +47,13 @@ export default function GeneralView() {
           <NewReminder></NewReminder>
         </div>
         <div className="todo-list w-full">
-
           {events.map((event) => (
-
-            <div className="bg-secondary rounded w-full p-2 m-2" key={event.id_evento}>
+            <div
+              className="bg-secondary rounded w-full p-2 m-2"
+              key={event.id_evento}>
               {event.nombre}
-              
-              {event.fecha}
+
+              {event.fecha} 
               <input type="checkbox" name="check" id="check" />
             </div>
           ))}
