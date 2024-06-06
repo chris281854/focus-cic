@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { Await, useNavigate } from "react-router-dom"
 import { UserContext } from "../../context/UserContext"
 import { useUser } from "../../context/UserContext"
 import Header from "../Header"
 import Footer from "../Footer"
 
 export default function Login() {
-  const { user , login } = useUser();
+  const { user , login, loading } = useUser();
   const navigate = useNavigate()
   const [error, setError] = useState("")
   
@@ -19,7 +19,7 @@ export default function Login() {
     if (user) {
       navigate("/home");
     }
-  }, []);
+  }, [loading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault()

@@ -73,6 +73,7 @@ app.post("/api/post/events", async (req, res) => {
         eventDate,
         eventPriority,
         eventDescription,
+        
       ]
     )
     res.status(201).json({ message: "Evento creado correctamente" })
@@ -115,18 +116,18 @@ app.post("/api/login", async (req, res) => {
   }
 })
 
-app.post('/api/verifyToken', (req, res) => {
-  const token = req.headers.authorization.split(' ')[1];
+app.post("/api/verifyToken", (req, res) => {
+  const token = req.headers.authorization.split(" ")[1]
 
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
-      res.status(401).json({ error: 'Token inválido' });
+      return res.status(401).json({ error: "Token inválido" })
     } else {
       //decoded debe poseer los datos del usuario
-      res.json(decoded);
+      return res.json({ user: decoded })
     }
-  });
-});
+  })
+})
 
 app.post("/api/register", async (req, res) => {
   const { name, lastName, birthDate, phoneNumer, nickName, email, password } =

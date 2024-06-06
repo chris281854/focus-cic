@@ -3,7 +3,7 @@ import { useState } from "react"
 import axios from "axios"
 
 export default function NewEvent() {
-  const [reminderID, setReminderID] = useState("")
+  const [reminderDate, setReminderDate] = useState("")
   const [state, setState] = useState("")
   const [endDate, setEndDate] = useState("")
   const [eventName, setEventName] = useState("")
@@ -23,7 +23,7 @@ export default function NewEvent() {
       const response = await axios.post(
         "http://localhost:3001/api/post/events",
         {
-          reminderID,
+          reminderDate,
           state,
           endDate,
           eventName,
@@ -58,12 +58,12 @@ export default function NewEvent() {
                   value={eventName}
                   onChange={(e) => setEventName(e.target.value)}
                 />
-                <label htmlFor="EventNote">Notas</label>
+                <label htmlFor="eventDescription">Notas</label>
                 <input
                   type="text"
-                  name="EventNote"
-                  value={eventNote}
-                  onChange={(e) => setEventNote(e.target.value)}
+                  name="EventDescription"
+                  value={eventDescription}
+                  onChange={(e) => setEventDescription(e.target.value)}
                 />
                 <label htmlFor="EventDate">Hora y fecha</label>
                 <input
@@ -72,24 +72,21 @@ export default function NewEvent() {
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
                 />
+                <label htmlFor="EventCategory">Categoría</label>
+                <input
+                  type="textbox"
+                  name="EventCategory"
+                  value={eventCategory}
+                  onChange={(e) => setEventCategory(e.target.value)}
+                />
                 <div>
                   <input
                     type="checkbox"
                     name="reminder"
                     id="reminder"
-                    checked={reminder}
-                    onChange={(e) => setReminder(e.target.checked)}
                   />
                   <label htmlFor="reminder"> ¿Añadir recordatorio?</label>
                   <br />
-                  {reminder && (
-                    <input
-                      type="datetime-local"
-                      name="reminderDate"
-                      value={reminderDate}
-                      onChange={(e) => setReminderDate(e.target.value)}
-                    />
-                  )}
                 </div>
                 <div className="p-2 flex self-center justify-around w-1/2">
                   <button type="reset" onClick={toggleNewEvent}>
