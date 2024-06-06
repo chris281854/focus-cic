@@ -1,57 +1,77 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { UserContext } from "../../context/UserContext"
+import { useUser } from "../../context/UserContext"
 import Header from "../Header"
 import Footer from "../Footer"
 
 export default function Login() {
-  const { login } = useContext(UserContext)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const { user , login } = useUser();
+  const navigate = useNavigate()
   const [error, setError] = useState("")
+  
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+
+  useEffect(() => {
+    // Si el usuario ya está autenticado, redirige a la página de inicio
+    if (user) {
+      navigate("/home");
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("/login", {
+      const response = await fetch("http://localhost:3001/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       })
       if (response.ok) {
-        const userData = await response.json
+        const userData = await response.json()
         login(userData)
+        console.log("Iniciando sesión")
+        navigate("/home")
       } else {
-        throw new Error("LLogin failed")
+        const errorData = await response.json()
+        setError(errorData.error)
+        console.error(errorData.error)
       }
     } catch (error) {
-      setError("Invalid Username or Password")
+      setError("Error de red o problema con el servidor")
+      console.error(error)
     }
   }
 
   return (
     <>
-    <div className="flex items-center content-center flex-col bg-white text-primary dark:bg-bg-main-color dark:text-white pb-8">
     <Header></Header>
+    <div className="flex items-center content-center flex-col bg-white text-primary dark:bg-bg-main-color dark:text-white pb-8">
+    <div className="flex flex-col min-h-screen min-w-full items-center">
+      <h1>Inicio de Sesión</h1>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Correo Electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Login</button>
+        <button type="submit">Iniciar Sesión</button>
         {error && <p>{error}</p>}
       </form>
-      <Footer></Footer>
+    </div>
       </div>
+      <Footer></Footer>
     </>
   )
 }

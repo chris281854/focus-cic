@@ -9,6 +9,10 @@ import GeneralView from "./components/sections/GeneralView"
 import Calendar from "./components/sections/Calendar"
 import Settings from "./components/pages/Settings"
 import Login from "./components/pages/Login"
+import Register from "./components/pages/Register"
+import ProtectedRoute from "./components/ProtectedRoute"
+
+
 
 function App() {
   return (
@@ -18,7 +22,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Welcome />} />
             <Route path="/welcome" element={<Welcome />} />
-            <Route path="/home/*" element={<Home />}>
+            <Route path="/home/*" element={<ProtectedRoute><Home /></ProtectedRoute>}>
               {/* Rutas secundarias dentro de /home */}
               <Route index element={<GeneralView />} />
               <Route path="calendar" element={<Calendar />} />
@@ -28,6 +32,7 @@ function App() {
             <Route path="/about-us" element={<About />} />
             <Route path="/contact-us" element={<Contact />} />
             <Route path="/login" element={<Login />}/>
+            <Route path="/register" element={<Register />}/>
           </Routes>
         </BrowserRouter>
       </UserProvider>
