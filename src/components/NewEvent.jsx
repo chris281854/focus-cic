@@ -1,16 +1,20 @@
 import React from "react"
 import { useState } from "react"
 import axios from "axios"
+import { useUser } from "../context/UserContext"
 
-export default function NewEvent() {
-  const [reminderDate, setReminderDate] = useState("")
-  const [state, setState] = useState("")
-  const [endDate, setEndDate] = useState("")
+export default function NewEvent({ onEventCreated }) {
+  const { user } = useUser()
+  const [state, setState] = useState(false)
+  const [eventDate, setEventDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
   const [eventName, setEventName] = useState("")
   const [eventCategory, setEventCategory] = useState("")
-  const [eventDate, setEventDate] = useState("")
-  const [eventPriority, setEventPriority] = useState("")
+  const [reminderDate, setReminderDate] = useState(null)
+  const [eventPriority, setEventPriority] = useState(3)
   const [eventDescription, setEventDescription] = useState("")
+  const [mail, setMail] = useState(false)
+  const [addReminder, setAddReminder] = useState(false)
 
   const [openNewEvent, setOpenNewEvent] = useState(false)
   const toggleNewEvent = () => {
@@ -23,18 +27,21 @@ export default function NewEvent() {
       const response = await axios.post(
         "http://localhost:3001/api/post/events",
         {
-          reminderDate,
+          reminderDate: addReminder ? reminderDate : null,
           state,
-          endDate,
+          endDate: endDate || null,
           eventName,
           eventCategory,
           eventDate,
           eventPriority,
           eventDescription,
+          userId: user.user_id,
+          mail,
         }
       )
       console.log("Evento creado: ", response.data)
-      //Lógica de cerrar el form aquí
+      toggleNewEvent()
+      onEventCreated()
     } catch (error) {
       console.error("Error al crear el evento: ", error)
     }
@@ -57,6 +64,7 @@ export default function NewEvent() {
                   name="EventName"
                   value={eventName}
                   onChange={(e) => setEventName(e.target.value)}
+                  required
                 />
                 <label htmlFor="eventDescription">Notas</label>
                 <input
@@ -71,6 +79,7 @@ export default function NewEvent() {
                   name="EventDate"
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
+                  required
                 />
                 <label htmlFor="EventCategory">Categoría</label>
                 <input
@@ -79,13 +88,31 @@ export default function NewEvent() {
                   value={eventCategory}
                   onChange={(e) => setEventCategory(e.target.value)}
                 />
+                <label htmlFor="Prioridad"></label>
+                <input
+                  type="number"
+                  name="EventPriority"
+                  value={eventPriority}
+                  onChange={(e) => setEventPriority(e.target.value)}
+                  required
+                />
                 <div>
                   <input
                     type="checkbox"
                     name="reminder"
                     id="reminder"
+                    onChange={(e) => setAddReminder(e.target.checked)}
                   />
                   <label htmlFor="reminder"> ¿Añadir recordatorio?</label>
+                  {addReminder && (
+                    <input
+                      type="datetime-local"
+                      name="reminderDate"
+                      value={reminderDate}
+                      onChange={(e) => setReminderDate(e.target.value)}
+                      required
+                    />
+                  )}
                   <br />
                 </div>
                 <div className="p-2 flex self-center justify-around w-1/2">

@@ -50,10 +50,11 @@ app.get("/api/get/events", async (req, res) => {
 
 //Insertar eventos
 app.post("/api/post/events", async (req, res) => {
+  const client = await pool.connect() // Obtén un cliente de la pool de conexiones
+
   try {
-    events
     const {
-      reminderID,
+      reminderDate,
       state,
       endDate,
       eventName,
@@ -61,10 +62,15 @@ app.post("/api/post/events", async (req, res) => {
       eventDate,
       eventPriority,
       eventDescription,
+      userId,
+      mail,
     } = req.body
+
+    await client.query("BEGIN") // Iniciar una transacción
+
     // Insertar los datos del nuevo evento en la base de datos utilizando el cliente PostgreSQL
-    await pool.query(
-      'INSERT INTO "Events" (state, end_date, name, category, date, priority_level, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+    const eventResult = await client.query(
+      'INSERT INTO "Events" (state, end_date, name, category, date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING event_id',
       [
         state,
         endDate,
@@ -73,13 +79,44 @@ app.post("/api/post/events", async (req, res) => {
         eventDate,
         eventPriority,
         eventDescription,
-        
+        userId,
       ]
     )
+
+    console.log("Resultado de inserción del evento:", eventResult)
+
+    if (!eventResult.rows || eventResult.rows.length === 0) {
+      throw new Error("Error al insertar el evento")
+    }
+    const eventID = eventResult.rows[0].event_id // Obtener el ID del nuevo evento
+    // Insertar el recordatorio en la tabla Reminders
+    if (reminderDate) {
+      const reminderResult = await client.query(
+        'INSERT INTO "Reminders" (date, user_id, mail) VALUES ($1, $2, $3) RETURNING reminder_id',
+        [reminderDate, userId, mail]
+      )
+
+      if (!reminderResult.rows || reminderResult.rows.length === 0) {
+        throw new Error("Error al insertar el recordatorio")
+      }
+
+      const newReminderID = reminderResult.rows[0].reminder_id // Obtener el ID del nuevo recordatorio
+      // Insertar la relación en la tabla intermedia Event_Reminder
+      await client.query(
+        'INSERT INTO "Event_Reminder" (event_id, reminder_id) VALUES ($1, $2)',
+        [eventID, newReminderID]
+      )
+    }
+    await client.query("COMMIT") // Confirmar la transacción
+
     res.status(201).json({ message: "Evento creado correctamente" })
   } catch (error) {
+    await client.query("ROLLBACK") // Revertir la transacción en caso de error
+
     console.error("Error al crear el evento:", error)
     res.status(500).json({ error: "Error al crear el evento" })
+  } finally {
+    client.release()
   }
 })
 

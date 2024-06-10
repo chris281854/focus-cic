@@ -22,6 +22,7 @@ export default function GeneralView() {
     },
   ])
   const [text, setText] = useState("")
+  const [newEventAlert, setNewEventAlert] = useState(false)
 
   useEffect(() => {
     // Función para obtener los eventos desde el servidor
@@ -34,7 +35,11 @@ export default function GeneralView() {
       }
     }
     fetchEvents()
-  }, [])
+  }, [newEventAlert])
+
+  const handleNewEventAlert = () => {
+    setNewEventAlert(true)
+  }
 
   return (
     <>
@@ -42,20 +47,13 @@ export default function GeneralView() {
         <h2>Tareas y Eventos</h2>
         <div className="flex p-4">
           <button>+</button>
-          <NewEvent></NewEvent>
+          <NewEvent onEventCreated={handleNewEventAlert}></NewEvent>
           <NewTask></NewTask>
           <NewReminder></NewReminder>
         </div>
         <div className="todo-list w-full">
           {events.map((event) => (
-            <div
-              className="bg-secondary rounded w-full p-2 m-2"
-              key={event.id_evento}>
-              {event.nombre}
-
-              {event.fecha} 
-              <input type="checkbox" name="check" id="check" />
-            </div>
+            <ToDoItem key={event.event_id} event={event} />
           ))}
           <input value={text} onChange={(e) => setText(e.target.value)} />
           <button onClick={() => addTask(text)}>Add</button>
