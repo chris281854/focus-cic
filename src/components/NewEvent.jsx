@@ -6,7 +6,7 @@ import { useUser } from "../context/UserContext"
 
 export default function NewEvent({ onEventCreated }) {
   const { user } = useUser()
-  const [state, setState] = useState(false)
+  const [state, setState] = useState(0)
   const [eventDate, setEventDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
   const [eventName, setEventName] = useState("")
@@ -25,7 +25,6 @@ export default function NewEvent({ onEventCreated }) {
   }
   //Reset form
   const reset = () => {
-    setState(false)
     setEventDate(null)
     setEndDate(null)
     setEventName("")
