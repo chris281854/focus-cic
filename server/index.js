@@ -37,10 +37,15 @@ function authenticateToken(req, res, next) {
 }
 
 //ROUTES
-// Endpoint para obtener datos de PostgreSQL
+// Recibir datos
 app.get("/api/get/events", async (req, res) => {
+  const userId = req.query.userId
+
   try {
-    const result = await pool.query('SELECT * FROM "Events"')
+    const result = await pool.query(
+      'SELECT * FROM "Events" WHERE user_id = $1',
+      [userId]
+    )
     res.json(result.rows)
   } catch (err) {
     console.error(err)
@@ -48,7 +53,22 @@ app.get("/api/get/events", async (req, res) => {
   }
 })
 
-//Insertar eventos
+app.get("/api/get/tasks", async (req, res) => {
+  const userId = req.query.userId
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM "Tasks" WHERE user_id = $1',
+      [userId]
+    )
+    res.json(result.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).send("Error al obtener las tareas")
+  }
+})
+
+//Insertar
 app.post("/api/post/events", async (req, res) => {
   const client = await pool.connect() // Obtén un cliente de la pool de conexiones
 
@@ -117,6 +137,43 @@ app.post("/api/post/events", async (req, res) => {
     res.status(500).json({ error: "Error al crear el evento" })
   } finally {
     client.release()
+  }
+})
+
+//Eliminar Items
+app.delete("/api/items/delete", async (req, res) => {
+  const { id, type } = req.body
+  console.log(id, type)
+
+  if (!id || !type) {
+    return res.status(400).json({ error: "ID y tipo requeridos" })
+  }
+  try {
+    let tableName
+    let idName
+    if (type === "task") {
+      tableName = "Tasks"
+      idName = "task_id"
+    } else if (type === "event") {
+      tableName = "Events"
+      idName = "event_id"
+    } else {
+      return res.status(400).json({ error: "Tipo inválido" })
+    }
+
+    const result = await pool.query(
+      `DELETE FROM "${tableName}" WHERE ${idName} = $1 RETURNING *`,
+      [id]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Item no encontrado" })
+    }
+
+    res.status(200).json({ message: "Item eliminado exitosamente" })
+  } catch (error) {
+    console.error(error)
+    res.status.apply(500).json({ error: "¿ interno del servidor" })
   }
 })
 

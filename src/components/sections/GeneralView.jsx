@@ -4,41 +4,50 @@ import NewTask from "../NewTask"
 import NewReminder from "../NewReminder"
 import ToDoItem from "../ToDoItem"
 import axios from "axios"
+import { useUser } from "../../context/UserContext"
 
 export default function GeneralView() {
+  const { user } = useUser()
+
   //Estructura de tareas provisional (debe vincularse la base de datos)
   const [events, setEvents] = useState([])
   const [reminders, setReminders] = useState([])
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      text: "Doctor Appointment",
-      completed: true,
-    },
-    {
-      id: 2,
-      text: "Meeting at School",
-      completed: false,
-    },
-  ])
+  const [tasks, setTasks] = useState([])
   const [text, setText] = useState("")
-  const [newEventAlert, setNewEventAlert] = useState(false)
+  const [tableModified, setTableModified] = useState(false)
 
   useEffect(() => {
     // Función para obtener los eventos desde el servidor
-    const fetchEvents = async () => {
+    const fetchTasks = async (userId) => {
       try {
-        const response = await axios.get("http://localhost:3001/api/get/events")
+        const response = await axios.get(
+          `http://localhost:3001/api/get/tasks?userId=${userId}`
+        )
+        setTasks(response.data)
+      } catch (error) {
+        console.error("Error al obtener las tareas: ", error)
+      }
+    }
+    fetchTasks(user.user_id)
+
+    const fetchEvents = async (userId) => {
+      console.log(userId)
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/get/events?userId=${userId}`
+        )
         setEvents(response.data)
       } catch (error) {
         console.error("Error al obtener los eventos: ", error)
       }
     }
-    fetchEvents()
-  }, [newEventAlert])
+    fetchEvents(user.user_id)
+    
+    setTableModified(false)
+  }, [tableModified])
 
-  const handleNewEventAlert = () => {
-    setNewEventAlert(true)
+  const handleTableModified = () => {
+    setTableModified(true)
   }
 
   return (
@@ -46,17 +55,17 @@ export default function GeneralView() {
       <div className="flex relative p-5 flex-col w-full">
         <h2>Tareas y Eventos</h2>
         <div className="flex p-4">
-          <button>+</button>
-          <NewEvent onEventCreated={handleNewEventAlert}></NewEvent>
-          <NewTask></NewTask>
-          <NewReminder></NewReminder>
+          <NewEvent onEventCreated={handleTableModified}></NewEvent>
+          <NewTask onTaskCreated={handleTableModified}></NewTask>
+          <NewReminder onReminderCreated={handleTableModified}></NewReminder>
         </div>
         <div className="todo-list w-full">
           {events.map((event) => (
-            <ToDoItem key={event.event_id} event={event} />
+            <ToDoItem key={event.event_id} event={event} onEventModified={handleTableModified} />
           ))}
-          <input value={text} onChange={(e) => setText(e.target.value)} />
-          <button onClick={() => addTask(text)}>Add</button>
+          {tasks.map((task) => (
+            <ToDoItem key={task.task_id} task={task} onEventModified={handleTableModified}/>
+          ))}
         </div>
       </div>
     </>

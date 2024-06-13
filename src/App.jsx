@@ -11,7 +11,7 @@ import Settings from "./components/pages/Settings"
 import Login from "./components/pages/Login"
 import Register from "./components/pages/Register"
 import ProtectedRoute from "./components/ProtectedRoute"
-
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 
 function App() {
