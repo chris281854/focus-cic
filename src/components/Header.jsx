@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useContext } from "react"
 import { Link } from "react-router-dom"
+import { useUser } from "../context/UserContext"
 
 const Header = () => {
+  const { user, logout } = useUser()
+
+  const handleLogOut = () => {
+    logout()
+  }
+
   //scroll effect
   const [scrollY, setScrollY] = useState(0)
   useEffect(() => {
@@ -40,9 +47,10 @@ const Header = () => {
 
   return (
     <header
-      className={`flex fixed top-0 w-full pt-4 pb-4 items-center justify-between z-50 bg-primary transition-all duration-1000 rounded-b-3xl flex-row ${
-        scrollY > 0 ? "bg-opacity-30 bg-black backdrop-blur" : ""
-      }`}>
+      className={`flex top-0 w-full pt-4 pb-4 items-center justify-between z-50 bg-primary transition-all duration-1000 rounded-b-3xl flex-row 
+      
+      ${scrollY > 0 ? "bg-opacity-30 bg-black backdrop-blur" : ""}
+      `}>
       <Link className="tittle-header hover:text-accent transition-all duration-500">
         <img src="/Focus Logo Vector Large.png" alt="Logo" />
         <h2>Focus</h2>
@@ -54,14 +62,24 @@ const Header = () => {
           {theme === "dark" ? "💡" : "🌙"}
         </button>
         <Link to="/about-us" className={twLinks}>
-          About Us
+          Sobre nosotros
         </Link>
-        <Link to="/" className={twLinks}>
-          Log In
-        </Link>
-        <Link to="/" className={twLinks}>
-          Sign Up
-        </Link>
+        {user ? (
+          <Link onClick={handleLogOut} to="/login" className={twLinks}>
+            Cerrar sesión
+          </Link>
+        ) : (
+          <Link to="/login" className={twLinks}>
+            Iniciar sesión
+          </Link>
+        )}
+        {!user ? (
+          <Link to="/register" className={twLinks}>
+            Registrarse
+          </Link>
+        ) : (
+          <></>
+        )}
       </div>
     </header>
   )

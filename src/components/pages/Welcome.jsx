@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import "./Welcome.css"
 import Header from "../Header.jsx"
 import Footer from "../Footer"
-import SplitLine from "../SplitLine.jsx"
+// import SplitLine from "../SplitLine.jsx"
 
 export default function Welcome() {
   return (

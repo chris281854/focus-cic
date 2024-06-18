@@ -1,5 +1,5 @@
-import { React, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { React, useState, useEffect } from "react"
+import DayDiv from "./DayDiv"
 
 export default function MonthView() {
   const monthName = [
@@ -17,33 +17,59 @@ export default function MonthView() {
     "Diciembre",
   ]
 
+  //Variables de fecha
   const now = new Date()
-  let [month, setMonth] = useState(now.getMonth())
-  let [year, setYear] = useState(now.getFullYear())
-  let day = now.getDate()
-  let currentMonth = now.getMonth()
-  let currentYear = now.getFullYear()
-  const currentDate = `${currentYear}-${currentMonth}-${day}`
+  const currentDay = now.getDate()
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
+
+  const [day, setDay] = useState(currentDay)
+  const [month, setMonth] = useState(now.getMonth())
+  const [year, setYear] = useState(now.getFullYear())
+
+  //Datos de la Tabla
+  const currentDate = `${currentYear}-${currentMonth}-${currentDay}`
+  const [selectedDate, setSelectedDate] = useState(
+    new Date(`${year}-${month + 1}-${day}`)
+  )
+  const [selectedDiv, setSelectedDiv] = useState(null)
+  const handleSelectedDiv = (dataDate) => {
+    setSelectedDiv(() => {
+      if (dataDate === selectedDiv) {
+        return null
+      } else {
+        setDay(() => parseInt(dataDate.split("-")[2]))
+        // console.log(day)
+        return dataDate
+      }
+    })
+  }
 
   // Fechas en encabezados
   let textMonth = monthName[month]
   let currentTextMonth = monthName[currentMonth]
-  let textDay = day
+  let textDay = currentDay
   let textYear = year
+
+  //UseEffect para la actualización de los valores de selectedDate:
+  useEffect(() => {
+    const newDate = new Date(`${year}-${month + 1}-${day}`)
+    setSelectedDate(newDate)
+    setDatePickValue(newDate)
+  }, [year, month, day])
 
   function getNextMonth() {
     if (month !== 11) setMonth(month + 1)
     else {
       setYear(year + 1)
-      setMonth((month = 0))
+      setMonth(0)
     }
-    //se deben actualizar fechas en encabezados
   }
   function getPrevMonth() {
     if (month !== 0) setMonth(month - 1)
     else {
       setYear(year - 1)
-      setMonth((month = 11))
+      setMonth(11)
     }
     //se deben actualizar fechas en encabezados
   }
@@ -57,7 +83,6 @@ export default function MonthView() {
   function startDay() {
     let start = new Date(year, month, 1)
     return start.getDate() - 1 === -1 ? 6 : start.getDay()
-    // return start.getDate() === 1 ? start.getDay() : (start.getDay() + 1) % 7;
   }
 
   function leapYear() {
@@ -90,29 +115,29 @@ export default function MonthView() {
   const monthDayCalList = []
   const monthDays = []
   const divClassname = {
-    actualDays: 'celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden',
-    prevDays: "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
-    nextDays: "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
+    actualDays: "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden",
+    prevDays:
+      "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
+    nextDays:
+      "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
+    selectedDay: "",
   }
+
   // Días del mes pasado
   for (let i = startDay(); i > 0; i--) {
     const dayOfPrevMonth = getTotalDays(month - 1) - (i - 1)
 
     monthDayCalList.push(
-      <div
-        key={`prev-${dayOfPrevMonth}`}
-        className={divClassname.prevDays}>
+      <div key={`prev-${dayOfPrevMonth}`} className={divClassname.prevDays}>
         <p> {dayOfPrevMonth} </p>
         {/* <p>{content}</p> */}
         {/* Aquí puedes agregar tu lógica para las listas de tareas */}
       </div>
     )
-    console.log(month)
   }
+
   // Días del mes actual:
   for (let i = 1; i <= getTotalDays(month); i++) {
-    //Y determinar el día actual
-
     monthDays.push({ id: i, content: `Descripción para el día ${i}` })
   }
 
@@ -121,16 +146,15 @@ export default function MonthView() {
     const dataDate = `${year}-${month}-${id}`
 
     monthDayCalList.push(
-      <div
+      <DayDiv
         key={id}
-        data-date={dataDate}
-        className={`${divClassname.actualDays} ${
-          dataDate == currentDate ? "bg-green-400" : ""
-        }`}>
-        <p>{id}</p>
-        <p>{content}</p>
-        {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-      </div>
+        id={id}
+        content={content}
+        dataDate={dataDate}
+        currentDate={currentDate}
+        selectedDiv={selectedDiv}
+        handleSelectedDiv={handleSelectedDiv}
+      />
     )
   }
   //Días del mes siguiente
@@ -152,61 +176,72 @@ export default function MonthView() {
     )
   }
 
-  // console.log(currentDate)
-  // console.log(monthDayCalList)
+  //Date picker:
+  const [datePickValue, setDatePickValue] = useState(selectedDate)
+  const handleDatePickChange = (event) => {
+    const date = event.target.value
+
+    //parsear para obtener año, mes y día por separado
+    const parsedDate = new Date(date)
+    const parsedYear = parsedDate.getFullYear()
+    const parsedMonth = parsedDate.getMonth()
+    const parsedDay = parsedDate.getDate() + 1
+
+    setYear(parsedYear)
+    setMonth(parsedMonth)
+    setDay(parsedDay)
+  }
+
   return (
     <>
-      <div className="container_calendar w-fit h-fit">
-        <div className="header_calendar">
-          <h1 id="text_day">{textDay}</h1>
-          <h5 id="text_month">{currentTextMonth}</h5>
+      <div className="container_calendar">
+        <div className="header_calendar flex">
+          <p className="text-xl flex self-center pr-3">Today:</p>
+          <h1 id="text_day" className="font-bold">
+            {textDay}
+          </h1>
+          <h5 id="text_month" className="flex self-center pl-4 text-xl">
+            {currentTextMonth} {currentYear}
+          </h5>
         </div>
-        <div className="body_calendar w-fit border-2 h-fit">
-          <div className="container_details">
-            <div className="detail_1">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-            </div>
-            <div className="detail_2">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-            </div>
+        <div className="body_calendar border-2">
+          <div className="spans-div flex justify-center content-center">
+            <span className="p-2"> {textMonth} </span>
+            <span className="p-2"> {textYear} </span>
           </div>
           <div className="container_change_date flex items-center justify-center">
-            <button className="last_year self-start" onClick={getPrevYear}>
+            <button
+              className="last_year rounded-full bg-transparent selection:outline-none m-1 focus:outline-none"
+              onClick={getPrevYear}>
               &lt;
             </button>
-            <button className="last_month self-start" onClick={getPrevMonth}>
+            <button
+              className="last_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+              onClick={getPrevMonth}>
               &lt;
             </button>
             <div className="min-w-40 text-center">
-              <span id="text_month_02"> {textMonth} </span>
-              <span id="text_year"> {textYear} </span>
+              <input
+                value={datePickValue.toISOString().split("T")[0]}
+                onChange={handleDatePickChange}
+                type="date"
+                name="date-input"
+                id="date-input"
+                className="border-none outline-none bg-transparent text-white"
+              />
             </div>
-            <button className="next_month" onClick={getNextMonth}>
+            <button
+              className="next_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+              onClick={getNextMonth}>
               &gt;
             </button>
-            <button className="next_year" onClick={getNextYear}>
+            <button
+              className="next_year rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+              onClick={getNextYear}>
               &gt;
             </button>
           </div>
-          <div className="container_weedays flex justify-between">
+          <div className="container_weedays grid grid-rows-1 grid-cols-7 text-center">
             <span className="week_days_item">DOM</span>
             <span className="week_days_item">LUN</span>
             <span className="week_days_item">MAR</span>
@@ -215,7 +250,7 @@ export default function MonthView() {
             <span className="week_days_item">VIE</span>
             <span className="week_days_item">SÁB</span>
           </div>
-          <div className="container_days grid grid-rows-5 grid-cols-7 grid-flow-row w-fit border-2 text-xs">
+          <div className="grid grid-rows-5 grid-cols-7 grid-flow-row border-2 text-xs">
             {monthDayCalList}
           </div>
         </div>

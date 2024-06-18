@@ -1,25 +1,72 @@
-import { React, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { React, useEffect, useState } from "react"
 import NewEvent from "../NewEvent"
-import NewTask from "../newTask"
+import NewTask from "../NewTask"
 import NewReminder from "../NewReminder"
+import ToDoItem from "../ToDoItem"
+import axios from "axios"
+import { useUser } from "../../context/UserContext"
 
 export default function GeneralView() {
+  const { user } = useUser()
+
+  //Estructura de tareas provisional (debe vincularse la base de datos)
+  const [events, setEvents] = useState([])
+  const [reminders, setReminders] = useState([])
+  const [tasks, setTasks] = useState([])
+  const [text, setText] = useState("")
+  const [tableModified, setTableModified] = useState(false)
+
+  useEffect(() => {
+    // Función para obtener los eventos desde el servidor
+    const fetchTasks = async (userId) => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/get/tasks?userId=${userId}`
+        )
+        setTasks(response.data)
+      } catch (error) {
+        console.error("Error al obtener las tareas: ", error)
+      }
+    }
+    fetchTasks(user.user_id)
+
+    const fetchEvents = async (userId) => {
+      console.log(userId)
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/get/events?userId=${userId}`
+        )
+        setEvents(response.data)
+      } catch (error) {
+        console.error("Error al obtener los eventos: ", error)
+      }
+    }
+    fetchEvents(user.user_id)
+    
+    setTableModified(false)
+  }, [tableModified])
+
+  const handleTableModified = () => {
+    setTableModified(true)
+  }
 
   return (
     <>
-      <div className="flex relative p-5 flex-col w-fit">
+      <div className="flex relative p-5 flex-col w-full">
         <h2>Tareas y Eventos</h2>
         <div className="flex p-4">
-          <button>+</button>
-          <NewEvent></NewEvent>
-          <NewTask></NewTask>
-          <NewReminder></NewReminder>
+          <NewEvent onEventCreated={handleTableModified}></NewEvent>
+          <NewTask onTaskCreated={handleTableModified}></NewTask>
+          <NewReminder onReminderCreated={handleTableModified}></NewReminder>
         </div>
-        <h2>Hoy</h2>
-        <div>Task list</div>
-        <h2>Mañana</h2>
-        <h2>Semana</h2>
+        <div className="todo-list w-full">
+          {events.map((event) => (
+            <ToDoItem key={event.event_id} event={event} onEventModified={handleTableModified} />
+          ))}
+          {tasks.map((task) => (
+            <ToDoItem key={task.task_id} task={task} onEventModified={handleTableModified}/>
+          ))}
+        </div>
       </div>
     </>
   )
