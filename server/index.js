@@ -68,6 +68,41 @@ app.get("/api/get/tasks", async (req, res) => {
   }
 })
 
+app.get("/api/get/reminders", async (req, res) => {
+  const userId = req.query.userId
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM "Reminders" WHERE user_id = $1',
+      [userId]
+    )
+    res.json(result.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).send("Error al obtener las tareas")
+  }
+})
+
+app.get("/api/get/userData", async (req, res) => {
+  const userId = req.query.userId
+
+  try {
+    const result = await pool.query(
+      'SELECT name, last_name FROM "Users" WHERE USER_ID = $1',
+      [userId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" })
+    }
+
+    res.json(result.rows[0])
+  } catch (err) {
+    console.error(err)
+    res.status(500).send("Error al obtener datos de usuario")
+  }
+})
+
 //Insertar
 app.post("/api/post/events", async (req, res) => {
   const client = await pool.connect() // Obtén un cliente de la pool de conexiones
@@ -88,7 +123,6 @@ app.post("/api/post/events", async (req, res) => {
 
     await client.query("BEGIN") // Iniciar una transacción
 
-    // Insertar los datos del nuevo evento en la base de datos utilizando el cliente PostgreSQL
     const eventResult = await client.query(
       'INSERT INTO "Events" (state, end_date, name, category, date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING event_id',
       [
@@ -135,6 +169,75 @@ app.post("/api/post/events", async (req, res) => {
 
     console.error("Error al crear el evento:", error)
     res.status(500).json({ error: "Error al crear el evento" })
+  } finally {
+    client.release()
+  }
+})
+
+app.post("/api/post/tasks", async (req, res) => {
+  const client = await pool.connect()
+
+  try {
+    const {
+      reminderDate,
+      state,
+      taskName,
+      taskCategory,
+      taskDate,
+      taskPriority,
+      taskDescription,
+      userId,
+      mail,
+    } = req.body
+
+    await client.query("BEGIN") // Iniciar una transacción
+
+    // Insertar los datos del nuevo evento en la base de datos utilizando el cliente PostgreSQL
+    const taskResult = await client.query(
+      'INSERT INTO "Tasks" (state, name, category, due_date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING task_id',
+      [
+        state,
+        taskName,
+        taskCategory,
+        taskDate,
+        taskPriority,
+        taskDescription,
+        userId,
+      ]
+    )
+
+    console.log("Resultado de inserción de la tarea:", taskResult)
+
+    if (!taskResult.rows || taskResult.rows.length === 0) {
+      throw new Error("Error al insertar la tarea")
+    }
+    const taskID = taskResult.rows[0].task_id // Obtener el ID de la nueva tarea
+    // Insertar el recordatorio en la tabla Reminders
+    if (reminderDate) {
+      const reminderResult = await client.query(
+        'INSERT INTO "Reminders" (date, user_id, mail) VALUES ($1, $2, $3) RETURNING reminder_id',
+        [reminderDate, userId, mail]
+      )
+
+      if (!reminderResult.rows || reminderResult.rows.length === 0) {
+        throw new Error("Error al insertar el recordatorio")
+      }
+
+      const newReminderID = reminderResult.rows[0].reminder_id // Obtener el ID del nuevo recordatorio
+      // Insertar la relación en la tabla intermedia Task_Reminder
+      await client.query(
+        'INSERT INTO "Task_Reminder" (task_id, reminder_id) VALUES ($1, $2)',
+        [taskID, newReminderID]
+      )
+    }
+    await client.query("COMMIT") // Confirmar la transacción
+
+    res.status(201).json({ message: "Evento creado correctamente" })
+  } catch (error) {
+    await client.query("ROLLBACK") // Revertir la transacción en caso de error
+
+    console.error("Error al crear la tarea:", error)
+    res.status(500).json({ error: "Error al crear la tarea" })
   } finally {
     client.release()
   }
@@ -246,6 +349,85 @@ app.post("/api/register", async (req, res) => {
 
 app.get("api/protected", authenticateToken, (req, res) => {
   res.json({ message: "This is a protected route", user: req.user })
+})
+
+//Actualizar perfil
+app.get("api/updateProfile", authenticateToken, async (req, res) => {
+  const {
+    user_id,
+    name,
+    lastName,
+    birthDate,
+    phoneNumer,
+    nickName,
+    email,
+    password,
+  } = req.body
+
+  if (!user_id) {
+    return res.status(400).json({ error: "User ID is required" })
+  }
+
+  try {
+    let updateFields = []
+    let values = []
+    let valueIndex = 1
+
+    if (name) {
+      updateFields.push(`name = $${valueIndex}`)
+      values.push(name)
+      valueIndex++
+    }
+    if (lastName) {
+      updateFields.push(`last_name = $${valueIndex}`)
+      values.push(lastName)
+      valueIndex++
+    }
+    if (birthDate) {
+      updateFields.push(`birthdate = $${valueIndex}`)
+      values.push(birthDate)
+      valueIndex++
+    }
+    if (phoneNumber) {
+      updateFields.push(`phone_number = $${valueIndex}`)
+      values.push(phoneNumber)
+      valueIndex++
+    }
+    if (email) {
+      updateFields.push(`email = $${valueIndex}`)
+      values.push(email)
+      valueIndex++
+    }
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10)
+      updateFields.push(`password = $${valueIndex}`)
+      values.push(hashedPassword)
+      valueIndex++
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: "No fields to update" })
+    }
+
+    values.push(user_id)
+
+    const query = `UPDATE "Users" SET ${updateFields.join(
+      ", "
+    )} WHERE user_id = $${valueIndex} RETURNING *`
+    const result = await pool.query(query, values)
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" })
+    }
+
+    res.status(200).json({
+      message: "Usuario actualizado exitosamente",
+      user: result.rows[0],
+    })
+    await pool.query()
+  } catch (error) {
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
 })
 
 const port = process.env.PORT || 3001

@@ -43,6 +43,7 @@ export default function GeneralView() {
     }
     fetchEvents(user.user_id)
     
+    
     setTableModified(false)
   }, [tableModified])
 

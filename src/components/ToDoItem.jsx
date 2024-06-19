@@ -1,7 +1,10 @@
+
+
 export default function ToDoItem({ event, task, onEventModified }) {
-  function handleChange() {
-    toggleCompleted(task.id)
-  }
+  // function handleChange() {
+  //   toggleCompleted(task.id)
+  // }
+
   //Estados:
   //0: Incompleto
   //1: Retrasado
@@ -68,25 +71,18 @@ export default function ToDoItem({ event, task, onEventModified }) {
     <>
       {event ? (
         <div className="max-w-sm w-full bg-black rounded-lg shadow-lg p-6 m-3">
-          <div className="flex items-center justify-between">
+          <div className="flex relative items-center justify-between">
             <h2 className="text-xl font-bold text-white">{event.name}</h2>
             <button
-              className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1"
-              onClick={() => handleDelete(event.event_id, "event")}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 absolute right-10"
+                onClick={() => handleDelete(event.event_id, "event")}>
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 relative right-0"
+                onClick={() => handleDelete(event.event_id, "event")}>
+              <i class="fa-solid fa-xmark"></i>
+              </button>
           </div>
           <p className="text-gray-400 mt-2">{event.description}</p>
           <div className="flex items-center justify-between mt-4">
@@ -103,24 +99,17 @@ export default function ToDoItem({ event, task, onEventModified }) {
       ) : (
         <>
           <div className="max-w-sm w-full bg-black rounded-lg shadow-lg p-6 m-3">
-            <div className="flex items-center justify-between">
+            <div className="flex relative items-center justify-between">
               <h2 className="text-xl font-bold text-white">{task.name}</h2>
               <button
-                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1"
+                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 absolute right-10"
                 onClick={() => handleDelete(task.task_id, "task")}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 relative right-0"
+                onClick={() => handleDelete(task.task_id, "task")}>
+              <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
             <p className="text-gray-400 mt-2">{task.description}</p>

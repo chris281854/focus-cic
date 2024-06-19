@@ -47,10 +47,10 @@ const Header = () => {
 
   return (
     <header
-      className={`flex top-0 w-full pt-4 pb-4 items-center justify-between z-50 bg-primary transition-all duration-1000 rounded-b-3xl flex-row 
-      
-      ${scrollY > 0 ? "bg-opacity-30 bg-black backdrop-blur" : ""}
-      `}>
+      className={`flex top-0 w-full pt-4 pb-4 items-center justify-between z-50 bg-primary transition-all duration-1000 flex-row 
+        `}>
+
+        {/* Change color scroll => ${scrollY > 0 ? "bg-opacity-30 bg-black backdrop-blur" : ""} */}
       <Link className="tittle-header hover:text-accent transition-all duration-500">
         <img src="/Focus Logo Vector Large.png" alt="Logo" />
         <h2>Focus</h2>
