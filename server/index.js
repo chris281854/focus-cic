@@ -43,7 +43,15 @@ app.get("/api/get/events", async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT * FROM "Events" WHERE user_id = $1',
+      `SELECT 
+        e.*, 
+        er.reminder_id, 
+        r.date AS reminder_date, 
+        r.mail AS reminder_mail
+      FROM "Events" e
+      LEFT JOIN "Event_Reminder" er ON e.event_id = er.event_id
+      LEFT JOIN "Reminders" r ON er.reminder_id = r.reminder_id
+      WHERE e.user_id = $1`,
       [userId]
     )
     res.json(result.rows)
@@ -58,7 +66,15 @@ app.get("/api/get/tasks", async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT * FROM "Tasks" WHERE user_id = $1',
+      `SELECT 
+        t.*, 
+        tr.reminder_id, 
+        r.date AS reminder_date, 
+        r.mail AS reminder_mail
+      FROM "Tasks" t
+      LEFT JOIN "Task_Reminder" tr ON t.task_id = tr.task_id
+      LEFT JOIN "Reminders" r ON tr.reminder_id = r.reminder_id
+      WHERE t.user_id = $1`,
       [userId]
     )
     res.json(result.rows)
@@ -83,12 +99,44 @@ app.get("/api/get/reminders", async (req, res) => {
   }
 })
 
+app.get("/api/get/itemData", async (req, res) => {
+  const { userId, itemId, itemType } = req.query
+
+  if (!userId || !itemId || !type) {
+    return res
+      .status(400)
+      .json({ error: "User ID, Item ID, and type are required" })
+  }
+
+  try {
+    let query
+    if (type === "event") {
+      query = `SELECT * FROM "Events" WHERE user_id = $1 AND event_id = $2`
+    } else if (type === "task") {
+      query = `SELECT * FROM "Tasks" WHERE user_id = $1 AND task_id = $2`
+    } else {
+      return res.status(400).json({ error: "Tipo inválido" })
+    }
+
+    const result = await pool.query(query, [userId, itemId])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Item no encontrado" })
+    }
+
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: "Internal server error" })
+  }
+})
+
 app.get("/api/get/userData", async (req, res) => {
   const userId = req.query.userId
 
   try {
     const result = await pool.query(
-      'SELECT name, last_name FROM "Users" WHERE USER_ID = $1',
+      'SELECT name, last_name, nickname, phone_number, email, birthDate FROM "Users" WHERE USER_ID = $1',
       [userId]
     )
 
@@ -175,43 +223,47 @@ app.post("/api/post/events", async (req, res) => {
 })
 
 app.post("/api/post/tasks", async (req, res) => {
-  const client = await pool.connect()
+
+  const client = await pool.connect() // Obtén un cliente de la pool de conexiones
 
   try {
     const {
-      reminderDate,
+      taskReminderDate,
       state,
+      endDate,
       taskName,
       taskCategory,
       taskDate,
       taskPriority,
       taskDescription,
       userId,
-      mail,
+      taskMail,
+      taskId,
+      taskReminderId
     } = req.body
 
     await client.query("BEGIN") // Iniciar una transacción
 
-    // Insertar los datos del nuevo evento en la base de datos utilizando el cliente PostgreSQL
     const taskResult = await client.query(
-      'INSERT INTO "Tasks" (state, name, category, due_date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING task_id',
+      'INSERT INTO "Tasks" (state, end_date, name, category, date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING task_id',
       [
         state,
-        taskName,
-        taskCategory,
-        taskDate,
-        taskPriority,
-        taskDescription,
+        endDate,
+        eventName,
+        eventCategory,
+        eventDate,
+        eventPriority,
+        eventDescription,
         userId,
       ]
     )
 
-    console.log("Resultado de inserción de la tarea:", taskResult)
+    console.log("Resultado de inserción del evento:", eventResult)
 
-    if (!taskResult.rows || taskResult.rows.length === 0) {
-      throw new Error("Error al insertar la tarea")
+    if (!eventResult.rows || eventResult.rows.length === 0) {
+      throw new Error("Error al insertar el evento")
     }
-    const taskID = taskResult.rows[0].task_id // Obtener el ID de la nueva tarea
+    const eventID = eventResult.rows[0].event_id // Obtener el ID del nuevo evento
     // Insertar el recordatorio en la tabla Reminders
     if (reminderDate) {
       const reminderResult = await client.query(
@@ -224,10 +276,10 @@ app.post("/api/post/tasks", async (req, res) => {
       }
 
       const newReminderID = reminderResult.rows[0].reminder_id // Obtener el ID del nuevo recordatorio
-      // Insertar la relación en la tabla intermedia Task_Reminder
+      // Insertar la relación en la tabla intermedia Event_Reminder
       await client.query(
-        'INSERT INTO "Task_Reminder" (task_id, reminder_id) VALUES ($1, $2)',
-        [taskID, newReminderID]
+        'INSERT INTO "Event_Reminder" (event_id, reminder_id) VALUES ($1, $2)',
+        [eventID, newReminderID]
       )
     }
     await client.query("COMMIT") // Confirmar la transacción
@@ -236,8 +288,8 @@ app.post("/api/post/tasks", async (req, res) => {
   } catch (error) {
     await client.query("ROLLBACK") // Revertir la transacción en caso de error
 
-    console.error("Error al crear la tarea:", error)
-    res.status(500).json({ error: "Error al crear la tarea" })
+    console.error("Error al crear el evento:", error)
+    res.status(500).json({ error: "Error al crear el evento" })
   } finally {
     client.release()
   }
@@ -280,10 +332,149 @@ app.delete("/api/items/delete", async (req, res) => {
   }
 })
 
+//Actualizar evento
+
+app.patch("/api/event/update", authenticateToken, async (req, res) => {
+  const {
+    eventReminderDate,
+    state,
+    endDate,
+    eventName,
+    eventCategory,
+    eventDate,
+    eventPriority,
+    eventDescription,
+    eventMail,
+    eventId,
+    userId,
+    eventReminderId,
+  } = req.body
+
+  // // Verifica si todos los campos necesarios están presentes
+  // if (!eventId || !userId || !state || !eventName || !eventDate) {
+  //   return res.status(400).json({ error: "Missing required fields" })
+  // }
+
+  const client = await pool.connect()
+
+  if (!eventId) {
+    return res.status(400).json({ error: "Event ID is required" })
+  }
+
+  if (req.user.user_id !== userId) {
+    return res
+      .status(403)
+      .json({ error: "User not authorized to update this event" })
+  }
+
+  try {
+    await client.query("BEGIN")
+
+    const updateEventQuery = `
+      UPDATE "Events" 
+      SET 
+        "state" = $1,
+        "end_date" = $2,
+        "name" = $3,
+        "category" = $4,
+        "date" = $5,
+        "priority_level" = $6,
+        "description" = $7,
+        "user_id" = $8
+      WHERE "event_id" = $9 AND "user_id" = $8
+      RETURNING *;
+    `
+    const eventValues = [
+      state,
+      endDate,
+      eventName,
+      eventCategory,
+      eventDate,
+      eventPriority,
+      eventDescription,
+      userId,
+      eventId,
+    ]
+
+    const eventResult = await client.query(updateEventQuery, eventValues)
+
+    if (eventResult.rows.length === 0) {
+      await client.query("ROLLBACK")
+      return res
+        .status(404)
+        .json({ error: "Event not found or user not authorized" })
+    }
+
+    if (!eventReminderId && reminderDate) {
+      const insertReminderQuery = `
+        INSERT INTO "Reminders" ("date", "mail", "user_id")
+        VALUES ($1, $2, $3)
+        RETURNING "reminder_id";
+      `
+      const insertReminderValues = [eventReminderDate, eventMail, userId]
+      const reminderResult = await client.query(
+        insertReminderQuery,
+        insertReminderValues
+      )
+      const newReminderId = reminderResult.rows[0].reminder_id
+
+      const insertEventReminderQuery = `
+        INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
+        VALUES ($1, $2);
+      `
+      await client.query(insertEventReminderQuery, [eventId, newReminderId])
+
+    } else if (eventReminderId) {
+      const deleteReminderQuery = `
+        DELETE FROM "Reminders"
+        WHERE "reminder_id" = $1;
+      `
+      await client.query(deleteReminderQuery, [eventReminderId])
+
+      const insertReminderQuery = `
+        INSERT INTO "Reminders" ("date", "mail", "user_id")
+        VALUES ($1, $2, $3)
+        RETURNING "reminder_id";
+      `
+      const insertReminderValues = [eventReminderDate, eventMail, userId]
+
+      const reminderResult = await client.query(
+        insertReminderQuery,
+        insertReminderValues
+      )
+      const newReminderId = reminderResult.rows[0].reminder_id
+
+      const insertEventReminderQuery = `
+        INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
+        VALUES ($1, $2);
+      `
+
+      await client.query(insertEventReminderQuery, [eventId, newReminderId])
+    }
+
+    await client.query("COMMIT")
+
+    res.status(200).json({
+      message: "Event and Reminder updated successfully",
+      event: eventResult.rows[0],
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("Error updating event and reminder", error)
+    res.status(500).json({
+      error: "An error occurred while updating the event and reminder",
+    })
+  } finally {
+    client.release()
+  }
+})
+
+//Actualiar tareas
+app.patch("/api/task/update", authenticateToken, async (req, res) => {})
+
 //Iniciar sesión
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body
-  console.log(email, password)
 
   try {
     const result = await pool.query('SELECT * FROM "Users" WHERE email = $1', [
@@ -352,19 +543,12 @@ app.get("api/protected", authenticateToken, (req, res) => {
 })
 
 //Actualizar perfil
-app.get("api/updateProfile", authenticateToken, async (req, res) => {
-  const {
-    user_id,
-    name,
-    lastName,
-    birthDate,
-    phoneNumer,
-    nickName,
-    email,
-    password,
-  } = req.body
+app.patch("/api/updateProfile", authenticateToken, async (req, res) => {
+  const userId = req.query.userId
 
-  if (!user_id) {
+  const { name, lastName, birthDate, phoneNumber, email, password } = req.body
+
+  if (!userId) {
     return res.status(400).json({ error: "User ID is required" })
   }
 
@@ -409,7 +593,7 @@ app.get("api/updateProfile", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "No fields to update" })
     }
 
-    values.push(user_id)
+    values.push(userId)
 
     const query = `UPDATE "Users" SET ${updateFields.join(
       ", "
@@ -424,8 +608,43 @@ app.get("api/updateProfile", authenticateToken, async (req, res) => {
       message: "Usuario actualizado exitosamente",
       user: result.rows[0],
     })
-    await pool.query()
   } catch (error) {
+    console.error("Internal server error:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
+})
+
+//Cambiar contraseña
+app.patch("/api/changePassword", authenticateToken, async (req, res) => {
+  const userId = req.query.userId
+  const { password } = req.body
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" })
+  }
+
+  if (!password) {
+    return res.status(400).json({ error: "Password is required" })
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await pool.query(
+      `UPDATE "Users" SET password = $1 WHERE user_id  = $2 RETURNING *`,
+      [hashedPassword, userId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" })
+    }
+
+    res.status(200).json({
+      message: "Contraseña actualizada exitosamente",
+      user: result.rows[0],
+    })
+  } catch (error) {
+    console.error(error)
     res.status(500).json({ error: "Error interno del servidor" })
   }
 })

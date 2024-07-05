@@ -1,7 +1,11 @@
 import React from "react"
 import { useState } from "react"
+import sendEmail from "./EmailSender"
 
 export default function NewReminder() {
+  
+  
+
   const [openNewReminder, setOpenNewReminder] = useState(false)
 
   const toggleNewReminder = () => {

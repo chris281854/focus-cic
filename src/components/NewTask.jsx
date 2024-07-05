@@ -66,27 +66,34 @@ export default function NewTask({ onTaskCreated }) {
         </button>
 
         {openNewTask && (
-          <div className="flex fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-screen w-screen bg-opacity-30 bg-black backdrop-blur">
-            <div className="flex justify-center text-center p-6 w-1/2 h-fit fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary rounded-3xl">
-              <button
-                onClick={reset}
-                className="absolute right-3 h-10 w-10 text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-2">
-                <i className="fas fa-redo"></i>
-              </button>
-              <form
-                action=""
-                onSubmit={(task) => task.preventDefault()}
-                className="flex flex-col w-full">
-                <label htmlFor="taskName">Tarea</label>
+          <div className="flex fixed z-50 inset-0 bg-opacity-30 bg-black backdrop-blur">
+          <div className="flex flex-col justify-start p-4 w-full sm:w-3/4 md:w-1/2 lg:w-1/3 h-auto sm:h-5/6 bg-gray-900 rounded-3xl mx-auto my-auto overflow-scroll no-scrollbar">
+            <button
+              onClick={reset}
+              className="static top-3 -right-44 h-10 w-10 text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full flex self-end items-center justify-center">
+              <i className="fas fa-redo"></i>
+            </button>
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col w-full space-y-4 -mt-6"
+              id="form">
+              <div>
+                <label
+                  htmlFor="taskName"
+                  className="block text-white text-left mb-1">
+                  Tarea
+                </label>
                 <input
                   type="text"
                   name="taskName"
                   id="taskName"
-                  value={taskName}
+                  value={taskName ?? ""}
                   onChange={(e) => setTaskName(e.target.value)}
                   required
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-
+              </div>
+              <div>
                 <label htmlFor="taskDescription">Notas</label>
                 <input
                   type="text"
@@ -94,57 +101,78 @@ export default function NewTask({ onTaskCreated }) {
                   id="taskDescription"
                   value={taskDescription}
                   onChange={(e) => setTaskDescription(e.target.value)}
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-
-                <label htmlFor="taskDate">Hora y fecha</label>
+              </div>
+              <div>
+                <label
+                  htmlFor="taskCategory"
+                  className="block text-white text-left mb-1">
+                  Categoría
+                </label>
+                <input
+                  type="text"
+                  name="taskCategory"
+                  value={taskCategory}
+                  onChange={(e) => setTaskCategory(e.target.value)}
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="taskDate"
+                  className="block text-white text-left mb-1">
+                  Hora y fecha
+                </label>
                 <input
                   type="datetime-local"
                   name="taskDate"
                   value={taskDate}
                   onChange={(e) => setTaskDate(e.target.value)}
                   required
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-                <label htmlFor="taskCategory">Categoría</label>
-                <input
-                  type="text"
-                  name="taskCategory"
-                  value={taskCategory}
-                  onChange={(e) => setTaskCategory(e.target.value)}
-                />
+              </div>
+              <div>
                 <label htmlFor="Prioridad">Prioridad</label>
-                <input
-                  type="number"
+                <select
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  id="TaskPriority"
                   name="TaskPriority"
                   value={taskPriority}
-                  onChange={(e) => setTaskPriority(e.target.value)}
+                  onChange={(e) => setTaskPriority(e.target.value)}>
+                  <option value="0">Básico</option>
+                  <option value="1">Importante + Urgente</option>
+                  <option value="2">Importante</option>
+                  <option value="3">Urgente</option>
+                </select>
+              </div>
+              {addReminder && (
+                <input
+                  type="datetime-local"
+                  name="reminderDate"
+                  value={reminderDate}
+                  onChange={(e) => setReminderDate(e.target.value)}
                   required
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-                {addReminder && (
-                  <input
-                    type="datetime-local"
-                    name="reminderDate"
-                    value={reminderDate}
-                    onChange={(e) => setReminderDate(e.target.value)}
-                    required
-                  />
-                )}
-                <div>
-                  <input type="checkbox" name="reminder" id="reminder" />
-                  <label htmlFor="reminder"> ¿Añadir recordatorio?</label>
-                  <br />
-                  <input type="datetime-local" name="reminderDate" />
-                </div>
-                <div className="p-2 flex self-center justify-around w-1/2">
-                  <button type="reset" onClick={toggleNewTask}>
-                    Cancelar
-                  </button>
-                  <button type="submit" onClick={handleSubmit}>
-                    Guardar
-                  </button>
-                </div>
-              </form>
-            </div>
+              )}
+              <div className="flex justify-around mt-4 self">
+                <button
+                  type="reset"
+                  onClick={toggleNewTask}
+                  className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                  Guardar
+                </button>
+              </div>
+            </form>
           </div>
+        </div>
         )}
       </div>
     </>

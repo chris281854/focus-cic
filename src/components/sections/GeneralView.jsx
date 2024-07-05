@@ -16,6 +16,25 @@ export default function GeneralView() {
   const [text, setText] = useState("")
   const [tableModified, setTableModified] = useState(false)
 
+  function generateEvents() {
+    return events.map((event) => (
+      <ToDoItem
+        key={event.event_id}
+        event={event}
+        onEventModified={handleTableModified}
+      />
+    ))
+  }
+  function generateTasks() {
+    return tasks.map((task) => (
+      <ToDoItem
+        key={task.task_id}
+        task={task}
+        onEventModified={handleTableModified}
+      />
+    ))
+  }
+
   useEffect(() => {
     // Función para obtener los eventos desde el servidor
     const fetchTasks = async (userId) => {
@@ -31,7 +50,6 @@ export default function GeneralView() {
     fetchTasks(user.user_id)
 
     const fetchEvents = async (userId) => {
-      console.log(userId)
       try {
         const response = await axios.get(
           `http://localhost:3001/api/get/events?userId=${userId}`
@@ -42,8 +60,7 @@ export default function GeneralView() {
       }
     }
     fetchEvents(user.user_id)
-    
-    
+
     setTableModified(false)
   }, [tableModified])
 
@@ -61,12 +78,8 @@ export default function GeneralView() {
           <NewReminder onReminderCreated={handleTableModified}></NewReminder>
         </div>
         <div className="todo-list w-full">
-          {events.map((event) => (
-            <ToDoItem key={event.event_id} event={event} onEventModified={handleTableModified} />
-          ))}
-          {tasks.map((task) => (
-            <ToDoItem key={task.task_id} task={task} onEventModified={handleTableModified}/>
-          ))}
+          {generateEvents()}
+          {generateTasks()}
         </div>
       </div>
     </>

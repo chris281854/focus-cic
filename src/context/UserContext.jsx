@@ -37,7 +37,6 @@ export const UserProvider = ({ children }) => {
         })
         .then((userData) => {
           // Actualizar el estado de usuario con los datos del usuario
-          console.log("hello")
           setUser(userData.user)
         })
         .catch((error) => {
