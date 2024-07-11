@@ -7,7 +7,7 @@ import axios from "axios"
 import { useUser } from "../../context/UserContext"
 
 export default function GeneralView() {
-  const { user } = useUser()
+  const { user, lifeAreas } = useUser()
 
   //Estructura de tareas provisional (debe vincularse la base de datos)
   const [events, setEvents] = useState([])

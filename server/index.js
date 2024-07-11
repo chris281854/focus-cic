@@ -47,11 +47,17 @@ app.get("/api/get/events", async (req, res) => {
         e.*, 
         er.reminder_id, 
         r.date AS reminder_date, 
-        r.mail AS reminder_mail
+        r.mail AS reminder_mail,
+        ARRAY_AGG(la.name) AS life_areas
       FROM "Events" e
+      
       LEFT JOIN "Event_Reminder" er ON e.event_id = er.event_id
       LEFT JOIN "Reminders" r ON er.reminder_id = r.reminder_id
-      WHERE e.user_id = $1`,
+      LEFT JOIN "Event_Life_Areas" ela ON e.event_id = ela.event_id
+      LEFT JOIN "Life_Areas" la ON ela.life_area_id = la.life_area_id
+      
+      WHERE e.user_id = $1
+      GROUP BY e.event_id, er.reminder_id, r.date, r.mail;`,
       [userId]
     )
     res.json(result.rows)
@@ -99,6 +105,21 @@ app.get("/api/get/reminders", async (req, res) => {
   }
 })
 
+app.get("/api/get/lifeAreas", async (req, res) => {
+  const userId = 2
+  // req.query.userId
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM "Life_Areas" WHERE user_id = $1',
+      [userId]
+    )
+    res.json(result.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).send("Error al obtener las Áreas de vida")
+  }
+})
 app.get("/api/get/itemData", async (req, res) => {
   const { userId, itemId, itemType } = req.query
 
@@ -167,6 +188,7 @@ app.post("/api/post/events", async (req, res) => {
       eventDescription,
       userId,
       mail,
+      lifeAreaIds,
     } = req.body
 
     await client.query("BEGIN") // Iniciar una transacción
@@ -209,6 +231,19 @@ app.post("/api/post/events", async (req, res) => {
         [eventID, newReminderID]
       )
     }
+
+    if (lifeAreaIds && lifeAreaIds.length > 0) {
+      const lifeAreasQuery = `
+      INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
+      VALUES ${lifeAreaIds.map(() => "($1, $2)").join(", ")}
+      `
+      const lifeAreasValues = lifeAreaIds.flatMap((lifeAreaId) => [
+        eventID,
+        lifeAreaId,
+      ])
+      await client.query(lifeAreasQuery, lifeAreasValues)
+    }
+
     await client.query("COMMIT") // Confirmar la transacción
 
     res.status(201).json({ message: "Evento creado correctamente" })
@@ -223,7 +258,6 @@ app.post("/api/post/events", async (req, res) => {
 })
 
 app.post("/api/post/tasks", async (req, res) => {
-
   const client = await pool.connect() // Obtén un cliente de la pool de conexiones
 
   try {
@@ -239,7 +273,7 @@ app.post("/api/post/tasks", async (req, res) => {
       userId,
       taskMail,
       taskId,
-      taskReminderId
+      taskReminderId,
     } = req.body
 
     await client.query("BEGIN") // Iniciar una transacción
@@ -295,6 +329,69 @@ app.post("/api/post/tasks", async (req, res) => {
   }
 })
 
+app.post("/api/post/lifeAreas", authenticateToken, async (req, res) => {
+  const { name, userId, score, date } = req.body
+
+  if (!name || userId) {
+    return res.status(400).json({ error: "Nombre y userId requeridos" })
+  }
+
+  try {
+    await client.query("BEGIN")
+
+    const lifeAreaResult = await pool.query(
+      `INSERT INTO "Life_Areas" (name, user_id) VALUES ($1, $2) RETURNING *`[
+        (name, userId)
+      ]
+    )
+    const lifeArea = lifeAreaResult.rows[0]
+
+    if (score) {
+      const lifeAreaScoreResult = await client.query(
+        `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2,) RETURNING *`,
+        [lifeArea.id, userId, score, date]
+      )
+      const lifeAreaScore = lifeAreaScoreResult.rows[0]
+    }
+    await client.query("COMMIT")
+
+    res.status(201).json({ lifeArea, lifeAreaScore })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("Error al crear life area y life area score", error)
+    res
+      .status(500)
+      .json({ error: "Error al crear life area y life area score" })
+  } finally {
+    client.release()
+  }
+})
+
+app.post("/api/post/lifeAreaScore", authenticateToken, async (req, res) => {
+  const { lifeAreaId, userId, score, date } = req.body
+
+  if (!date || !lifeAreaId || !userId || !score) {
+    return res.status(400).json({ error: "data requerida" })
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2, $3, $4) RETURNING *`[
+        (lifeAreaId, userId, score, date)
+      ]
+    )
+    res.status(201).json(result.rows[0])
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("Error al crear life area score", error)
+    res
+      .status(500)
+      .json({ error: "Error al crear life area score" })
+  } finally {
+    client.release()
+  }
+})
+
 //Eliminar Items
 app.delete("/api/items/delete", async (req, res) => {
   const { id, type } = req.body
@@ -332,8 +429,51 @@ app.delete("/api/items/delete", async (req, res) => {
   }
 })
 
-//Actualizar evento
+app.delete("/api/lifeAreas/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params
+  const { userId } = req.body
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" })
+  }
 
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    await client.query(
+      `DELETE FROM "Life_Area_Score" WHERE life_area_id = $1`,
+      [id]
+    )
+
+    const result = await client.query(
+      `DELETE FROM "Life_Areas" Where life_area_id = $1 AND user_id = $2 RETURNING *`,
+      [id, userId]
+    )
+
+    if (result.rows.length === 0) {
+      await client.query("ROLLBACK")
+      return res
+        .status(404)
+        .json({ error: "Life area no encontrada o usuario no autorizado" })
+    }
+
+    await client.query("COMMIT")
+
+    res
+      .status(200)
+      .json({ message: "Life area y scores relacionados elimidados" })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    return res
+      .status(500)
+      .json({ error: "Error al eliminar life area y score relacionado" })
+  } finally {
+    client.release()
+  }
+})
+
+//Actualizar
 app.patch("/api/event/update", authenticateToken, async (req, res) => {
   const {
     eventReminderDate,
@@ -348,12 +488,8 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
     eventId,
     userId,
     eventReminderId,
+    lifeAreas,
   } = req.body
-
-  // // Verifica si todos los campos necesarios están presentes
-  // if (!eventId || !userId || !state || !eventName || !eventDate) {
-  //   return res.status(400).json({ error: "Missing required fields" })
-  // }
 
   const client = await pool.connect()
 
@@ -405,7 +541,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
         .json({ error: "Event not found or user not authorized" })
     }
 
-    if (!eventReminderId && reminderDate) {
+    if (!eventReminderId && eventReminderDate) {
       const insertReminderQuery = `
         INSERT INTO "Reminders" ("date", "mail", "user_id")
         VALUES ($1, $2, $3)
@@ -423,7 +559,6 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
         VALUES ($1, $2);
       `
       await client.query(insertEventReminderQuery, [eventId, newReminderId])
-
     } else if (eventReminderId) {
       const deleteReminderQuery = `
         DELETE FROM "Reminders"
@@ -452,10 +587,27 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
       await client.query(insertEventReminderQuery, [eventId, newReminderId])
     }
 
+    //Manejar áreas de vida
+
+    const deleteLifeAreasQuery = `
+      DELETE FROM "Event_Life_Areas" WHERE "event_id" = $1;
+    `
+    await client.query(deleteLifeAreasQuery, [eventId])
+
+    if (lifeAreas && lifeAreas.length > 0) {
+      const insertLifeAreaQueries = lifeAreas.map((areaId) => {
+        return client.query(
+          `INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id") VALUES ($1, $2);`,
+          [eventId, areaId]
+        )
+      })
+      await Promise.all(insertLifeAreaQueries)
+    }
+
     await client.query("COMMIT")
 
     res.status(200).json({
-      message: "Event and Reminder updated successfully",
+      message: "Event, related Reminder and life area updated successfully",
       event: eventResult.rows[0],
     })
   } catch (error) {
@@ -469,8 +621,35 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
   }
 })
 
-//Actualiar tareas
 app.patch("/api/task/update", authenticateToken, async (req, res) => {})
+
+app.patch("api/update/lifeAreas/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params
+  const { userId, name } = req.body
+
+  if (!name || !userId || score) {
+    return res
+      .status(400)
+      .json({ error: "Name, userId, score, date son requeridos" })
+  }
+
+  try {
+    const lifeAreaResult = await pool.query(
+      `UPDATE "Life_Areas" SET name = $1 WHERE life_area_id = $2 AND user_id = $3 RETURNING *`,
+      [name, id, userId]
+    )
+
+    if (lifeAreaResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "life area no ha sido encontrada o usuario no autorizado",
+      })
+    }
+    res.status(200).json(result.rows[0])
+  } catch (error) {
+    console.error("Error al actualizar life area: ", error)
+    res.status(500).json({ error: "Error al actualizar life area" })
+  }
+})
 
 //Iniciar sesión
 app.post("/api/login", async (req, res) => {
@@ -538,7 +717,7 @@ app.post("/api/register", async (req, res) => {
   }
 })
 
-app.get("api/protected", authenticateToken, (req, res) => {
+app.get("/api/protected", authenticateToken, (req, res) => {
   res.json({ message: "This is a protected route", user: req.user })
 })
 

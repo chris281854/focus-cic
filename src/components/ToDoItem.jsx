@@ -80,6 +80,7 @@ export default function ToDoItem({ event, task, onEventModified }) {
             <span className="text-sm text-gray-500">
               Para: {dayjs(event.date).format("D MMMM | H:m a")}
             </span>
+            <span>{event.life_areas.join(', ')}</span>
             <button
               className="text-black bg-accent hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 rounded-full px-4 py-1 text-sm font-medium"
               onClick={() => handleComplete(event.event_id, "event")}>

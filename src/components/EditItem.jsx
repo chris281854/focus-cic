@@ -27,6 +27,8 @@ export default function EditItem({ onEdit, setOnEdit, event, task, onEventModifi
   const [taskMail, setTaskMail] = useState(task?.reminder_id || false)
   const [eventReminderId, setEventReminderId] = useState(event?.reminder_id)
   const [taskReminderId, setTaskReminderId] = useState(task?.reminder_id)
+  const [eventLifeAreas, setEventLifeAreas] = useState(event?.life_areas.join(', '))
+  const [taskLifeAreas, setTaskLifeAreas] = useState(task?.life_areas.join(', '))
 
   const [eventReminderDate, setEventReminderDate] = useState(
     event.reminder_date
@@ -58,6 +60,7 @@ export default function EditItem({ onEdit, setOnEdit, event, task, onEventModifi
     setEventDescription("")
     setAddEventReminder(false)
     setEventMail(false)
+    setEventLifeAreas(null)
 
     setTaskDate(null)
     setTaskName("")
@@ -67,6 +70,7 @@ export default function EditItem({ onEdit, setOnEdit, event, task, onEventModifi
     setTaskDescription("")
     setAddTaskReminder(false)
     setTaskMail(false)
+    setTaskLifeAreas(null)
   }
   console.log(event.event_id)
 
@@ -193,7 +197,7 @@ export default function EditItem({ onEdit, setOnEdit, event, task, onEventModifi
                       name="EventCategory"
                       id="EventCategory"
                       value={eventCategory}
-                      onChange={(e) => setEventCategory(e.target.value)}
+                      onChange={(e) => setEventLifeAreas(e.target.value)}
                       className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                       <option value="Social">Social</option>
                       <option value="Intelectual">Intelectual</option>

@@ -4,9 +4,10 @@ import { UserContext } from "../../context/UserContext"
 import { useUser } from "../../context/UserContext"
 import Header from "../Header"
 import Footer from "../Footer"
+import axios from "axios"
 
 export default function Login() {
-  const { user , login, loading } = useUser();
+  const { user , login, loading, updateLifeAreas } = useUser();
   const navigate = useNavigate()
   const [error, setError] = useState("")
   
