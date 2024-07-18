@@ -38,11 +38,36 @@ function authenticateToken(req, res, next) {
 
 //ROUTES
 // Recibir datos
-app.get("/api/get/events", async (req, res) => {
+app.get("/api/get/events", authenticateToken, async (req, res) => {
   const userId = req.query.userId
 
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" })
+  }
+
+  const client = await pool.connect()
+
   try {
-    const result = await pool.query(
+    await client.query("BEGIN")
+
+    const result = await client.query(
+      `
+      UPDATE "Events" 
+      SET "state" = CASE
+        WHEN "date" < NOW() THEN 0
+        WHEN "date" < NOW() + INTERVAL '1 day' THEN 1
+        WHEN "date" < NOW() + INTERVAL '1 week' THEN 2
+        ELSE 3
+      END
+      WHERE "user_id" = $1
+      AND "state" != 4`,
+      [userId]
+    )
+
+    await client.query("COMMIT")
+
+    // Obtener los eventos actualizados
+    const updatedResult = await client.query(
       `SELECT 
         e.*, 
         er.reminder_id, 
@@ -50,20 +75,83 @@ app.get("/api/get/events", async (req, res) => {
         r.mail AS reminder_mail,
         ARRAY_AGG(la.name) AS life_areas
       FROM "Events" e
-      
       LEFT JOIN "Event_Reminder" er ON e.event_id = er.event_id
       LEFT JOIN "Reminders" r ON er.reminder_id = r.reminder_id
       LEFT JOIN "Event_Life_Areas" ela ON e.event_id = ela.event_id
       LEFT JOIN "Life_Areas" la ON ela.life_area_id = la.life_area_id
-      
       WHERE e.user_id = $1
-      GROUP BY e.event_id, er.reminder_id, r.date, r.mail;`,
+      GROUP BY e.event_id, er.reminder_id, r.date, r.mail`,
       [userId]
     )
-    res.json(result.rows)
+
+    res.status(200).json(updatedResult.rows)
   } catch (err) {
-    console.error(err)
+    await client.query("ROLLBACK")
+    console.error(
+      "Error al obtener y actualizar el estado de los eventos:",
+      err
+    )
     res.status(500).send("Error al obtener los eventos")
+  } finally {
+    client.release()
+  }
+})
+
+app.get("/api/get/allEvents", authenticateToken, async (req, res) => {
+  const userId = req.query.userId
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    const result = await client.query(
+      `
+      UPDATE "Events" 
+      SET "state" = CASE
+        WHEN "date" < NOW() THEN 0
+        WHEN "date" < NOW() + INTERVAL '1 day' THEN 1
+        WHEN "date" < NOW() + INTERVAL '1 week' THEN 2
+        ELSE 3
+      END
+      WHERE "user_id" = $1`,
+      [userId]
+    )
+
+    await client.query("COMMIT")
+
+    // Obtener los eventos actualizados
+    const updatedResult = await client.query(
+      `SELECT 
+        e.*, 
+        er.reminder_id, 
+        r.date AS reminder_date, 
+        r.mail AS reminder_mail,
+        ARRAY_AGG(la.name) AS life_areas
+      FROM "Events" e
+      LEFT JOIN "Event_Reminder" er ON e.event_id = er.event_id
+      LEFT JOIN "Reminders" r ON er.reminder_id = r.reminder_id
+      LEFT JOIN "Event_Life_Areas" ela ON e.event_id = ela.event_id
+      LEFT JOIN "Life_Areas" la ON ela.life_area_id = la.life_area_id
+      WHERE e.user_id = $1
+      GROUP BY e.event_id, er.reminder_id, r.date, r.mail`,
+      [userId]
+    )
+
+    res.status(200).json(updatedResult.rows)
+  } catch (err) {
+    await client.query("ROLLBACK")
+    console.error(
+      "Error al obtener y actualizar el estado de los eventos:",
+      err
+    )
+    res.status(500).send("Error al obtener los eventos")
+  } finally {
+    client.release()
   }
 })
 
@@ -110,16 +198,32 @@ app.get("/api/get/lifeAreas", async (req, res) => {
   // req.query.userId
 
   try {
-    const result = await pool.query(
-      'SELECT * FROM "Life_Areas" WHERE user_id = $1',
-      [userId]
-    )
-    res.json(result.rows)
+    const query = `
+    SELECT 
+    la.*, 
+    COALESCE(
+      json_agg(
+        json_build_object(
+          'goal_id', g.goal_id,
+          'name', g.name,
+          'description', g.description,
+          'target_date', g.target_date
+        )
+      ) FILTER (WHERE g.goal_id IS NOT NULL), 
+      '[]'
+    ) AS goals
+  FROM "Life_Areas" la
+  LEFT JOIN "Goals" g ON la.life_area_id = g.life_area_id
+  GROUP BY la.life_area_id, la.name, la.score
+`
+    const result = await pool.query(query)
+    res.status(200).json(result.rows)
   } catch (err) {
     console.error(err)
     res.status(500).send("Error al obtener las Áreas de vida")
   }
 })
+
 app.get("/api/get/itemData", async (req, res) => {
   const { userId, itemId, itemType } = req.query
 
@@ -330,7 +434,7 @@ app.post("/api/post/tasks", async (req, res) => {
 })
 
 app.post("/api/post/lifeAreas", authenticateToken, async (req, res) => {
-  const { name, userId, score, date } = req.body
+  const { name, userId, score, longGoal } = req.body
 
   if (!name || userId) {
     return res.status(400).json({ error: "Nombre y userId requeridos" })
@@ -384,9 +488,7 @@ app.post("/api/post/lifeAreaScore", authenticateToken, async (req, res) => {
   } catch (error) {
     await client.query("ROLLBACK")
     console.error("Error al crear life area score", error)
-    res
-      .status(500)
-      .json({ error: "Error al crear life area score" })
+    res.status(500).json({ error: "Error al crear life area score" })
   } finally {
     client.release()
   }
@@ -409,6 +511,9 @@ app.delete("/api/items/delete", async (req, res) => {
     } else if (type === "event") {
       tableName = "Events"
       idName = "event_id"
+    } else if (type === "reminder") {
+      tableName = "Reminders"
+      idName = "reminder_id"
     } else {
       return res.status(400).json({ error: "Tipo inválido" })
     }
@@ -477,7 +582,220 @@ app.delete("/api/lifeAreas/:id", authenticateToken, async (req, res) => {
 app.patch("/api/event/update", authenticateToken, async (req, res) => {
   const {
     eventReminderDate,
-    state,
+    endDate,
+    eventName,
+    eventCategory,
+    eventDate,
+    eventPriority,
+    eventDescription,
+    eventMail,
+    eventId,
+    userId,
+    eventReminderId,
+    lifeAreas,
+  } = req.body
+
+  const client = await pool.connect()
+
+  if (!eventId) {
+    return res.status(400).json({ error: "Event ID is required" })
+  }
+
+  if (req.user.user_id !== userId) {
+    return res
+      .status(403)
+      .json({ error: "User not authorized to update this event" })
+  }
+
+  try {
+    await client.query("BEGIN")
+
+    const updateEventQuery = `
+      UPDATE "Events" 
+      SET 
+        "end_date" = $1,
+        "name" = $2,
+        "category" = $3,
+        "date" = $4,
+        "priority_level" = $5,
+        "description" = $6,
+        "user_id" = $7
+      WHERE "event_id" = $8 AND "user_id" = $7
+      RETURNING *;
+    `
+    const eventValues = [
+      endDate,
+      eventName,
+      eventCategory,
+      eventDate,
+      eventPriority,
+      eventDescription,
+      userId,
+      eventId,
+    ]
+
+    const eventResult = await client.query(updateEventQuery, eventValues)
+
+    if (eventResult.rows.length === 0) {
+      await client.query("ROLLBACK")
+      return res
+        .status(404)
+        .json({ error: "Event not found or user not authorized" })
+    }
+
+    if (!eventReminderId && eventReminderDate) {
+      const insertReminderQuery = `
+        INSERT INTO "Reminders" ("date", "mail", "user_id")
+        VALUES ($1, $2, $3)
+        RETURNING "reminder_id";
+      `
+      const insertReminderValues = [eventReminderDate, eventMail, userId]
+      const reminderResult = await client.query(
+        insertReminderQuery,
+        insertReminderValues
+      )
+      const newReminderId = reminderResult.rows[0].reminder_id
+
+      const insertEventReminderQuery = `
+        INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
+        VALUES ($1, $2);
+      `
+      await client.query(insertEventReminderQuery, [eventId, newReminderId])
+    } else if (eventReminderId) {
+      const deleteReminderQuery = `
+        DELETE FROM "Reminders"
+        WHERE "reminder_id" = $1;
+      `
+      await client.query(deleteReminderQuery, [eventReminderId])
+
+      const insertReminderQuery = `
+        INSERT INTO "Reminders" ("date", "mail", "user_id")
+        VALUES ($1, $2, $3)
+        RETURNING "reminder_id";
+      `
+      const insertReminderValues = [eventReminderDate, eventMail, userId]
+
+      const reminderResult = await client.query(
+        insertReminderQuery,
+        insertReminderValues
+      )
+      const newReminderId = reminderResult.rows[0].reminder_id
+
+      const insertEventReminderQuery = `
+        INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
+        VALUES ($1, $2);
+      `
+
+      await client.query(insertEventReminderQuery, [eventId, newReminderId])
+    }
+
+    //Manejar áreas de vida
+
+    const deleteLifeAreasQuery = `
+      DELETE FROM "Event_Life_Areas" WHERE "event_id" = $1;
+    `
+    await client.query(deleteLifeAreasQuery, [eventId])
+
+    if (lifeAreas && lifeAreas.length > 0) {
+      const insertLifeAreaQueries = lifeAreas.map((areaId) => {
+        return client.query(
+          `INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id") VALUES ($1, $2);`,
+          [eventId, areaId]
+        )
+      })
+      await Promise.all(insertLifeAreaQueries)
+    }
+
+    await client.query("COMMIT")
+
+    res.status(200).json({
+      message: "Event, related Reminder and life area updated successfully",
+      event: eventResult.rows[0],
+    })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("Error updating event and reminder", error)
+    res.status(500).json({
+      error: "An error occurred while updating the event and reminder",
+    })
+  } finally {
+    client.release()
+  }
+})
+
+app.patch("/api/items/complete", authenticateToken, async (req, res) => {
+  const { eventId, userId } = req.body
+
+  if (!eventId || !userId) {
+    return res.status(400).json({ error: "EventId and userId is required" })
+  }
+
+  if (req.user.user_id !== userId) {
+    return res
+      .status(403)
+      .json({ error: "User not authorized to update this event" })
+  }
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("BEGIN")
+
+    const updateResult = await client.query(
+      `UPDATE "Events" 
+      SET "state" = 4
+      WHERE "event_id" = $1 AND "user_id" = $2
+      RETURNING *;`,
+      [eventId, userId]
+    )
+
+    if (updateResult.rows.length === 0) {
+      await client.query("ROLLBACK")
+      return res
+        .status(404)
+        .json({ error: "Event not found or user not authorized" })
+    }
+
+    const reminderIdsResult = await client.query(
+      `SELECT "reminder_id"
+      FROM "Event_Reminder"
+      WHERE "event_id" = $1`,
+      [eventId]
+    )
+
+    const reminderIds = reminderIdsResult.rows.map((row) => row.reminder_id)
+
+    if ((reminderIds, reminderIds.length > 0)) {
+      await client.query(
+        `DELETE FROM "Reminders"
+        WHERE "reminder_id" = ANY($1::BIGINT[])`,
+        [reminderIds]
+      )
+    }
+
+    await client.query(
+      `DELETE FROM "Event_Reminder"
+      WHERE "event_id" = $1`,
+      [eventId]
+    )
+
+    await client.query("COMMIT")
+
+    res.status(200).json({ message: "Evento completado" })
+  } catch (error) {
+    await client.query("ROLLBACK")
+    console.error("Error al marcar como completado", error)
+    res.status(500).json({
+      error: "An error occurred while updating the event and reminder tables",
+    })
+  } finally {
+    client.release()
+  }
+})
+
+app.patch("/api/event/update", authenticateToken, async (req, res) => {
+  const {
+    eventReminderDate,
     endDate,
     eventName,
     eventCategory,
@@ -521,7 +839,6 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
       RETURNING *;
     `
     const eventValues = [
-      state,
       endDate,
       eventName,
       eventCategory,

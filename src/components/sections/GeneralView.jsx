@@ -5,19 +5,25 @@ import NewReminder from "../NewReminder"
 import ToDoItem from "../ToDoItem"
 import axios from "axios"
 import { useUser } from "../../context/UserContext"
+import dayjs from "dayjs"
+import { getStatus } from "../../../public/utils"
 
 export default function GeneralView() {
   const { user, lifeAreas } = useUser()
 
-  //Estructura de tareas provisional (debe vincularse la base de datos)
   const [events, setEvents] = useState([])
-  const [reminders, setReminders] = useState([])
+  const [alarms, setAlarms] = useState([])
   const [tasks, setTasks] = useState([])
-  const [text, setText] = useState("")
   const [tableModified, setTableModified] = useState(false)
 
   function generateEvents() {
-    return events.map((event) => (
+    if (!events | events.length === 0 ) {
+      return null
+    }
+
+    const unfinishedEvents = events.filter((event) => event.status !== 4)
+
+    return unfinishedEvents.map((event) => (
       <ToDoItem
         key={event.event_id}
         event={event}
@@ -34,9 +40,18 @@ export default function GeneralView() {
       />
     ))
   }
+  function generateAlarms() {
+    return alarms.map((alarm) => (
+      <ToDoItem
+        key={alarm.reminder_id}
+        reminder={alarm}
+        onEventModified={handleTableModified}
+      />
+    ))
+  }
 
   useEffect(() => {
-    // Función para obtener los eventos desde el servidor
+    // Obtener eventos del servidor
     const fetchTasks = async (userId) => {
       try {
         const response = await axios.get(
@@ -52,14 +67,43 @@ export default function GeneralView() {
     const fetchEvents = async (userId) => {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/get/events?userId=${userId}`
+          `http://localhost:3001/api/get/events?userId=${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         )
+
+        const eventWithStatus = response.data.map((event) => ({
+          ...event,
+          status: getStatus(event.date),
+        }))
+
         setEvents(response.data)
+        return eventWithStatus
       } catch (error) {
         console.error("Error al obtener los eventos: ", error)
       }
     }
     fetchEvents(user.user_id)
+
+    const fetchReminders = async (userId) => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/get/reminders?userId=${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
+        setAlarms(response.data)
+      } catch (error) {
+        console.error("Error al obtener los eventos: ", error)
+      }
+    }
+    fetchReminders(user.user_id)
 
     setTableModified(false)
   }, [tableModified])
@@ -80,6 +124,10 @@ export default function GeneralView() {
         <div className="todo-list w-full">
           {generateEvents()}
           {generateTasks()}
+        </div>
+        <div className="">
+          <mark>Alarmas</mark>
+          {generateAlarms()}
         </div>
       </div>
     </>

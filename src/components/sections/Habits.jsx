@@ -5,15 +5,25 @@ import dayjs from "dayjs"
 import LifeRolCard from "../LifeRolCard"
 
 export default function Habits() {
+  const baseAreas = ["Social", "Intelectual", "Físico", "Espiritual"]
+  const optionalAreas = ["Finanzas", "Familia", "Carrera"]
+
+  const [selectedTopic, setSelectedTopic] = useState([])
+  
   const { user, lifeAreas, updateLifeAreas } = useUser()
+  // console.log(lifeAreas)
   const [newLifeArea, setNewLifeArea] = useState("")
   const [newScore, setNewScore] = useState("")
   const [editingLifeArea, setEditingLifeArea] = useState(null)
   const [updatedName, setUpdatedName] = useState("")
   const [updatedScore, setUpdatedScore] = useState("")
 
+  const [relatedGoals, setRelatedGoal] = useState("")
   const [longTermGoal, setLongTermGoal] = useState("")
-  const [shortTermGoal, setShortTermGoal] = useState("")
+
+
+  
+  const [randomColor, setRandomColor] = useState() //Utilizar o eliminar
 
   const fetchLifeAreas = async () => {
     try {
@@ -43,7 +53,7 @@ export default function Habits() {
           name: newLifeArea,
           userId: user.user_id,
           score: newScore,
-          date: dayjs(),
+          longTermGoal: longTermGoal,
         },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -85,36 +95,97 @@ export default function Habits() {
     }
   }
 
+  const colors = [
+    "bg-red-500",
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-purple-500",
+    "bg-pink-500",
+    "bg-indigo-500",
+  ]
+
+  const getRandomColor = () => {
+    const randomIndex = Math.floor(Math.random() * colors.length)
+    return colors[randomIndex]
+  }
+
+  const handleClick = () => {
+    setRandomColor(getRandomColor())
+  }
+
   return (
-    <div className="">
-      <div>
-        <h1>Facetas</h1>
-        <div>
-          <input
-            type="text"
-            placeholder="New Life Area"
-            value={newLifeArea}
-            onChange={(e) => setNewLifeArea(e.target.value)}
-          />
-          <input
-            type="number"
-            placeholder="Score"
-            value={newScore}
-            onChange={(e) => setNewScore(e.target.value)}
-          />
-          <button onClick={addLifeArea}>Add Life Area</button>
+    <div className="w-full min-h-screen text-white flex flex-col items-center justify-center py-10 px-4">
+      <h1 className="text-4xl font-bold mb-8">Facetas</h1>
+      <div className="w-full">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">
+            Añadir nueva área de vida
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Nueva área de vida"
+              value={newLifeArea}
+              onChange={(e) => setNewLifeArea(e.target.value)}
+              className="w-full sm:w-auto flex-grow px-4 py-2 rounded-lg bg-gray-800 text-white"
+            />
+            <input
+              type="number"
+              placeholder="satisfacción"
+              value={newScore}
+              onChange={(e) => setNewScore(e.target.value)}
+              className="w-full sm:w-auto flex-grow px-4 py-2 rounded-lg bg-gray-800 text-white"
+            />
+
+            <button
+              onClick={addLifeArea}
+              className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-300">
+              Add Life Area
+            </button>
+          </div>
         </div>
-      </div>
-      <div>
-        {lifeAreas.map((area) => (
-          <LifeRolCard
-            key={area.id}
-            title={area.name}
-            longTermGoal={longTermGoal}
-            shortTermGoal={shortTermGoal}
-            satisfaction={75}
-          />
-        ))}
+        <div className="grid gap-4 mb-8 p-4">
+          {lifeAreas.map((area) => (
+            <LifeRolCard
+              key={area.life_area_id}
+              title={area.name}
+              relatedGoals={area.goals}
+              satisfaction={area.score}
+            />
+          ))}
+        </div>
+        <div className="bg-gray-900 p-2 rounded-md">
+          <h2 className="text-2xl font-semibold mb-4">Escoge tus facetas</h2>
+          <div className="flex flex-col">
+            <div className="flex justify-self-center self-center w-fit gap-4 justify-around mb-4">
+              {baseAreas.map((baseArea, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedTopic(baseArea)}
+                  className={`block w-fit text-left p-4 rounded-lg transition duration-300 ${
+                    selectedTopic === baseArea ? "bg-blue-800" : "bg-blue-800"
+                  } hover:bg-blue-700`}>
+                  {baseArea}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-self-center self-center w-fit gap-4 justify-around">
+              {optionalAreas.map((optionalArea, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedTopic(optionalArea)}
+                  className={`block w-full text-left p-4 rounded-lg transition duration-300 ${
+                    selectedTopic === optionalArea
+                      ? "bg-blue-600"
+                      : "bg-gray-800"
+                  } hover:bg-blue-700`}>
+                  {optionalArea}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

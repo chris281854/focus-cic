@@ -4,7 +4,14 @@ import axios from "axios"
 import { useUser } from "../context/UserContext"
 import dayjs from "dayjs"
 
-export default function EditItem({ onEdit, setOnEdit, event, task, onEventModified }) {
+export default function EditItem({
+  onEdit,
+  setOnEdit,
+  event,
+  task,
+  onEventModified,
+}) {
+  
   const { user } = useUser()
   const [state, setState] = useState(0)
   //Eventos
@@ -27,8 +34,12 @@ export default function EditItem({ onEdit, setOnEdit, event, task, onEventModifi
   const [taskMail, setTaskMail] = useState(task?.reminder_id || false)
   const [eventReminderId, setEventReminderId] = useState(event?.reminder_id)
   const [taskReminderId, setTaskReminderId] = useState(task?.reminder_id)
-  const [eventLifeAreas, setEventLifeAreas] = useState(event?.life_areas.join(', '))
-  const [taskLifeAreas, setTaskLifeAreas] = useState(task?.life_areas.join(', '))
+  const [eventLifeAreas, setEventLifeAreas] = useState(
+    event?.life_areas.join(", ")
+  )
+  const [taskLifeAreas, setTaskLifeAreas] = useState(
+    task?.life_areas.join(", ")
+  )
 
   const [eventReminderDate, setEventReminderDate] = useState(
     event.reminder_date
@@ -79,7 +90,6 @@ export default function EditItem({ onEdit, setOnEdit, event, task, onEventModifi
 
     const updateData = {
       eventReminderDate,
-      state,
       endDate: endDate || eventDate,
       eventName,
       eventCategory,

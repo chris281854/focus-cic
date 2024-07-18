@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from "react"
 
-export default function DayView() {
+
+export default function DayView({ events }) {
   const monthName = [
     "Enero",
     "Febrero",
@@ -117,6 +118,18 @@ export default function DayView() {
       return nextYear
     })
   }
+  const getHours = () => {
+    const hours = []
+    for (let i = 1; i <= 12; i++) {
+      hours.push(
+        <div key={i} className="flex items-center justify-between">
+          {i}
+          <div className="h-2 w-2 rounded-full bg-gray-300 ml-2"></div>
+        </div>
+      )
+    }
+    return hours
+  }
 
   const dayBox = [
     <div
@@ -127,47 +140,7 @@ export default function DayView() {
         selectedDate == currentDate ? "bg-green-400" : ""
       }`}>
       <p>{day}</p>
-      <div className="grid grid-rows-12 grid-cols-1">
-        <div>
-          1<div></div>
-        </div>
-        <div>
-          2<div></div>
-        </div>
-        <div>
-          3<div></div>
-        </div>
-        <div>
-          4<div></div>
-        </div>
-        <div>
-          5<div></div>
-        </div>
-        <div>
-          6<div></div>
-        </div>
-        <div>
-          7<div></div>
-        </div>
-        <div>
-          8<div></div>
-        </div>
-        <div>
-          9<div></div>
-        </div>
-        <div>
-          10
-          <div></div>
-        </div>
-        <div>
-          11
-          <div></div>
-        </div>
-        <div>
-          12
-          <div></div>
-        </div>
-      </div>
+      <div className="grid grid-rows-12 grid-cols-1">{getHours()}</div>
       {/* Aquí puedes agregar tu lógica para las listas de tareas */}
     </div>,
   ]
@@ -241,7 +214,7 @@ export default function DayView() {
               <span id="text_month_02"> {textMonth} </span>
               <span id="text_year"> {textYear} </span>
               <input
-                value={datePickValue.toISOString().split('T')[0]}
+                value={datePickValue.toISOString().split("T")[0]}
                 onChange={handleDatePickChange}
                 type="date"
                 name="date-input"
@@ -267,7 +240,6 @@ export default function DayView() {
           </div>
         </div>
       </div>
-      {/* <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> */}
     </>
   )
 }
