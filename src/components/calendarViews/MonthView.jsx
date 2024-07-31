@@ -1,7 +1,8 @@
 import { React, useState, useEffect } from "react"
 import DayDiv from "./DayDiv"
+import dayjs from "dayjs"
 
-export default function MonthView() {
+export default function MonthView({ events }) {
   const monthName = [
     "Enero",
     "Febrero",
@@ -33,19 +34,31 @@ export default function MonthView() {
     new Date(`${year}-${month + 1}-${day}`)
   )
   const [selectedDiv, setSelectedDiv] = useState(null)
+
+  // const handleSelectedDiv = (dataDate) => {
+  //   setSelectedDiv(() => {
+  //     if (dataDate === selectedDiv) {
+  //       return null
+  //     } else {
+  //       setDay(() => parseInt(dataDate.split("-")[2]))
+  //       // console.log(day)
+  //       return dataDate
+  //     }
+  //   })
+  // }
+
+  // Fechas en encabezados
   const handleSelectedDiv = (dataDate) => {
-    setSelectedDiv(() => {
-      if (dataDate === selectedDiv) {
-        return null
+    setSelectedDiv((prevSelectedDiv) => {
+      if (dataDate === prevSelectedDiv) {
+        return null // No hacer cambios si ya está seleccionado
       } else {
         setDay(() => parseInt(dataDate.split("-")[2]))
-        // console.log(day)
         return dataDate
       }
     })
   }
 
-  // Fechas en encabezados
   let textMonth = monthName[month]
   let currentTextMonth = monthName[currentMonth]
   let textDay = currentDay
@@ -54,8 +67,11 @@ export default function MonthView() {
   //UseEffect para la actualización de los valores de selectedDate:
   useEffect(() => {
     const newDate = new Date(`${year}-${month + 1}-${day}`)
-    setSelectedDate(newDate)
-    setDatePickValue(newDate)
+    if (newDate.getTime() !== selectedDate.getTime()) {
+      //Revisar esto
+      setSelectedDate(newDate)
+      setDatePickValue(newDate)
+    }
   }, [year, month, day])
 
   function getNextMonth() {
@@ -111,6 +127,13 @@ export default function MonthView() {
     else return leapYear() ? 29 : 28
   }
 
+  const getMatchingEvents = (events, dataDate) => {
+    const matchingEvents = events.filter(
+      (event) => dayjs(event.date).format("YYYY-M-D") === dataDate
+    )
+    return matchingEvents
+  }
+
   //Datos de la Tabla:
   const monthDayCalList = []
   const monthDays = []
@@ -137,26 +160,30 @@ export default function MonthView() {
   }
 
   // Días del mes actual:
-  for (let i = 1; i <= getTotalDays(month); i++) {
-    monthDays.push({ id: i, content: `Descripción para el día ${i}` })
-  }
+    for (let i = 1; i <= getTotalDays(month); i++) {
+      monthDays.push({ id: i, content: "" })
+    }
 
-  for (let i = 0; i < monthDays.length; i++) {
-    const { id, content } = monthDays[i]
-    const dataDate = `${year}-${month}-${id}`
+    for (let i = 0; i < monthDays.length; i++) {
+      const { id, content } = monthDays[i]
+      const dataDate = `${year}-${month}-${id}`
 
-    monthDayCalList.push(
-      <DayDiv
-        key={id}
-        id={id}
-        content={content}
-        dataDate={dataDate}
-        currentDate={currentDate}
-        selectedDiv={selectedDiv}
-        handleSelectedDiv={handleSelectedDiv}
-      />
-    )
-  }
+      const matchingEvents = getMatchingEvents(events, dataDate)
+
+      monthDayCalList.push(
+        <DayDiv
+          datedEvents={matchingEvents}
+          key={id}
+          id={id}
+          content={content}
+          dataDate={dataDate}
+          currentDate={currentDate}
+          selectedDiv={selectedDiv}
+          handleSelectedDiv={handleSelectedDiv}
+        />
+      )
+    }
+  
   //Días del mes siguiente
   const daysInNextMonth = (() => {
     return 7 * 6 - monthDayCalList.length

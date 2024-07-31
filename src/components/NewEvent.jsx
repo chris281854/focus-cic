@@ -71,80 +71,143 @@ export default function NewEvent({ onEventCreated }) {
         </button>
 
         {openNewEvent && (
-          <div className="flex fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-screen w-screen bg-opacity-30 bg-black backdrop-blur">
-            <div className="flex justify-center text-center p-6 w-1/2 h-fit fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary rounded-3xl">
-            <button onClick={reset} className="absolute right-3 h-10 w-10 text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-2">
-                    <i className="fas fa-redo"></i>
-                </button>
-              <form onSubmit={handleSubmit} className="flex flex-col w-full" id="form">
-                <label htmlFor="EventName">Evento</label>
+          <div className="flex fixed z-50 inset-0 bg-opacity-30 bg-black backdrop-blur">
+          <div className="flex flex-col justify-start p-4 w-full sm:w-3/4 md:w-1/2 lg:w-1/3 h-auto sm:h-5/6 bg-gray-900 rounded-3xl mx-auto my-auto overflow-scroll no-scrollbar">
+            <button
+              onClick={reset}
+              className="static top-3 -right-44 h-10 w-10 text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full flex self-end items-center justify-center">
+              <i className="fas fa-redo"></i>
+            </button>
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col w-full space-y-4 -mt-6"
+              id="form">
+              <div>
+                <label
+                  htmlFor="EventName"
+                  className="block text-white text-left mb-1">
+                  Evento
+                </label>
                 <input
                   type="text"
                   name="EventName"
-                  value={eventName}
+                  id="EventName"
+                  value={eventName ?? ""}
                   onChange={(e) => setEventName(e.target.value)}
                   required
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-                <label htmlFor="eventDescription">Notas</label>
+              </div>
+              <div>
+                <label
+                  htmlFor="eventDescription"
+                  className="block text-white text-left mb-1">
+                  Notas
+                </label>
                 <input
                   type="text"
                   name="EventDescription"
                   value={eventDescription}
                   onChange={(e) => setEventDescription(e.target.value)}
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-                <label htmlFor="EventDate">Hora y fecha</label>
-                <input
-                  type="datetime-local"
-                  name="EventDate"
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                  required
-                />
-                <label htmlFor="EventCategory">Categoría</label>
-                <input
-                  type="textbox"
+              </div>
+              <div>
+                <label
+                  htmlFor="EventCategory"
+                  className="block text-white text-left mb-1">
+                  Categoría
+                </label>
+                <select
                   name="EventCategory"
-                  value={eventCategory}
-                  onChange={(e) => setEventCategory(e.target.value)}
-                />
-                <label htmlFor="Prioridad"></label>
+                  id="EventCategory"
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                  <option value="Social">Social</option>
+                  <option value="Intelectual">Intelectual</option>
+                  <option value="Fisico">Fisico</option>
+                  <option value="Espiritual">Espiritual</option>
+                  <option value="Finanzas">Finanzas</option>
+                  <option value="Familia">Familia</option>
+                  <option value="Carrera">Carrera</option>
+                </select>
+              </div>
+              <div className="md:flex space-x-4">
+                <div>
+                  <label
+                    htmlFor="EventDate"
+                    className="block text-white text-left mb-1">
+                    Hora y fecha
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="EventDate"
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    required
+                    className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="EventPriority"
+                    className="block text-white text-left mb-2">
+                    Prioridad
+                  </label>
+                  <select
+                    className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    id="EventPriority"
+                    name="EventPriority"
+                    value={eventPriority}
+                    onChange={(e) => setEventPriority(e.target.value)}>
+                    <option value="0">Básico</option>
+                    <option value="1">Importante + Urgente</option>
+                    <option value="2">Importante</option>
+                    <option value="3">Urgente</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
                 <input
-                  type="number"
-                  name="EventPriority"
-                  value={eventPriority}
-                  onChange={(e) => setEventPriority(e.target.value)}
-                  required
+                  type="checkbox"
+                  name="reminder"
+                  id="reminder"
+                  checked={addReminder}
+                  onChange={(e) => setAddReminder(e.target.checked)}
+                  className="text-primary focus:ring-primary focus:ring-2"
                 />
+                <label htmlFor="reminder" className="text-white">
+                  {" "}
+                  ¿Añadir recordatorio?
+                </label>
+              </div>
+              {addReminder && (
                 <div>
                   <input
-                    type="checkbox"
-                    name="reminder"
-                    id="reminder"
-                    value={addReminder}
-                    onChange={(e) => setAddReminder(e.target.checked)}
+                    type="datetime-local"
+                    name="reminderDate"
+                    value={reminderDate}
+                    onChange={(e) => setReminderDate(e.target.value)}
+                    required
+                    className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
-                  <label htmlFor="reminder"> ¿Añadir recordatorio?</label>
-                  {addReminder && (
-                    <input
-                      type="datetime-local"
-                      name="reminderDate"
-                      value={reminderDate}
-                      onChange={(e) => setReminderDate(e.target.value)}
-                      required
-                    />
-                  )}
-                  <br />
                 </div>
-                <div className="p-2 flex self-center justify-around w-1/2">
-                  <button type="reset" onClick={toggleNewEvent}>
-                    Cancelar
-                  </button>
-                  
-                  <button type="submit">Guardar</button>
-                </div>
-              </form>
-            </div>
+              )}
+              <div className="flex justify-around mt-4 self">
+                <button
+                  type="reset"
+                  onClick={toggleNewEvent}
+                  className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                  Guardar
+                </button>
+              </div>
+            </form>
           </div>
+        </div>
         )}
       </div>
     </>

@@ -3,6 +3,7 @@ import { UserContext } from "../../context/UserContext"
 import { useNavigate } from "react-router-dom"
 import Header from "../Header"
 import Footer from "../Footer"
+import sendEmail from "../EmailSender"
 
 export default function Register() {
   const { login } = useContext(UserContext)
@@ -39,12 +40,39 @@ export default function Register() {
       if (response.ok) {
         const userData = await response.json()
         login(userData)
+        try {
+          await sendEmail({
+            to: email,
+            type: "welcome",
+            variables: { name, lastName, email },
+          })
+          console.log("Welcome email sent successfully")
+        } catch (error) {
+          console.error("Failed to send welcome email", error)
+        }
         navigate("/home")
       } else {
         throw new Error("Registro fallido")
       }
     } catch (error) {
       setError("Datos inválidos")
+    }
+  }
+
+  const emailSender = async () => {
+    try {
+      await sendEmail({
+        to: "josedgonzalez02@gmail.com",
+        type: "welcome",
+        variables: {
+          name: "David",
+          lastName: "G",
+          email: "josedgonzalez02@gmail.com",
+        },
+      })
+      return console.log("Welcome email sent successfully")
+    } catch (error) {
+      console.error("Failed to send welcome email", error)
     }
   }
 
@@ -101,6 +129,7 @@ export default function Register() {
             {error && <p>{error}</p>}
           </form>
         </div>
+        <button onClick={emailSender}>Enviar email</button>
       </div>
       <Footer></Footer>
     </>
