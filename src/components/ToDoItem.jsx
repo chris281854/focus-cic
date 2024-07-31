@@ -10,8 +10,14 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
   //1: Inmediato
   //2: Cerca
   //3: Lejos
-  const { user } = useUser()
 
+  //Niveles:
+  // 0: Urgente e importante
+  // 1: Urgente
+  // 2: Importante
+  // 3: Normal
+
+  const { user } = useUser()
   const [isOpen, setIsOpen] = useState(false)
   let eventState = ""
 
@@ -31,7 +37,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
       return "bg-white "
     } else if (state === 4) {
       eventState = "Completado"
-      return "bg-green-400"
+      return "bg-accent "
     }
   }
 
@@ -39,7 +45,6 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
     setIsOpen(!isOpen)
   }
 
-  // console.log(reminder)
   const [onEdit, setOnEdit] = useState(false)
 
   const toggleEditVisibility = () => {
@@ -115,7 +120,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
           </div>
           <div className="col-span-1 flex items-center">
             {event.life_areas.map((area) => (
-              <div className="rounded-full bg-cyan-400 p-1 pr-2 pl-2">
+              <div key={area} className="rounded-full bg-cyan-400 p-1 pr-2 pl-2">
                 {area}
               </div>
             ))}

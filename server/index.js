@@ -199,22 +199,32 @@ app.get("/api/get/lifeAreas", async (req, res) => {
 
   try {
     const query = `
-    SELECT 
-    la.*, 
-    COALESCE(
-      json_agg(
-        json_build_object(
-          'goal_id', g.goal_id,
-          'name', g.name,
-          'description', g.description,
-          'target_date', g.target_date
-        )
-      ) FILTER (WHERE g.goal_id IS NOT NULL), 
-      '[]'
-    ) AS goals
-  FROM "Life_Areas" la
-  LEFT JOIN "Goals" g ON la.life_area_id = g.life_area_id
-  GROUP BY la.life_area_id, la.name, la.score
+SELECT
+  la.*, 
+  COALESCE(
+    json_agg(
+      json_build_object(
+        'goal_id', g.goal_id,
+        'name', g.name,
+        'description', g.description,
+        'target_date', g.target_date
+      )
+    ) FILTER (WHERE g.goal_id IS NOT NULL), 
+    '[]'
+  ) AS goals,
+  COALESCE(
+    json_agg(
+      json_build_object(
+        'score_date', las.date,
+        'score_value', las.score
+      )
+    ) FILTER (WHERE las.score IS NOT NULL),
+    '[]'
+  ) AS scores
+FROM "Life_Areas" la
+LEFT JOIN "Goals" g ON la.life_area_id = g.life_area_id
+LEFT JOIN "Life_Area_Scores" las ON la.life_area_id = las.life_area_id
+GROUP BY la.life_area_id, la.name
 `
     const result = await pool.query(query)
     res.status(200).json(result.rows)
@@ -434,28 +444,31 @@ app.post("/api/post/tasks", async (req, res) => {
 })
 
 app.post("/api/post/lifeAreas", authenticateToken, async (req, res) => {
-  const { name, userId, score, longGoal } = req.body
+  const { name, userId, score, longTermGoal, date } = req.body
 
-  if (!name || userId) {
+  if (!name || !userId) {
     return res.status(400).json({ error: "Nombre y userId requeridos" })
   }
+
+  const client = await pool.connect()
 
   try {
     await client.query("BEGIN")
 
     const lifeAreaResult = await pool.query(
-      `INSERT INTO "Life_Areas" (name, user_id) VALUES ($1, $2) RETURNING *`[
-        (name, userId)
-      ]
+      `INSERT INTO "Life_Areas" (name, user_id, long_goal) VALUES ($1, $2, $3) RETURNING *`,
+      [name, userId, longTermGoal]
     )
     const lifeArea = lifeAreaResult.rows[0]
 
+    let lifeAreaScore
+
     if (score) {
       const lifeAreaScoreResult = await client.query(
-        `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2,) RETURNING *`,
-        [lifeArea.id, userId, score, date]
+        `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2, $3, $4) RETURNING *`,
+        [lifeArea.life_area_id, userId, score, date]
       )
-      const lifeAreaScore = lifeAreaScoreResult.rows[0]
+      lifeAreaScore = lifeAreaScoreResult.rows[0]
     }
     await client.query("COMMIT")
 
@@ -579,149 +592,157 @@ app.delete("/api/lifeAreas/:id", authenticateToken, async (req, res) => {
 })
 
 //Actualizar
-app.patch("/api/event/update", authenticateToken, async (req, res) => {
-  const {
-    eventReminderDate,
-    endDate,
-    eventName,
-    eventCategory,
-    eventDate,
-    eventPriority,
-    eventDescription,
-    eventMail,
-    eventId,
-    userId,
-    eventReminderId,
-    lifeAreas,
-  } = req.body
 
-  const client = await pool.connect()
+// app.patch("/api/event/update", authenticateToken, async (req, res) => {
+//   const {
+//     eventReminderDate,
+//     endDate,
+//     eventName,
+//     eventCategory,
+//     eventDate,
+//     eventPriority,
+//     eventDescription,
+//     eventMail,
+//     eventId,
+//     userId,
+//     eventReminderId,
+//     eventLifeArea,
+//   } = req.body
 
-  if (!eventId) {
-    return res.status(400).json({ error: "Event ID is required" })
-  }
+//   const client = await pool.connect()
 
-  if (req.user.user_id !== userId) {
-    return res
-      .status(403)
-      .json({ error: "User not authorized to update this event" })
-  }
+//   if (!eventId) {
+//     return res.status(400).json({ error: "Event ID is required" })
+//   }
 
-  try {
-    await client.query("BEGIN")
+//   if (req.user.user_id !== userId) {
+//     return res
+//       .status(403)
+//       .json({ error: "User not authorized to update this event" })
+//   }
 
-    const updateEventQuery = `
-      UPDATE "Events" 
-      SET 
-        "end_date" = $1,
-        "name" = $2,
-        "category" = $3,
-        "date" = $4,
-        "priority_level" = $5,
-        "description" = $6,
-        "user_id" = $7
-      WHERE "event_id" = $8 AND "user_id" = $7
-      RETURNING *;
-    `
-    const eventValues = [
-      endDate,
-      eventName,
-      eventCategory,
-      eventDate,
-      eventPriority,
-      eventDescription,
-      userId,
-      eventId,
-    ]
+//   try {
+//     await client.query("BEGIN")
 
-    const eventResult = await client.query(updateEventQuery, eventValues)
+//     const updateEventQuery = `
+//       UPDATE "Events"
+//       SET
+//         "end_date" = $1,
+//         "name" = $2,
+//         "category" = $3,
+//         "date" = $4,
+//         "priority_level" = $5,
+//         "description" = $6,
+//         "user_id" = $7
+//       WHERE "event_id" = $8 AND "user_id" = $7
+//       RETURNING *;
+//     `
+//     const eventValues = [
+//       endDate,
+//       eventName,
+//       eventCategory,
+//       eventDate,
+//       eventPriority,
+//       eventDescription,
+//       userId,
+//       eventId,
+//     ]
 
-    if (eventResult.rows.length === 0) {
-      await client.query("ROLLBACK")
-      return res
-        .status(404)
-        .json({ error: "Event not found or user not authorized" })
-    }
+//     const eventResult = await client.query(updateEventQuery, eventValues)
 
-    if (!eventReminderId && eventReminderDate) {
-      const insertReminderQuery = `
-        INSERT INTO "Reminders" ("date", "mail", "user_id")
-        VALUES ($1, $2, $3)
-        RETURNING "reminder_id";
-      `
-      const insertReminderValues = [eventReminderDate, eventMail, userId]
-      const reminderResult = await client.query(
-        insertReminderQuery,
-        insertReminderValues
-      )
-      const newReminderId = reminderResult.rows[0].reminder_id
+//     if (eventResult.rows.length === 0) {
+//       await client.query("ROLLBACK")
+//       return res
+//         .status(404)
+//         .json({ error: "Event not found or user not authorized" })
+//     }
 
-      const insertEventReminderQuery = `
-        INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
-        VALUES ($1, $2);
-      `
-      await client.query(insertEventReminderQuery, [eventId, newReminderId])
-    } else if (eventReminderId) {
-      const deleteReminderQuery = `
-        DELETE FROM "Reminders"
-        WHERE "reminder_id" = $1;
-      `
-      await client.query(deleteReminderQuery, [eventReminderId])
+//     if (!eventReminderId && eventReminderDate) {
+//       const insertReminderQuery = `
+//         INSERT INTO "Reminders" ("date", "mail", "user_id")
+//         VALUES ($1, $2, $3)
+//         RETURNING "reminder_id";
+//       `
+//       const insertReminderValues = [eventReminderDate, eventMail, userId]
+//       const reminderResult = await client.query(
+//         insertReminderQuery,
+//         insertReminderValues
+//       )
+//       const newReminderId = reminderResult.rows[0].reminder_id
 
-      const insertReminderQuery = `
-        INSERT INTO "Reminders" ("date", "mail", "user_id")
-        VALUES ($1, $2, $3)
-        RETURNING "reminder_id";
-      `
-      const insertReminderValues = [eventReminderDate, eventMail, userId]
+//       const insertEventReminderQuery = `
+//         INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
+//         VALUES ($1, $2);
+//       `
+//       await client.query(insertEventReminderQuery, [eventId, newReminderId])
+//     } else if (eventReminderId) {
+//       const deleteReminderQuery = `
+//         DELETE FROM "Reminders"
+//         WHERE "reminder_id" = $1;
+//       `
+//       await client.query(deleteReminderQuery, [eventReminderId])
 
-      const reminderResult = await client.query(
-        insertReminderQuery,
-        insertReminderValues
-      )
-      const newReminderId = reminderResult.rows[0].reminder_id
+//       const insertReminderQuery = `
+//         INSERT INTO "Reminders" ("date", "mail", "user_id")
+//         VALUES ($1, $2, $3)
+//         RETURNING "reminder_id";
+//       `
+//       const insertReminderValues = [eventReminderDate, eventMail, userId]
 
-      const insertEventReminderQuery = `
-        INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
-        VALUES ($1, $2);
-      `
+//       const reminderResult = await client.query(
+//         insertReminderQuery,
+//         insertReminderValues
+//       )
+//       const newReminderId = reminderResult.rows[0].reminder_id
 
-      await client.query(insertEventReminderQuery, [eventId, newReminderId])
-    }
+//       const insertEventReminderQuery = `
+//         INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
+//         VALUES ($1, $2);
+//       `
 
-    //Manejar áreas de vida
+//       await client.query(insertEventReminderQuery, [eventId, newReminderId])
+//     }
 
-    const deleteLifeAreasQuery = `
-      DELETE FROM "Event_Life_Areas" WHERE "event_id" = $1;
-    `
-    await client.query(deleteLifeAreasQuery, [eventId])
+//     //Manejar áreas de vida
 
-    if (lifeAreas && lifeAreas.length > 0) {
-      const insertLifeAreaQueries = lifeAreas.map((areaId) => {
-        return client.query(
-          `INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id") VALUES ($1, $2);`,
-          [eventId, areaId]
-        )
-      })
-      await Promise.all(insertLifeAreaQueries)
-    }
+//     const deleteLifeAreasQuery = `
+//       DELETE FROM "Event_Life_Areas" WHERE "event_id" = $1;
+//     `
+//     await client.query(deleteLifeAreasQuery, [eventId])
 
-    await client.query("COMMIT")
+//     // if (lifeAreas && lifeAreas.length > 0) {
+//     //   const insertLifeAreaQueries = lifeAreas.map((areaId) => {
+//     //     return client.query(
+//     //       `INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id") VALUES ($1, $2);`,
+//     //       [eventId, areaId]
+//     //     )
+//     //   })
+//     //   await Promise.all(insertLifeAreaQueries)
+//     // }
 
-    res.status(200).json({
-      message: "Event, related Reminder and life area updated successfully",
-      event: eventResult.rows[0],
-    })
-  } catch (error) {
-    await client.query("ROLLBACK")
-    console.error("Error updating event and reminder", error)
-    res.status(500).json({
-      error: "An error occurred while updating the event and reminder",
-    })
-  } finally {
-    client.release()
-  }
-})
+//     if (eventLifeArea) {
+//       const insertLifeAreaQuery = `
+//         INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id")
+//         VALUES ($1, $2);
+//       `
+//       await client.query(insertLifeAreaQuery, [eventId, eventLifeArea])
+//     }
+//     await client.query("COMMIT")
+
+//     res.status(200).json({
+//       message: "Event, related Reminder and life area updated successfully",
+//       event: eventResult.rows[0],
+//     })
+//   } catch (error) {
+//     await client.query("ROLLBACK")
+//     console.error("Error updating event and reminder", error)
+//     res.status(500).json({
+//       error: "An error occurred while updating the event and reminder",
+//     })
+//   } finally {
+//     client.release()
+//   }
+// })
 
 app.patch("/api/items/complete", authenticateToken, async (req, res) => {
   const { eventId, userId } = req.body
@@ -796,6 +817,7 @@ app.patch("/api/items/complete", authenticateToken, async (req, res) => {
 app.patch("/api/event/update", authenticateToken, async (req, res) => {
   const {
     eventReminderDate,
+    state,
     endDate,
     eventName,
     eventCategory,
@@ -839,6 +861,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
       RETURNING *;
     `
     const eventValues = [
+      state,
       endDate,
       eventName,
       eventCategory,

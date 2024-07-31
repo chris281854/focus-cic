@@ -1,8 +1,8 @@
 import React from "react"
 import { Outlet } from "react-router-dom"
-import Header from "../Header"
-import Footer from "../Footer"
-import Panel from "../Panel"
+import Header from "../../Header"
+import Footer from "../../Footer"
+import Panel from "../../Panel"
 import { useState } from "react"
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <>
       <Header></Header>
-      <div className="container static flex h-fit min-h-full w-full max-w-full right-0 pt-0 bg-white dark:bg-bg-main-color">
+      <div className="container static flex h-fit min-h-full w-full max-w-full right-0 p-0 bg-white dark:bg-bg-main-color">
         <Panel
           panelVisibility={panelVisibility}
           setPanelVisibility={setPanelVisibility}></Panel>

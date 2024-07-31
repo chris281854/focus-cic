@@ -11,8 +11,7 @@ export default function EditItem({
   task,
   onEventModified,
 }) {
-  
-  const { user } = useUser()
+  const { user, lifeAreas } = useUser()
   const [state, setState] = useState(0)
   //Eventos
   const [eventId, setEventId] = useState(event?.event_id)
@@ -34,9 +33,7 @@ export default function EditItem({
   const [taskMail, setTaskMail] = useState(task?.reminder_id || false)
   const [eventReminderId, setEventReminderId] = useState(event?.reminder_id)
   const [taskReminderId, setTaskReminderId] = useState(task?.reminder_id)
-  const [eventLifeAreas, setEventLifeAreas] = useState(
-    event?.life_areas.join(", ")
-  )
+  const [eventLifeArea, setEventLifeArea] = useState(event?.life_areas)
   const [taskLifeAreas, setTaskLifeAreas] = useState(
     task?.life_areas.join(", ")
   )
@@ -71,7 +68,7 @@ export default function EditItem({
     setEventDescription("")
     setAddEventReminder(false)
     setEventMail(false)
-    setEventLifeAreas(null)
+    setEventLifeArea(null)
 
     setTaskDate(null)
     setTaskName("")
@@ -90,16 +87,18 @@ export default function EditItem({
 
     const updateData = {
       eventReminderDate,
+      state,
       endDate: endDate || eventDate,
       eventName,
       eventCategory,
       eventDate,
       eventPriority,
       eventDescription,
-      userId: user.user_id,
       eventMail,
       eventId,
+      userId: user.user_id,
       eventReminderId,
+      eventLifeAreas: eventLifeArea,
     }
 
     axios
@@ -204,18 +203,20 @@ export default function EditItem({
                       Categoría
                     </label>
                     <select
-                      name="EventCategory"
-                      id="EventCategory"
-                      value={eventCategory}
-                      onChange={(e) => setEventLifeAreas(e.target.value)}
+                      name="eventLifeArea"
+                      id="eventLifeArea"
+                      value={eventLifeArea}
+                      onChange={(e) =>
+                        setEventLifeArea(eventLifeArea.target.value)
+                      }
                       className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                      <option value="Social">Social</option>
-                      <option value="Intelectual">Intelectual</option>
-                      <option value="Fisico">Fisico</option>
-                      <option value="Espiritual">Espiritual</option>
-                      <option value="Finanzas">Finanzas</option>
-                      <option value="Familia">Familia</option>
-                      <option value="Carrera">Carrera</option>
+                      {lifeAreas.map((area) => (
+                        <option
+                          key={area.life_area_id}
+                          value={area.life_area_id}>
+                          {area.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="md:flex space-x-4">

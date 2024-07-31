@@ -34,7 +34,7 @@ export default function Login() {
       })
       if (response.ok) {
         const userData = await response.json()
-        login(userData)
+        await login(userData)
         console.log("Iniciando sesión")
         navigate("/home")
       } else {

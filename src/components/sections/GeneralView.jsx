@@ -6,11 +6,11 @@ import ToDoItem from "../ToDoItem"
 import axios from "axios"
 import { useUser } from "../../context/UserContext"
 import dayjs from "dayjs"
-import { getStatus } from "../../../public/utils"
+import { getStatus } from "../../../utils.jsx"
 
 export default function GeneralView() {
   const { user, lifeAreas } = useUser()
-
+  
   const [events, setEvents] = useState([])
   const [alarms, setAlarms] = useState([])
   const [tasks, setTasks] = useState([])
@@ -22,7 +22,7 @@ export default function GeneralView() {
     }
 
     const unfinishedEvents = events.filter((event) => event.status !== 4)
-
+console.log(events)
     return unfinishedEvents.map((event) => (
       <ToDoItem
         key={event.event_id}
