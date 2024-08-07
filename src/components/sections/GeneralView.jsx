@@ -22,7 +22,6 @@ export default function GeneralView() {
     }
 
     const unfinishedEvents = events.filter((event) => event.status !== 4)
-console.log(events)
     return unfinishedEvents.map((event) => (
       <ToDoItem
         key={event.event_id}

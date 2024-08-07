@@ -268,10 +268,10 @@ app.get("/api/get/itemData", async (req, res) => {
 
 app.get("/api/get/userData", async (req, res) => {
   const userId = req.query.userId
-
   try {
     const result = await pool.query(
       'SELECT name, last_name, nickname, phone_number, email, birthDate FROM "Users" WHERE USER_ID = $1',
+
       [userId]
     )
 
@@ -347,6 +347,7 @@ app.post("/api/post/events", async (req, res) => {
     }
 
     if (lifeAreaIds && lifeAreaIds.length > 0) {
+      console.log(lifeAreaIds)
       const lifeAreasQuery = `
       INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
       VALUES ${lifeAreaIds.map(() => "($1, $2)").join(", ")}
@@ -961,6 +962,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
   }
 })
 
+//ELIMINAR:
 app.patch("/api/task/update", authenticateToken, async (req, res) => {})
 
 app.patch("api/update/lifeAreas/:id", authenticateToken, async (req, res) => {

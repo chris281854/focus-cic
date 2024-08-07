@@ -3,6 +3,23 @@ import { useUser } from "../../../../context/UserContext"
 import axios, { formToJSON } from "axios"
 import dayjs from "dayjs"
 import LifeAreaCard from "../../../LifeAreaCard"
+import { TrendingUp } from "lucide-react"
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
+  Tooltip as ChartTooltip,
+} from "recharts"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../../ui/card"
+import { ChartContainer } from "../../../ui/chart"
 
 export default function Habits() {
   // Manejar eventos base
@@ -13,11 +30,12 @@ export default function Habits() {
     { id: 3, value: "Carrera" },
   ]
 
+  const [latestScores, setLatestScores] = useState([])
   const [selectedValues, setSelectedValues] = useState([])
 
   const { user, lifeAreas, updateLifeAreas } = useUser()
   const [newLifeArea, setNewLifeArea] = useState("")
-  const [newScore, setNewScore] = useState("")
+  const [newScore, setNewScore] = useState(5)
   const [editingLifeArea, setEditingLifeArea] = useState(null)
   const [updatedName, setUpdatedName] = useState("")
   const [updatedScore, setUpdatedScore] = useState("")
@@ -128,7 +146,6 @@ export default function Habits() {
     "bg-pink-500",
     "bg-indigo-500",
   ]
-
   const getRandomColor = () => {
     const randomIndex = Math.floor(Math.random() * colors.length)
     return colors[randomIndex]
@@ -152,13 +169,85 @@ export default function Habits() {
     }
   }
   const downScore = (event) => {
-    if (newScore > 0) {
+    if (newScore > 1) {
       setNewScore((prevScore) => Number(prevScore) - 1)
     }
   }
 
+  const getLatestScores = (lifeAreas) => {
+    return lifeAreas.map((area) => {
+      if (!area.scores || area.scores.length === 0) {
+        return { name: area.name, score: null, date: null }
+      }
+
+      const latestScore = area.scores.reduce(
+        (acc, current) => {
+          if (
+            !acc.score_date ||
+            dayjs(current.score_date).isAfter(dayjs(acc.score_date))
+          ) {
+            return current
+          }
+          return acc
+        },
+        { score_value: null, score_date: null }
+      )
+
+      return {
+        name: area.name,
+        score: latestScore.score_value,
+        date: latestScore.score_date,
+      }
+    })
+  }
+  // console.log(latestScores)
+
+  const ChartTooltipContent = ({ payload }) => {
+    if (!payload || !payload.length) return null
+    return (
+      <div className="custom-tooltip">
+        <p>{`${payload[0].payload.area} : ${payload[0].value}`}</p>
+      </div>
+    )
+  }
+
+  useEffect(() => {
+    setLatestScores(getLatestScores(lifeAreas))
+  }, [lifeAreas])
+
+  const chartData = latestScores.map((score) => ({
+    area: score.name,
+    score: score.score !== null ? score.score : 1,
+  }))
+
   return (
     <div className="w-full min-h-screen text-white flex flex-col items-center justify-center py-10 px-4">
+      <Card>
+        <CardHeader className="items-center">
+          <CardTitle>Facetas</CardTitle>
+          <CardDescription>
+            Satisfacción percibida en cada una de sus facetas
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pb-0">
+          <ChartContainer className="mx-auto aspect-square max-h-[250px]">
+            <RadarChart data={chartData}>
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <PolarAngleAxis dataKey="area" />
+              <PolarGrid />
+              <Radar
+              dataKey="score"
+              fill="#4299e1"
+              fillOpacity={0.7}
+              dot={{
+                r: 4,
+                fillOpacity: 1,
+              }}
+            />
+            </RadarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
       <h1 className="text-4xl font-bold mb-8">Facetas</h1>
       <div className="w-full max-w-4xl">
         <div className="mb-8">
@@ -249,8 +338,7 @@ export default function Habits() {
                   {optionalArea.value}
                 </button>
               ))}
-              <div>
-              </div>
+              <div></div>
             </div>
           </div>
         </div>

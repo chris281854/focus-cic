@@ -9,7 +9,7 @@ export default function NewEvent({ onEventCreated }) {
   const [eventDate, setEventDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
   const [eventName, setEventName] = useState("")
-  const [eventCategory, setEventCategory] = useState("")
+  const [eventLifeArea, setEventLifeArea] = useState("")
   const [reminderDate, setReminderDate] = useState(null)
   const [eventPriority, setEventPriority] = useState(3)
   const [eventDescription, setEventDescription] = useState("")
@@ -27,7 +27,7 @@ export default function NewEvent({ onEventCreated }) {
     setEventDate(null)
     setEndDate(null)
     setEventName("")
-    setEventCategory("")
+    setEventLifeArea("")
     setReminderDate(null)
     setEventPriority(3)
     setEventDescription("")
@@ -45,7 +45,7 @@ export default function NewEvent({ onEventCreated }) {
           state,
           endDate: endDate || null,
           eventName,
-          eventCategory,
+          lifeAreaIds: eventLifeArea,
           eventDate,
           eventPriority,
           eventDescription,
@@ -120,8 +120,8 @@ export default function NewEvent({ onEventCreated }) {
                   <select
                     name="EventCategory"
                     id="EventCategory"
-                    value={eventCategory}
-                    onChange={(e) => setEventLifeAreas(e.target.value)}
+                    value={eventLifeArea}
+                    onChange={(e) => setEventLifeArea(e.target.value)}
                     className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                     {lifeAreas.map((area) => (
                       <option key={area.life_area_id} value={area.life_area_id}>
@@ -158,10 +158,10 @@ export default function NewEvent({ onEventCreated }) {
                       name="EventPriority"
                       value={eventPriority}
                       onChange={(e) => setEventPriority(e.target.value)}>
-                      <option value="0">Básico</option>
-                      <option value="1">Importante + Urgente</option>
+                      <option value="0">Urgente + Importante</option>
+                      <option value="1">Urgente</option>
                       <option value="2">Importante</option>
-                      <option value="3">Urgente</option>
+                      <option value="3">Normal</option>
                     </select>
                   </div>
                 </div>

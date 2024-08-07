@@ -11,7 +11,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
   //2: Cerca
   //3: Lejos
 
-  //Niveles:
+  //Niveles: (eventPriority)
   // 0: Urgente e importante
   // 1: Urgente
   // 2: Importante
@@ -111,7 +111,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
               "grid rounded-sm self-center min-h-full w-3 h-14 -ml-3 -mt-3 -mb-3 left-0"
             }></div>
           <div className="col-span-1 flex items-center pl-2">
-            <h2 className="text-xl font-light text-white">{event.name}</h2>
+            <h2 className="text-xl bgc font-light text-white">{event.name}</h2>
           </div>
           <div className="col-span-1 flex items-center justify-center">
             <span className="text-base text-gray-500">

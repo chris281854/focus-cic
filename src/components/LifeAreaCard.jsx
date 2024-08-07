@@ -2,7 +2,7 @@ import React from "react"
 import { useState, useEffect } from "react"
 import LifeArea from "./pages/home/habits/LifeArea/LifeArea"
 
-export default function LifeAreaCard({ key, area }) {
+export default function LifeAreaCard({ area }) {
   const title = area.name
   const satisfaction = area.scores[0]?.score_value
   const longTermGoal = area.long_goal
