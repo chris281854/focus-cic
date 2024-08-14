@@ -1,5 +1,5 @@
 import React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 import { useUser } from "../context/UserContext"
 
@@ -15,6 +15,8 @@ export default function NewEvent({ onEventCreated }) {
   const [eventDescription, setEventDescription] = useState("")
   const [addReminder, setAddReminder] = useState(false)
   const [mail, setMail] = useState(false)
+  const [selectedAreas, setSelectedAreas] = useState([])
+  const [category, setCategory] = useState(0) //task - event
 
   //Abrir panel
   const [openNewEvent, setOpenNewEvent] = useState(false)
@@ -35,17 +37,30 @@ export default function NewEvent({ onEventCreated }) {
     setMail(false)
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
+  //Manejar selección de areas:
+  const handleSeleccion = async (value) => {
+    setSelectedAreas((prevSelectedAreas) => {
+      if (prevSelectedAreas.includes(value)) {
+        //Retirar valores seleccionados
+        return prevSelectedAreas.filter((item) => item !== value)
+      } else {
+        return [...prevSelectedAreas, value]
+      }
+    })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
     try {
       const response = await axios.post(
         "http://localhost:3001/api/post/events",
         {
           reminderDate: addReminder ? reminderDate : null,
-          state,
+          // state,
           endDate: endDate || null,
           eventName,
-          lifeAreaIds: eventLifeArea,
+          category,
+          lifeAreaIds: selectedAreas,
           eventDate,
           eventPriority,
           eventDescription,
@@ -65,26 +80,25 @@ export default function NewEvent({ onEventCreated }) {
   return (
     <>
       <div className="relative">
-        <button className="new-event" onClick={toggleNewEvent}>
+        <button className="new-event bg-slate-800 m-2" onClick={toggleNewEvent}>
           Nuevo evento
         </button>
-
         {openNewEvent && (
-          <div className="flex fixed z-50 inset-0 bg-opacity-30 bg-black backdrop-blur">
-            <div className="flex flex-col justify-start p-4 w-full sm:w-3/4 md:w-1/2 lg:w-1/3 h-auto sm:h-5/6 bg-gray-900 rounded-3xl mx-auto my-auto overflow-scroll no-scrollbar">
+          <div className="flex fixed z-50 inset-0 bg-opacity-30 bg-black backdrop-blur items-center justify-center">
+            <div className="relative p-4 max-w-full sm:w-3/4 md:w-1/2 lg:w-3/4 xl:w-5/12 sm:h-fit min-h-fit max-h-full bg-gray-900 rounded-3xl my-auto overflow-y-scroll no-scrollbar">
               <button
                 onClick={reset}
-                className="static top-3 -right-44 h-10 w-10 text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full flex self-end items-center justify-center">
+                className="absolute top-3 right-3 h-10 w-10 text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full flex items-center justify-center">
                 <i className="fas fa-redo"></i>
               </button>
               <form
                 onSubmit={handleSubmit}
-                className="flex flex-col w-full space-y-4 -mt-6"
+                className="flex flex-col w-full space-y-4"
                 id="form">
                 <div>
                   <label
                     htmlFor="EventName"
-                    className="block text-white text-left mb-1">
+                    className="block text-white text-left mb-6">
                     Evento
                   </label>
                   <input
@@ -103,35 +117,16 @@ export default function NewEvent({ onEventCreated }) {
                     className="block text-white text-left mb-1">
                     Notas
                   </label>
-                  <input
+                  <textarea
                     type="text"
                     name="EventDescription"
                     value={eventDescription}
                     onChange={(e) => setEventDescription(e.target.value)}
-                    className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full min-h-16 p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
-                <div>
-                  <label
-                    htmlFor="EventCategory"
-                    className="block text-white text-left mb-1">
-                    Categoría
-                  </label>
-                  <select
-                    name="EventCategory"
-                    id="EventCategory"
-                    value={eventLifeArea}
-                    onChange={(e) => setEventLifeArea(e.target.value)}
-                    className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    {lifeAreas.map((area) => (
-                      <option key={area.life_area_id} value={area.life_area_id}>
-                        {area.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:flex space-x-4">
-                  <div>
+                <div className="space-x-4 flex justify-evenly">
+                  <div className="w-full">
                     <label
                       htmlFor="EventDate"
                       className="block text-white text-left mb-1">
@@ -146,10 +141,10 @@ export default function NewEvent({ onEventCreated }) {
                       className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
-                  <div>
+                  <div className="w-full">
                     <label
                       htmlFor="EventPriority"
-                      className="block text-white text-left mb-2">
+                      className="block text-white text-left mb-1">
                       Prioridad
                     </label>
                     <select
@@ -161,9 +156,24 @@ export default function NewEvent({ onEventCreated }) {
                       <option value="0">Urgente + Importante</option>
                       <option value="1">Urgente</option>
                       <option value="2">Importante</option>
-                      <option value="3">Normal</option>
+                      <option value="3">Casual</option>
                     </select>
                   </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <label className="block text-white text-left mb-1">
+                    Repetir:
+                  </label>
+                  <select
+                    name="repetition"
+                    id="repetition"
+                    className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="0"> Nunca </option>
+                    <option value="1">Diario</option>
+                    <option value="2">Semanal</option>
+                    <option value="3">Mensual</option>
+                    <option value="4">Anual</option>
+                  </select>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -175,7 +185,6 @@ export default function NewEvent({ onEventCreated }) {
                     className="text-primary focus:ring-primary focus:ring-2"
                   />
                   <label htmlFor="reminder" className="text-white">
-                    {" "}
                     ¿Añadir recordatorio?
                   </label>
                 </div>
@@ -191,7 +200,7 @@ export default function NewEvent({ onEventCreated }) {
                     />
                   </div>
                 )}
-                <div className="flex justify-around mt-4 self">
+                <div className="flex justify-around mt-4">
                   <button
                     type="reset"
                     onClick={toggleNewEvent}
@@ -206,6 +215,20 @@ export default function NewEvent({ onEventCreated }) {
                 </div>
               </form>
             </div>
+            <aside className="relative lg:ml-4 content-center bg-gray-900 p-4 rounded-3xl lg:w-fit mt-4 lg:mt-0 overflow-y-scroll scrollbar-none">
+              {lifeAreas.map((area) => (
+                <button
+                  key={area.life_area_id}
+                  onClick={() => handleSeleccion(area.life_area_id)}
+                  className={`block w-40 text-center p-2 rounded-lg hover:border-blue-700 m-2 border-none outline-none transition duration-300 ${
+                    selectedAreas.includes(area.life_area_id)
+                      ? "bg-blue-600"
+                      : "bg-gray-700"
+                  }`}>
+                  {area.name}
+                </button>
+              ))}
+            </aside>
           </div>
         )}
       </div>

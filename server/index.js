@@ -54,13 +54,14 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
       `
       UPDATE "Events" 
       SET "state" = CASE
-        WHEN "date" < NOW() THEN 0
-        WHEN "date" < NOW() + INTERVAL '1 day' THEN 1
-        WHEN "date" < NOW() + INTERVAL '1 week' THEN 2
-        ELSE 3
+        WHEN "date" < NOW() THEN 1
+        WHEN "date" < NOW() + INTERVAL '1 day' THEN 2
+        WHEN "date" < NOW() + INTERVAL '1 week' THEN 3
+        WHEN "date" < NOW() + INTERVAL '1 month' THEN 4
+        ELSE 5
       END
       WHERE "user_id" = $1
-      AND "state" != 4`,
+      AND "state" != 0`,
       [userId]
     )
 
@@ -293,11 +294,10 @@ app.post("/api/post/events", async (req, res) => {
   try {
     const {
       reminderDate,
-      state,
       endDate,
       eventName,
-      eventCategory,
       eventDate,
+      category,
       eventPriority,
       eventDescription,
       userId,
@@ -308,12 +308,11 @@ app.post("/api/post/events", async (req, res) => {
     await client.query("BEGIN") // Iniciar una transacción
 
     const eventResult = await client.query(
-      'INSERT INTO "Events" (state, end_date, name, category, date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING event_id',
+      'INSERT INTO "Events" (end_date, name, category, date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING event_id',
       [
-        state,
         endDate,
         eventName,
-        eventCategory,
+        category,
         eventDate,
         eventPriority,
         eventDescription,
@@ -347,15 +346,12 @@ app.post("/api/post/events", async (req, res) => {
     }
 
     if (lifeAreaIds && lifeAreaIds.length > 0) {
-      console.log(lifeAreaIds)
       const lifeAreasQuery = `
       INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
-      VALUES ${lifeAreaIds.map(() => "($1, $2)").join(", ")}
+      VALUES ${lifeAreaIds.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `
-      const lifeAreasValues = lifeAreaIds.flatMap((lifeAreaId) => [
-        eventID,
-        lifeAreaId,
-      ])
+      const lifeAreasValues = [eventID, ...lifeAreaIds]
+
       await client.query(lifeAreasQuery, lifeAreasValues)
     }
 
@@ -508,6 +504,24 @@ app.post("/api/post/lifeAreaScore", authenticateToken, async (req, res) => {
   }
 })
 
+app.post("/api/post/reminders", authenticateToken, async (req, res) => {
+  const { userId, date } = req.body
+
+  if (!date || !userId) {
+    return res.status(400).json({ error: "data requerida" })
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO "Reminders" (user_id, date) VALUES ($1, $2
+      RETURNING *`[(userId, date)]
+    )
+  } catch {
+    console.error("Error al crear reminder", error)
+    res.status(500).json({ error: "Error al crear reminder" })
+  }
+})
+
 //Eliminar Items
 app.delete("/api/items/delete", async (req, res) => {
   const { id, type } = req.body
@@ -593,158 +607,6 @@ app.delete("/api/lifeAreas/:id", authenticateToken, async (req, res) => {
 })
 
 //Actualizar
-
-// app.patch("/api/event/update", authenticateToken, async (req, res) => {
-//   const {
-//     eventReminderDate,
-//     endDate,
-//     eventName,
-//     eventCategory,
-//     eventDate,
-//     eventPriority,
-//     eventDescription,
-//     eventMail,
-//     eventId,
-//     userId,
-//     eventReminderId,
-//     eventLifeArea,
-//   } = req.body
-
-//   const client = await pool.connect()
-
-//   if (!eventId) {
-//     return res.status(400).json({ error: "Event ID is required" })
-//   }
-
-//   if (req.user.user_id !== userId) {
-//     return res
-//       .status(403)
-//       .json({ error: "User not authorized to update this event" })
-//   }
-
-//   try {
-//     await client.query("BEGIN")
-
-//     const updateEventQuery = `
-//       UPDATE "Events"
-//       SET
-//         "end_date" = $1,
-//         "name" = $2,
-//         "category" = $3,
-//         "date" = $4,
-//         "priority_level" = $5,
-//         "description" = $6,
-//         "user_id" = $7
-//       WHERE "event_id" = $8 AND "user_id" = $7
-//       RETURNING *;
-//     `
-//     const eventValues = [
-//       endDate,
-//       eventName,
-//       eventCategory,
-//       eventDate,
-//       eventPriority,
-//       eventDescription,
-//       userId,
-//       eventId,
-//     ]
-
-//     const eventResult = await client.query(updateEventQuery, eventValues)
-
-//     if (eventResult.rows.length === 0) {
-//       await client.query("ROLLBACK")
-//       return res
-//         .status(404)
-//         .json({ error: "Event not found or user not authorized" })
-//     }
-
-//     if (!eventReminderId && eventReminderDate) {
-//       const insertReminderQuery = `
-//         INSERT INTO "Reminders" ("date", "mail", "user_id")
-//         VALUES ($1, $2, $3)
-//         RETURNING "reminder_id";
-//       `
-//       const insertReminderValues = [eventReminderDate, eventMail, userId]
-//       const reminderResult = await client.query(
-//         insertReminderQuery,
-//         insertReminderValues
-//       )
-//       const newReminderId = reminderResult.rows[0].reminder_id
-
-//       const insertEventReminderQuery = `
-//         INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
-//         VALUES ($1, $2);
-//       `
-//       await client.query(insertEventReminderQuery, [eventId, newReminderId])
-//     } else if (eventReminderId) {
-//       const deleteReminderQuery = `
-//         DELETE FROM "Reminders"
-//         WHERE "reminder_id" = $1;
-//       `
-//       await client.query(deleteReminderQuery, [eventReminderId])
-
-//       const insertReminderQuery = `
-//         INSERT INTO "Reminders" ("date", "mail", "user_id")
-//         VALUES ($1, $2, $3)
-//         RETURNING "reminder_id";
-//       `
-//       const insertReminderValues = [eventReminderDate, eventMail, userId]
-
-//       const reminderResult = await client.query(
-//         insertReminderQuery,
-//         insertReminderValues
-//       )
-//       const newReminderId = reminderResult.rows[0].reminder_id
-
-//       const insertEventReminderQuery = `
-//         INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
-//         VALUES ($1, $2);
-//       `
-
-//       await client.query(insertEventReminderQuery, [eventId, newReminderId])
-//     }
-
-//     //Manejar áreas de vida
-
-//     const deleteLifeAreasQuery = `
-//       DELETE FROM "Event_Life_Areas" WHERE "event_id" = $1;
-//     `
-//     await client.query(deleteLifeAreasQuery, [eventId])
-
-//     // if (lifeAreas && lifeAreas.length > 0) {
-//     //   const insertLifeAreaQueries = lifeAreas.map((areaId) => {
-//     //     return client.query(
-//     //       `INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id") VALUES ($1, $2);`,
-//     //       [eventId, areaId]
-//     //     )
-//     //   })
-//     //   await Promise.all(insertLifeAreaQueries)
-//     // }
-
-//     if (eventLifeArea) {
-//       const insertLifeAreaQuery = `
-//         INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id")
-//         VALUES ($1, $2);
-//       `
-//       await client.query(insertLifeAreaQuery, [eventId, eventLifeArea])
-//     }
-//     await client.query("COMMIT")
-
-//     res.status(200).json({
-//       message: "Event, related Reminder and life area updated successfully",
-//       event: eventResult.rows[0],
-//     })
-//   } catch (error) {
-//     await client.query("ROLLBACK")
-//     console.error("Error updating event and reminder", error)
-//     res.status(500).json({
-//       error: "An error occurred while updating the event and reminder",
-//     })
-//   } finally {
-//     client.release()
-//   }
-// })
-
 app.patch("/api/items/complete", authenticateToken, async (req, res) => {
   const { eventId, userId } = req.body
 
@@ -765,7 +627,7 @@ app.patch("/api/items/complete", authenticateToken, async (req, res) => {
 
     const updateResult = await client.query(
       `UPDATE "Events" 
-      SET "state" = 4
+      SET "state" = 0
       WHERE "event_id" = $1 AND "user_id" = $2
       RETURNING *;`,
       [eventId, userId]
@@ -821,15 +683,15 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
     state,
     endDate,
     eventName,
-    eventCategory,
+    lifeAreaIds,
     eventDate,
+    category,
     eventPriority,
     eventDescription,
     eventMail,
     eventId,
     userId,
     eventReminderId,
-    lifeAreas,
   } = req.body
 
   const client = await pool.connect()
@@ -865,7 +727,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
       state,
       endDate,
       eventName,
-      eventCategory,
+      category,
       eventDate,
       eventPriority,
       eventDescription,
@@ -935,14 +797,14 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
     `
     await client.query(deleteLifeAreasQuery, [eventId])
 
-    if (lifeAreas && lifeAreas.length > 0) {
-      const insertLifeAreaQueries = lifeAreas.map((areaId) => {
-        return client.query(
-          `INSERT INTO "Event_Life_Areas" ("event_id", "life_area_id") VALUES ($1, $2);`,
-          [eventId, areaId]
-        )
-      })
-      await Promise.all(insertLifeAreaQueries)
+    if (lifeAreaIds && lifeAreaIds.length > 0) {
+      const lifeAreasQuery = `
+      INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
+      VALUES ${lifeAreaIds.map((_, i) => `($1, $${i + 2})`).join(", ")}
+      `
+      const lifeAreasValues = [eventId, ...lifeAreaIds]
+
+      await client.query(lifeAreasQuery, lifeAreasValues)
     }
 
     await client.query("COMMIT")

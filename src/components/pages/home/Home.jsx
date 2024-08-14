@@ -1,9 +1,9 @@
-import React from "react"
+import { useEffect, useState } from "react"
 import { Outlet } from "react-router-dom"
 import Header from "../../Header"
 import Footer from "../../Footer"
 import Panel from "../../Panel"
-import { useState } from "react"
+// import requestNotificationPermission from "../../../../server/RequestNotification"
 
 export default function Home() {
 
