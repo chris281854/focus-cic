@@ -250,13 +250,13 @@ export default function Habits() {
       </Card>
       <h1 className="text-4xl font-bold mb-8">Facetas</h1>
       <div className="w-full max-w-4xl">
-        <div className="mb-8">
+        <div className="mb-8 rounded-md bg-slate-900 p-4 w-fit">
           <h2 className="text-2xl font-semibold mb-4">
             Añadir nueva área de vida
           </h2>
           <div>
             <form onSubmit={addLifeArea} className="flex flex-col gap-4 mb-4">
-              <div className="flex flex-col sm:flex-row gap-4 items-start">
+              <div className="flex items-center flex-col sm:flex-row gap-4">
                 <input
                   type="text"
                   placeholder="Nombre"
@@ -292,12 +292,11 @@ export default function Habits() {
                 </div>
               </div>
               <div className="flex gap-4 items-center">
-                <input
-                  type="text"
+                <textarea
                   placeholder="Objetivos de largo plazo"
                   value={longTermGoal}
                   onChange={(e) => setLongTermGoal(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white"
+                  className="px-4 py-2 rounded-lg bg-gray-800 text-white max-h-40 min-h-20 w-3/4"
                 />
                 <button
                   type="submit"

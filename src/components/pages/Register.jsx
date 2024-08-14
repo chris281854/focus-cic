@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react"
 import { UserContext } from "../../context/UserContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import Header from "../Header"
 import Footer from "../Footer"
 import sendEmail from "../EmailSender"
@@ -78,60 +78,145 @@ export default function Register() {
 
   return (
     <>
-      <Header></Header>
-      <div className="flex items-center content-center flex-col bg-white text-primary dark:bg-bg-main-color dark:text-white pb-8">
-        <div className="flex flex-col min-h-screen min-w-full items-center">
-          <h1>Registro</h1>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Correo Electrónico"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="NickName"
-              value={nickName}
-              onChange={(e) => setNickName(e.target.value)}
-            />
-            <input
-              type="number"
-              placeholder="Número de teléfono"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <input
-              type="date"
-              placeholder="Fecha de Nacimiento"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-            />
-            <button type="submit">Registrarse</button>
-            {error && <p>{error}</p>}
-          </form>
+      <Header />
+      <div className="bg-gray-100 dark:bg-bg-main-color flex justify-center items-center h-screen">
+        {/* <!-- Left: Image --> */}
+        <div className="w-1/2 h-screen hidden lg:block">
+          <img
+            src="public\Wallpaper.jpg"
+            alt="Placeholder Image"
+            className="object-cover w-full h-full"
+          />
         </div>
-        <button onClick={emailSender}>Enviar email</button>
+        {/* <!-- Right: Login Form --> */}
+        <div className="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2 mt-24">
+          <h1 className="text-2xl font-semibold mb-4">Registro de Usuario</h1>
+          <form onSubmit={handleSubmit}>
+            {/* <!-- Email Input --> */}
+            <div className="mb-4">
+              <label
+                for="email"
+                className="block text-gray-600 dark:text-white">
+                Correo Electrónico
+              </label>
+              <input
+                type="text"
+                id="email"
+                name="email"
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+                value={email}
+                placeholder="Correo Electrónico"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            {/* <!-- Password Input --> */}
+            <div className="mb-4">
+              <label
+                for="password"
+                className="block text-gray-600 dark:text-white">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+                autocomplete="off"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="mb-4">
+              <label for="name" className="block text-gray-600 dark:text-white">
+                Nombre
+              </label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Nombre"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                for="email"
+                className="block text-gray-600 dark:text-white">
+                Apellido
+              </label>
+              <input
+                type="text"
+                name="apellido"
+                placeholder="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                for="nickName"
+                className="block text-gray-600 dark:text-white">
+                Nombre de Usuario
+              </label>
+              <input
+                type="text"
+                placeholder="NickName"
+                value={nickName}
+                onChange={(e) => setNickName(e.target.value)}
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                for="phone"
+                className="block text-gray-600 dark:text-white">
+                Telefono
+              </label>
+              <input
+                type="number"
+                name="phone"
+                placeholder="Número de teléfono"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                for="birthDate"
+                className="block text-gray-600 dark:text-white">
+                Fecha de Nacimiento
+              </label>
+              <input
+                type="date"
+                name="birthDate"
+                placeholder="Fecha de Nacimiento"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+              />
+            </div>
+            {/* <!-- Sign up Button --> */}
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full">
+              Registrarse
+            </button>
+          </form>
+          {/* <!-- Login  Link --> */}
+          <div className="mt-6 text-blue-500 text-center">
+            <p className="text-white">¿Ya tienes cuenta?</p>
+            <Link to="/login" className="hover:underline">
+              Iniciar Sesión
+            </Link>
+          </div>
+          {error && <p>{error}</p>}
+        </div>
       </div>
-      <Footer></Footer>
+      <Footer />
     </>
   )
 }

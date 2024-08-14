@@ -1,15 +1,17 @@
 import EditItem from "./EditItem"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import dayjs from "dayjs"
 import { useUser } from "../context/UserContext"
 import axios from "axios"
 
 export default function ToDoItem({ event, task, reminder, onEventModified }) {
   //Estados:
-  //0: Retrasado
-  //1: Inmediato
-  //2: Cerca
-  //3: Lejos
+  // 0: Completado
+  // 1: Atrasado
+  // 2. Para hoy
+  // 3: Para esta semana
+  // 4: Para este mes
+  // 5: Después
 
   //Niveles: (eventPriority)
   // 0: Urgente e importante
@@ -24,20 +26,23 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
   const stateColor = () => {
     const state = event.state
     if (state === 0) {
-      eventState = "Atrasado"
-      return "bg-red-600 "
-    } else if (state === 1) {
-      eventState = "Urgente"
-      return "bg-red-400 "
-    } else if (state === 2) {
-      eventState = "Incompleto"
-      return "bg-blue-600 "
-    } else if (state === 3) {
-      eventState = "Incompleto"
-      return "bg-white "
-    } else if (state === 4) {
       eventState = "Completado"
       return "bg-accent "
+    } else if (state === 1) {
+      eventState = "Atrasado"
+      return "bg-red-600 "
+    } else if (state === 2) {
+      eventState = "Para hoy"
+      return "bg-red-500 "
+    } else if (state === 3) {
+      eventState = "Para esta semana"
+      return "bg-orange-500 "
+    } else if (state === 4) {
+      eventState = "Para este mes"
+      return "bg-white "
+    } else if (state === 5) {
+      eventState = "Después"
+      return "bg-white "
     }
   }
 
@@ -119,11 +124,16 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
             </span>
           </div>
           <div className="col-span-1 flex items-center">
-            {event.life_areas.map((area) => (
-              <div key={area} className="rounded-full bg-cyan-400 p-1 pr-2 pl-2">
-                {area}
-              </div>
-            ))}
+            {event.life_areas.map(
+              (area) =>
+                area && (
+                  <div
+                    key={area}
+                    className="rounded-full bg-cyan-400 p-1 pr-2 pl-2">
+                    {area}
+                  </div>
+                )
+            )}
           </div>
           <div className="col-span-1 flex items-center justify-between pr-1">
             <button
@@ -167,34 +177,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
           )}
         </div>
       )}
-      {task && (
-        <>
-          <div className="max-w-sm w-full bg-black rounded-lg shadow-lg p-6 m-3">
-            <div className="flex relative items-center justify-between">
-              <h2 className="text-xl font-bold text-white">{task.name}</h2>
-              <button
-                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 absolute right-10"
-                onClick={toggleEditVisibility}>
-                <i className="fas fa-edit"></i>
-              </button>
-              <button
-                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 relative right-0"
-                onClick={() => handleDelete(task.task_id, "task")}>
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <p className="text-gray-400 mt-2">{task.description}</p>
-            <div className="flex items-center justify-between mt-4">
-              <span className="text-sm text-gray-500">Para: {task.date}</span>
-              <button
-                className="text-black bg-accent hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 rounded-full px-4 py-1 text-sm font-medium"
-                onClick={() => handleComplete(task.task_id, "task")}>
-                Completar
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+
       {reminder && (
         <>
           <div className="max-w-sm w-full bg-black rounded-lg shadow-lg p-6 m-3">
