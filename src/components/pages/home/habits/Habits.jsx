@@ -20,6 +20,7 @@ import {
   CardTitle,
 } from "../../../ui/card"
 import { ChartContainer } from "../../../ui/chart"
+import getRandomColor from "../../../../../server/RandomColor"
 
 export default function Habits() {
   // Manejar eventos base
@@ -96,6 +97,7 @@ export default function Habits() {
           score: newScore,
           longTermGoal: longTermGoal,
           date: dayjs(),
+          color: getRandomColor()
         },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -137,19 +139,6 @@ export default function Habits() {
     }
   }
 
-  const colors = [
-    "bg-red-500",
-    "bg-blue-500",
-    "bg-green-500",
-    "bg-yellow-500",
-    "bg-purple-500",
-    "bg-pink-500",
-    "bg-indigo-500",
-  ]
-  const getRandomColor = () => {
-    const randomIndex = Math.floor(Math.random() * colors.length)
-    return colors[randomIndex]
-  }
   const handleClick = () => {
     setRandomColor(getRandomColor())
   }

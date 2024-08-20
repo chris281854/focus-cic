@@ -54,11 +54,12 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
       `
       UPDATE "Events" 
       SET "state" = CASE
-        WHEN "date" < NOW() THEN 1
-        WHEN "date" < NOW() + INTERVAL '1 day' THEN 2
-        WHEN "date" < NOW() + INTERVAL '1 week' THEN 3
-        WHEN "date" < NOW() + INTERVAL '1 month' THEN 4
-        ELSE 5
+        WHEN "date" < NOW() THEN 1  -- Atrasado
+        WHEN "date" >= NOW() AND "date" < date_trunc('day', NOW() + INTERVAL '1 day') THEN 2  -- Para hoy
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 day') AND "date" < date_trunc('day', NOW() + INTERVAL '2 days') THEN 6  -- Para mañana
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '2 days') AND "date" < date_trunc('day', NOW() + INTERVAL '1 week') THEN 3  -- Para esta semana
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 week') AND "date" < date_trunc('day', NOW() + INTERVAL '1 month') THEN 4  -- Para este mes
+        ELSE 5  -- Después
       END
       WHERE "user_id" = $1
       AND "state" != 0`,
@@ -74,7 +75,12 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
         er.reminder_id, 
         r.date AS reminder_date, 
         r.mail AS reminder_mail,
-        ARRAY_AGG(la.name) AS life_areas
+        ARRAY_AGG(
+          json_build_object(
+            'name', la.name,
+            'color', la.color
+          )
+        ) AS life_areas
       FROM "Events" e
       LEFT JOIN "Event_Reminder" er ON e.event_id = er.event_id
       LEFT JOIN "Reminders" r ON er.reminder_id = r.reminder_id
@@ -441,7 +447,7 @@ app.post("/api/post/tasks", async (req, res) => {
 })
 
 app.post("/api/post/lifeAreas", authenticateToken, async (req, res) => {
-  const { name, userId, score, longTermGoal, date } = req.body
+  const { name, userId, score, longTermGoal, date, color } = req.body
 
   if (!name || !userId) {
     return res.status(400).json({ error: "Nombre y userId requeridos" })
@@ -453,8 +459,8 @@ app.post("/api/post/lifeAreas", authenticateToken, async (req, res) => {
     await client.query("BEGIN")
 
     const lifeAreaResult = await pool.query(
-      `INSERT INTO "Life_Areas" (name, user_id, long_goal) VALUES ($1, $2, $3) RETURNING *`,
-      [name, userId, longTermGoal]
+      `INSERT INTO "Life_Areas" (name, user_id, long_goal, color) VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, userId, longTermGoal, color]
     )
     const lifeArea = lifeAreaResult.rows[0]
 

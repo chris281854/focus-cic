@@ -114,7 +114,6 @@ mark {
   background-color: var(--primary);
   color: var(--accent);
   text-shadow: 10px 10px 30px;
-  box-shadow: rgb(183, 216, 230) 0px 0px 40px;
 }
 .subscribe-button:active {
   color: white;

@@ -19,6 +19,8 @@ import {
 } from "../../../../ui/card"
 import { ChartContainer } from "../../../../ui/chart"
 import dayjs from "dayjs"
+import getRandomColor from "../../../../../../server/RandomColor"
+import { TypeOutline } from "lucide-react"
 
 export default function LifeArea({ area, overView, setOverView }) {
   const satisfaction = area.scores[0]?.score_value
@@ -28,6 +30,7 @@ export default function LifeArea({ area, overView, setOverView }) {
   const [areaName, setAreaName] = useState(area.name)
   const [scoreBar, setScoreBar] = useState(satisfaction * 10)
   const scoresChartData = area.scores
+  const areaColor = area.color
 
   function scoreBarHandler() {
     if (satisfaction === null || satisfaction === NaN) {
@@ -84,8 +87,13 @@ export default function LifeArea({ area, overView, setOverView }) {
           />
           <div className="w-7/12 bg-gray-700 rounded-full h-4 mt-10 mb-10 relative">
             <div
-              className="bg-accent h-4 rounded-full shadow-[5px_5px_40px_rgba(7,237,24,0.25)] shadow-accent ring-2 ring-accent transition-all"
-              style={{ width: `${scoreBar}%` }}></div>
+              className={`outline h-4 rounded-full transition-all`}
+              style={{
+                width: `${scoreBar}%`,
+                outlineColor: `${areaColor}`,
+                backgroundColor: `${areaColor}`
+              }}
+            />
             <input
               type="range"
               min="10"
@@ -97,8 +105,8 @@ export default function LifeArea({ area, overView, setOverView }) {
             />
             <label>Modifica el valor ⬆</label>
           </div>
-          <div className="static ml-4 rounded-full h-14 w-14 bg-black text-center content-center">
-          <label>{newSatisfaction}</label>
+          <div className={`static ml-4 rounded-full h-14 w-14 bg-${areaColor} text-center content-center`}>
+            <label>{newSatisfaction}</label>
           </div>
         </div>
         <div className="flex p-2 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-900/70 hover:bg-slate-900 transition-all items-center flex-col w-80 h-fit max-h-72">
@@ -118,7 +126,7 @@ export default function LifeArea({ area, overView, setOverView }) {
               <p className="text-gray-300">{goal}</p>
             </div>
           ))}
-          
+
         <Card className={"shadow-md hover:bg-slate-900 transition-all w-10/12"}>
           <CardHeader>
             <CardTitle>Seguidor de Satisfacción</CardTitle>
@@ -169,7 +177,6 @@ export default function LifeArea({ area, overView, setOverView }) {
             </div>
           </CardFooter>
         </Card>
-      
       </div>
     </div>
   )

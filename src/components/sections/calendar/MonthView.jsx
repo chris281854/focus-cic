@@ -128,9 +128,18 @@ export default function MonthView({ events }) {
   }
 
   const getMatchingEvents = (events, dataDate) => {
-    const matchingEvents = events.filter(
-      (event) => dayjs(event.date).format("YYYY-M-D") === dataDate
-    )
+    // Extrae año, mes y día de dataDate
+    const [year, month, day] = dataDate.split("-").map(Number)
+
+    // Ajusta el mes para que coincida con la indexación de 1-12
+    const adjustedDataDate = `${year}-${month + 1}-${day}`
+
+    const matchingEvents = events.filter((event) => {
+      const eventDate = dayjs(event.date).format("YYYY-M-D")
+      console.log(eventDate, adjustedDataDate)
+      return eventDate === adjustedDataDate
+    })
+
     return matchingEvents
   }
 
@@ -160,30 +169,30 @@ export default function MonthView({ events }) {
   }
 
   // Días del mes actual:
-    for (let i = 1; i <= getTotalDays(month); i++) {
-      monthDays.push({ id: i, content: "" })
-    }
+  for (let i = 1; i <= getTotalDays(month); i++) {
+    monthDays.push({ id: i, content: "" })
+  }
 
-    for (let i = 0; i < monthDays.length; i++) {
-      const { id, content } = monthDays[i]
-      const dataDate = `${year}-${month}-${id}`
+  for (let i = 0; i < monthDays.length; i++) {
+    const { id, content } = monthDays[i]
+    const dataDate = `${year}-${month}-${id}`
 
-      const matchingEvents = getMatchingEvents(events, dataDate)
+    const matchingEvents = getMatchingEvents(events, dataDate)
 
-      monthDayCalList.push(
-        <DayDiv
-          datedEvents={matchingEvents}
-          key={id}
-          id={id}
-          content={content}
-          dataDate={dataDate}
-          currentDate={currentDate}
-          selectedDiv={selectedDiv}
-          handleSelectedDiv={handleSelectedDiv}
-        />
-      )
-    }
-  
+    monthDayCalList.push(
+      <DayDiv
+        datedEvents={matchingEvents}
+        key={id}
+        id={id}
+        content={content}
+        dataDate={dataDate}
+        currentDate={currentDate}
+        selectedDiv={selectedDiv}
+        handleSelectedDiv={handleSelectedDiv}
+      />
+    )
+  }
+
   //Días del mes siguiente
   const daysInNextMonth = (() => {
     return 7 * 6 - monthDayCalList.length
@@ -282,7 +291,6 @@ export default function MonthView({ events }) {
           </div>
         </div>
       </div>
-      {/* <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> */}
     </>
   )
 }

@@ -7,6 +7,7 @@ export default function LifeAreaCard({ area }) {
   const satisfaction = area.scores[0]?.score_value
   const longTermGoal = area.long_goal
   const relatedGoals = []
+  const areaColor = area.color
 
   const [scoreBar, setScoreBar] = useState(satisfaction * 10)
   const [overView, setOverView] = useState(false)
@@ -34,8 +35,11 @@ export default function LifeAreaCard({ area }) {
           <h2 className="text-2xl font-bold mb-2">{title}</h2>
           <div className="w-full bg-gray-700 rounded-full h-4 mb-4">
             <div
-              className="bg-blue-500 h-4 rounded-full"
-              style={{ width: `${scoreBar}%` }}></div>
+              className="h-4 rounded-full"
+              style={{
+                width: `${scoreBar}%`,
+                backgroundColor: `${areaColor}`,
+              }}></div>
           </div>
         </div>
         <div>

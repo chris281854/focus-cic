@@ -79,7 +79,7 @@ export default function Register() {
   return (
     <>
       <Header />
-      <div className="bg-gray-100 dark:bg-bg-main-color flex justify-center items-center h-screen">
+      <main className="bg-gray-100 dark:bg-bg-main-color flex justify-center items-center h-screen">
         {/* <!-- Left: Image --> */}
         <div className="w-1/2 h-screen hidden lg:block">
           <img
@@ -89,13 +89,13 @@ export default function Register() {
           />
         </div>
         {/* <!-- Right: Login Form --> */}
-        <div className="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2 mt-24">
+        <section className="lg:px-36 md:px-52 sm:px-20 pb-32 w-full lg:w-1/2 mt-24 h-screen overflow-scroll scrollbar-none">
           <h1 className="text-2xl font-semibold mb-4">Registro de Usuario</h1>
           <form onSubmit={handleSubmit}>
             {/* <!-- Email Input --> */}
             <div className="mb-4">
               <label
-                for="email"
+                htmlFor="email"
                 className="block text-gray-600 dark:text-white">
                 Correo Electrónico
               </label>
@@ -112,7 +112,7 @@ export default function Register() {
             {/* <!-- Password Input --> */}
             <div className="mb-4">
               <label
-                for="password"
+                htmlFor="password"
                 className="block text-gray-600 dark:text-white">
                 Contraseña
               </label>
@@ -121,14 +121,14 @@ export default function Register() {
                 id="password"
                 name="password"
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
-                autocomplete="off"
+                autoComplete="off"
                 placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div className="mb-4">
-              <label for="name" className="block text-gray-600 dark:text-white">
+              <label htmlFor="name" className="block text-gray-600 dark:text-white">
                 Nombre
               </label>
               <input
@@ -142,14 +142,14 @@ export default function Register() {
             </div>
             <div className="mb-4">
               <label
-                for="email"
+                htmlFor="email"
                 className="block text-gray-600 dark:text-white">
                 Apellido
               </label>
               <input
                 type="text"
                 name="apellido"
-                placeholder="lastName"
+                placeholder="Apellido"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
@@ -157,13 +157,13 @@ export default function Register() {
             </div>
             <div className="mb-4">
               <label
-                for="nickName"
+                htmlFor="nickName"
                 className="block text-gray-600 dark:text-white">
                 Nombre de Usuario
               </label>
               <input
                 type="text"
-                placeholder="NickName"
+                placeholder="Nombre de usuario"
                 value={nickName}
                 onChange={(e) => setNickName(e.target.value)}
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
@@ -171,7 +171,7 @@ export default function Register() {
             </div>
             <div className="mb-4">
               <label
-                for="phone"
+                htmlFor="phone"
                 className="block text-gray-600 dark:text-white">
                 Telefono
               </label>
@@ -186,7 +186,7 @@ export default function Register() {
             </div>
             <div className="mb-4">
               <label
-                for="birthDate"
+                htmlFor="birthDate"
                 className="block text-gray-600 dark:text-white">
                 Fecha de Nacimiento
               </label>
@@ -214,8 +214,8 @@ export default function Register() {
             </Link>
           </div>
           {error && <p>{error}</p>}
-        </div>
-      </div>
+        </section>
+      </main>
       <Footer />
     </>
   )

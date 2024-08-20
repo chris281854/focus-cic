@@ -47,18 +47,6 @@ export default function GeneralView() {
 
   useEffect(() => {
     // Obtener eventos del servidor
-    const fetchTasks = async (userId) => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3001/api/get/tasks?userId=${userId}`
-        )
-        setTasks(response.data)
-      } catch (error) {
-        console.error("Error al obtener las tareas: ", error)
-      }
-    }
-    fetchTasks(user.user_id)
-
     const fetchEvents = async (userId) => {
       try {
         const response = await axios.get(
@@ -105,10 +93,13 @@ export default function GeneralView() {
     completed: events.filter((event) => event.state === 0),
     overdue: events.filter((event) => event.state === 1),
     today: events.filter((event) => event.state === 2),
+    tomorrow: events.filter((event) => event.state === 6),
     thisWeek: events.filter((event) => event.state === 3),
     thisMonth: events.filter((event) => event.state === 4),
     later: events.filter((event) => event.state === 5),
   }
+  const hasOverdueEvents = categorizedEvents.overdue.length > 0
+
   const toggleSection = (section) => {
     setExpandedSections((prevState) => ({
       ...prevState,
@@ -117,15 +108,14 @@ export default function GeneralView() {
   }
 
   return (
-    <div className="flex relative p-5 flex-col w-full">
+    <div className="flex relative p-5 flex-col w-full select-none">
       <h2>Tareas y Eventos</h2>
       <div className="flex p-4">
         <NewEvent onEventCreated={handleTableModified}></NewEvent>
         <NewReminder onReminderCreated={handleTableModified}></NewReminder>
       </div>
-
       <div className="todo-list w-full">
-        {expandedSections.overdue && (
+        {hasOverdueEvents && (
           <div className="mb-6 transition-all duration-300">
             <h3
               onClick={() => toggleSection("overdue")}
@@ -143,6 +133,14 @@ export default function GeneralView() {
             Hoy {expandedSections.today ? "▲" : "▼"}
           </h3>
           {expandedSections.today && generateEvents(categorizedEvents.today)}
+        </div>
+        <div className="mb-6">
+          <h3
+            onClick={() => toggleSection("tomorrow")}
+            className="font-bold bg-gray-900 p-2 rounded-md">
+            Mañana {expandedSections.tomorrow ? "▲" : "▼"}
+          </h3>
+          {expandedSections.tomorrow && generateEvents(categorizedEvents.tomorrow)}
         </div>
         <div className="mb-6">
           <h3

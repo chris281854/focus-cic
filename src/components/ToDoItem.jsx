@@ -12,6 +12,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
   // 3: Para esta semana
   // 4: Para este mes
   // 5: Después
+  // 6: Mañana
 
   //Niveles: (eventPriority)
   // 0: Urgente e importante
@@ -33,6 +34,9 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
       return "bg-red-600 "
     } else if (state === 2) {
       eventState = "Para hoy"
+      return "bg-red-500 "
+    } else if (state === 6) {
+      eventState === "Para mañana"
       return "bg-red-500 "
     } else if (state === 3) {
       eventState = "Para esta semana"
@@ -103,7 +107,6 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
       console.error("Error al eliminar el evento", error)
     }
   }
-
   return (
     <>
       {event && (
@@ -123,14 +126,15 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
               {dayjs(event.date).format("D MMMM | h:m a")}
             </span>
           </div>
-          <div className="col-span-1 flex items-center">
+          <div className="col-span-1 flex items-center max-w-64 overflow-scroll scrollbar-none">
             {event.life_areas.map(
-              (area) =>
+              (area, index) =>
                 area && (
                   <div
-                    key={area}
-                    className="rounded-full bg-cyan-400 p-1 pr-2 pl-2">
-                    {area}
+                    key={index}
+                    className={`rounded-full p-1 pr-2 pl-2 mx-1`}
+                    style={{ backgroundColor: `${area.color}` }}>
+                    {area.name}
                   </div>
                 )
             )}

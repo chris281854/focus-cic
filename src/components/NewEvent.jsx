@@ -16,7 +16,7 @@ export default function NewEvent({ onEventCreated }) {
   const [addReminder, setAddReminder] = useState(false)
   const [mail, setMail] = useState(false)
   const [selectedAreas, setSelectedAreas] = useState([])
-  const [category, setCategory] = useState(0) //task - event
+  const [category, setCategory] = useState(true) //task: true - event: false
 
   //Abrir panel
   const [openNewEvent, setOpenNewEvent] = useState(false)
@@ -35,6 +35,11 @@ export default function NewEvent({ onEventCreated }) {
     setEventDescription("")
     setAddReminder(false)
     setMail(false)
+  }
+
+  //Manejar selección de categoría:
+  const handleCategory = () => {
+    setCategory(!category)
   }
 
   //Manejar selección de areas:
@@ -59,7 +64,7 @@ export default function NewEvent({ onEventCreated }) {
           // state,
           endDate: endDate || null,
           eventName,
-          category,
+          category: category ? "task" : "event",
           lifeAreaIds: selectedAreas,
           eventDate,
           eventPriority,
@@ -95,22 +100,49 @@ export default function NewEvent({ onEventCreated }) {
                 onSubmit={handleSubmit}
                 className="flex flex-col w-full space-y-4"
                 id="form">
-                <div>
-                  <label
-                    htmlFor="EventName"
-                    className="block text-white text-left mb-6">
-                    Evento
-                  </label>
+                <div className="relative w-fit inline-block align-middle select-none text-left">
                   <input
-                    type="text"
-                    name="EventName"
-                    id="EventName"
-                    value={eventName ?? ""}
-                    onChange={(e) => setEventName(e.target.value)}
-                    required
-                    className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    type="checkbox"
+                    id="category"
+                    name="category"
+                    checked="category"
+                    onChange={handleCategory}
+                    className="hidden"
                   />
+                  <label
+                    htmlFor="category"
+                    className={`block overflow-hidden cursor-pointer border-0 border-solid rounded-[20px] m-0 ${
+                      category ? "bg-orange-500" : "bg-gray-400"
+                    }`}>
+                    <span
+                      className={`block w-[200%] transition-[margin] duration-300 ease-in ${
+                        category ? "ml-0" : "-ml-[100%]"
+                      }`}>
+                      <span className="block float-left w-1/2 h-[34px] p-0 leading-[34px] text-[14px] font-bold text-white box-border uppercase pl-2.5">
+                        Tarea
+                      </span>
+                      <span className="block float-left w-1/2 h-[34px] p-0 leading-[34px] text-[14px] font-bold text-white box-border uppercase pr-2.5 text-right">
+                        Evento
+                      </span>
+                    </span>
+                    <span
+                      className={` block w-6 m-[5px] bg-white absolute top-0 bottom-0 border-0 border-solid rounded-[20px] transition-all duration-300 ease-in ${
+                        category ? "right-0" : "right-[87px]"
+                      }`}></span>
+                  </label>
                 </div>
+                <input
+                  type="text"
+                  name="EventName"
+                  id="EventName"
+                  placeholder="Nombre"
+                  autoFocus
+                  value={eventName ?? ""}
+                  onChange={(e) => setEventName(e.target.value)}
+                  required
+                  className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+
                 <div>
                   <label
                     htmlFor="eventDescription"
@@ -125,12 +157,15 @@ export default function NewEvent({ onEventCreated }) {
                     className="w-full min-h-16 p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
-                <div className="space-x-4 flex justify-evenly">
-                  <div className="w-full">
+                <div
+                  className={`gap-3 flex ${
+                    category ? "justify-evenly" : "justify-evenly flex-wrap"
+                  }`}>
+                  <div className={` ${category ? "w-full" : "w-6/12"}`}>
                     <label
                       htmlFor="EventDate"
                       className="block text-white text-left mb-1">
-                      Hora y fecha
+                      Comienza
                     </label>
                     <input
                       type="datetime-local"
@@ -138,9 +173,26 @@ export default function NewEvent({ onEventCreated }) {
                       value={eventDate}
                       onChange={(e) => setEventDate(e.target.value)}
                       required
-                      className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className={`w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
                     />
                   </div>
+                  {!category && (
+                    <div className={` ${category ? "w-full" : "w-5/12"}`}>
+                      <label
+                        htmlFor="endDate"
+                        className="block text-white text-left mb-1">
+                        Termina
+                      </label>
+                      <input
+                        type="datetime-local"
+                        name="endDate"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        required
+                        className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      />
+                    </div>
+                  )}
                   <div className="w-full">
                     <label
                       htmlFor="EventPriority"
@@ -220,11 +272,14 @@ export default function NewEvent({ onEventCreated }) {
                 <button
                   key={area.life_area_id}
                   onClick={() => handleSeleccion(area.life_area_id)}
-                  className={`block w-40 text-center p-2 rounded-lg hover:border-blue-700 m-2 border-none outline-none transition duration-300 ${
+                  className={`block w-40 text-center p-2 rounded-lg m-2 border-none outline-none transition duration-300 text-neutral-950 ${
                     selectedAreas.includes(area.life_area_id)
-                      ? "bg-blue-600"
-                      : "bg-gray-700"
-                  }`}>
+                      ? "opacity-100 text-opacity-100"
+                      : "opacity-50 text-opacity-75"
+                  }`}
+                  style={{
+                    backgroundColor: `${area.color}`,
+                  }}>
                   {area.name}
                 </button>
               ))}
