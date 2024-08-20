@@ -16,7 +16,11 @@ export default function NewEvent({ onEventCreated }) {
   const [addReminder, setAddReminder] = useState(false)
   const [mail, setMail] = useState(false)
   const [selectedAreas, setSelectedAreas] = useState([])
+<<<<<<< HEAD
   const [category, setCategory] = useState(true) //task: true - event: false
+=======
+  const [category, setCategory] = useState(0) //task - event
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
 
   //Abrir panel
   const [openNewEvent, setOpenNewEvent] = useState(false)
@@ -37,11 +41,14 @@ export default function NewEvent({ onEventCreated }) {
     setMail(false)
   }
 
+<<<<<<< HEAD
   //Manejar selección de categoría:
   const handleCategory = () => {
     setCategory(!category)
   }
 
+=======
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
   //Manejar selección de areas:
   const handleSeleccion = async (value) => {
     setSelectedAreas((prevSelectedAreas) => {
@@ -64,7 +71,11 @@ export default function NewEvent({ onEventCreated }) {
           // state,
           endDate: endDate || null,
           eventName,
+<<<<<<< HEAD
           category: category ? "task" : "event",
+=======
+          category,
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
           lifeAreaIds: selectedAreas,
           eventDate,
           eventPriority,
@@ -100,7 +111,16 @@ export default function NewEvent({ onEventCreated }) {
                 onSubmit={handleSubmit}
                 className="flex flex-col w-full space-y-4"
                 id="form">
+<<<<<<< HEAD
                 <div className="relative w-fit inline-block align-middle select-none text-left">
+=======
+                <div>
+                  <label
+                    htmlFor="EventName"
+                    className="block text-white text-left mb-6">
+                    Evento
+                  </label>
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
                   <input
                     type="checkbox"
                     id="category"
@@ -157,11 +177,16 @@ export default function NewEvent({ onEventCreated }) {
                     className="w-full min-h-16 p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
+<<<<<<< HEAD
                 <div
                   className={`gap-3 flex ${
                     category ? "justify-evenly" : "justify-evenly flex-wrap"
                   }`}>
                   <div className={` ${category ? "w-full" : "w-6/12"}`}>
+=======
+                <div className="space-x-4 flex justify-evenly">
+                  <div className="w-full">
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
                     <label
                       htmlFor="EventDate"
                       className="block text-white text-left mb-1">
@@ -176,6 +201,7 @@ export default function NewEvent({ onEventCreated }) {
                       className={`w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
                     />
                   </div>
+<<<<<<< HEAD
                   {!category && (
                     <div className={` ${category ? "w-full" : "w-5/12"}`}>
                       <label
@@ -193,6 +219,8 @@ export default function NewEvent({ onEventCreated }) {
                       />
                     </div>
                   )}
+=======
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
                   <div className="w-full">
                     <label
                       htmlFor="EventPriority"
@@ -272,6 +300,7 @@ export default function NewEvent({ onEventCreated }) {
                 <button
                   key={area.life_area_id}
                   onClick={() => handleSeleccion(area.life_area_id)}
+<<<<<<< HEAD
                   className={`block w-40 text-center p-2 rounded-lg m-2 border-none outline-none transition duration-300 text-neutral-950 ${
                     selectedAreas.includes(area.life_area_id)
                       ? "opacity-100 text-opacity-100"
@@ -280,6 +309,13 @@ export default function NewEvent({ onEventCreated }) {
                   style={{
                     backgroundColor: `${area.color}`,
                   }}>
+=======
+                  className={`block w-40 text-center p-2 rounded-lg hover:border-blue-700 m-2 border-none outline-none transition duration-300 ${
+                    selectedAreas.includes(area.life_area_id)
+                      ? "bg-blue-600"
+                      : "bg-gray-700"
+                  }`}>
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
                   {area.name}
                 </button>
               ))}

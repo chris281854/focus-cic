@@ -54,12 +54,20 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
       `
       UPDATE "Events" 
       SET "state" = CASE
+<<<<<<< HEAD
         WHEN "date" < NOW() THEN 1  -- Atrasado
         WHEN "date" >= NOW() AND "date" < date_trunc('day', NOW() + INTERVAL '1 day') THEN 2  -- Para hoy
         WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 day') AND "date" < date_trunc('day', NOW() + INTERVAL '2 days') THEN 6  -- Para mañana
         WHEN "date" >= date_trunc('day', NOW() + INTERVAL '2 days') AND "date" < date_trunc('day', NOW() + INTERVAL '1 week') THEN 3  -- Para esta semana
         WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 week') AND "date" < date_trunc('day', NOW() + INTERVAL '1 month') THEN 4  -- Para este mes
         ELSE 5  -- Después
+=======
+        WHEN "date" < NOW() THEN 1
+        WHEN "date" < NOW() + INTERVAL '1 day' THEN 2
+        WHEN "date" < NOW() + INTERVAL '1 week' THEN 3
+        WHEN "date" < NOW() + INTERVAL '1 month' THEN 4
+        ELSE 5
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
       END
       WHERE "user_id" = $1
       AND "state" != 0`,

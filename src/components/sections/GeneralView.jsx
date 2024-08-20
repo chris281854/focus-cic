@@ -93,13 +93,19 @@ export default function GeneralView() {
     completed: events.filter((event) => event.state === 0),
     overdue: events.filter((event) => event.state === 1),
     today: events.filter((event) => event.state === 2),
+<<<<<<< HEAD
     tomorrow: events.filter((event) => event.state === 6),
+=======
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
     thisWeek: events.filter((event) => event.state === 3),
     thisMonth: events.filter((event) => event.state === 4),
     later: events.filter((event) => event.state === 5),
   }
+<<<<<<< HEAD
   const hasOverdueEvents = categorizedEvents.overdue.length > 0
 
+=======
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
   const toggleSection = (section) => {
     setExpandedSections((prevState) => ({
       ...prevState,
@@ -108,14 +114,24 @@ export default function GeneralView() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="flex relative p-5 flex-col w-full select-none">
+=======
+    <div className="flex relative p-5 flex-col w-full">
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
       <h2>Tareas y Eventos</h2>
       <div className="flex p-4">
         <NewEvent onEventCreated={handleTableModified}></NewEvent>
         <NewReminder onReminderCreated={handleTableModified}></NewReminder>
       </div>
+<<<<<<< HEAD
       <div className="todo-list w-full">
         {hasOverdueEvents && (
+=======
+
+      <div className="todo-list w-full">
+        {expandedSections.overdue && (
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
           <div className="mb-6 transition-all duration-300">
             <h3
               onClick={() => toggleSection("overdue")}
@@ -136,6 +152,7 @@ export default function GeneralView() {
         </div>
         <div className="mb-6">
           <h3
+<<<<<<< HEAD
             onClick={() => toggleSection("tomorrow")}
             className="font-bold bg-gray-900 p-2 rounded-md">
             Mañana {expandedSections.tomorrow ? "▲" : "▼"}
@@ -153,6 +170,17 @@ export default function GeneralView() {
         </div>
         <div className="mb-6">
           <h3
+=======
+            onClick={() => toggleSection("thisWeek")}
+            className="font-bold bg-gray-900 p-2 rounded-md">
+            Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
+          </h3>
+          {expandedSections.thisWeek &&
+            generateEvents(categorizedEvents.thisWeek)}
+        </div>
+        <div className="mb-6">
+          <h3
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
             onClick={() => toggleSection("thisMonth")}
             className="font-bold bg-gray-900 p-2 rounded-md">
             Este Mes {expandedSections.thisMonth ? "▲" : "▼"}

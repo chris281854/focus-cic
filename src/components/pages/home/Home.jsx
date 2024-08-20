@@ -2,7 +2,11 @@ import { useEffect, useState } from "react"
 import { Outlet } from "react-router-dom"
 import Header from "../../Header"
 import Footer from "../../Footer"
+<<<<<<< HEAD
 import Panel from "./Panel"
+=======
+import Panel from "../../Panel"
+>>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
 // import requestNotificationPermission from "../../../../server/RequestNotification"
 
 export default function Home() {
