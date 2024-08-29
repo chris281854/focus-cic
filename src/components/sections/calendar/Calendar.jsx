@@ -10,6 +10,7 @@ export default function Calendar() {
   const [viewSelector, setViewSelector] = useState("mes")
   const [events, setEvents] = useState([])
   const [togglePosition, setTogglePosition] = useState("left")
+  const [eventCount, setEventCount] = useState(0)
 
   const handleSelectView = (e) => {
     setViewSelector(e)
@@ -20,7 +21,6 @@ export default function Calendar() {
   }
 
   useEffect(() => {
-    console.log("renderizando")
     const fetchEvents = async (userId) => {
       try {
         const response = await axios.get(
@@ -37,12 +37,16 @@ export default function Calendar() {
       }
     }
     fetchEvents(user.user_id)
-  }, [])
+  }, [eventCount])
+
+  const handleEventCreated = () => {
+    setEventCount((prevCount) => prevCount + 1)
+  }
 
   return (
     <>
       <div className="w-full select-none">
-        <div className="flex items-center space-x-1 ">
+        <div className="fixed top-1 w-fit h-fit justify-self-center z-10 ml-3 mt-3">
           <button
             onClick={() => handleSelectView("mes")}
             className={`cursor-pointer py-1 px-4 rounded-l-full ${
@@ -68,9 +72,13 @@ export default function Calendar() {
           </button>
         </div>
         <div>
-          {viewSelector === "mes" && <MonthView events={events} />}
-          {viewSelector === "semana" && <WeekView events={events} />}
-          {viewSelector === "dia" && <DayView events={events} />}
+          {viewSelector === "mes" && <MonthView events={events} onEventCreated={handleEventCreated} />}
+          {viewSelector === "semana" && (
+            <WeekView events={events} onEventCreated={handleEventCreated} />
+          )}
+          {viewSelector === "dia" && (
+            <DayView events={events} onEventCreated={handleEventCreated} />
+          )}
         </div>
       </div>
     </>

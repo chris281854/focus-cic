@@ -4,7 +4,7 @@ import dayjs from "dayjs"
 import { useUser } from "../context/UserContext"
 import axios from "axios"
 
-export default function ToDoItem({ event, task, reminder, onEventModified }) {
+export default function ToDoItem({ event, reminder, onEventModified }) {
   //Estados:
   // 0: Completado
   // 1: Atrasado
@@ -12,10 +12,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
   // 3: Para esta semana
   // 4: Para este mes
   // 5: Después
-<<<<<<< HEAD
   // 6: Mañana
-=======
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
 
   //Niveles: (eventPriority)
   // 0: Urgente e importante
@@ -38,12 +35,9 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
     } else if (state === 2) {
       eventState = "Para hoy"
       return "bg-red-500 "
-<<<<<<< HEAD
     } else if (state === 6) {
       eventState === "Para mañana"
       return "bg-red-500 "
-=======
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
     } else if (state === 3) {
       eventState = "Para esta semana"
       return "bg-orange-500 "
@@ -132,8 +126,7 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
               {dayjs(event.date).format("D MMMM | h:m a")}
             </span>
           </div>
-<<<<<<< HEAD
-          <div className="col-span-1 flex items-center max-w-64 overflow-scroll scrollbar-none">
+          <div className="col-span-1 flex items-center max-w-80 overflow-x-scroll rounded-xl scrollbar-none">
             {event.life_areas.map(
               (area, index) =>
                 area && (
@@ -142,16 +135,6 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
                     className={`rounded-full p-1 pr-2 pl-2 mx-1`}
                     style={{ backgroundColor: `${area.color}` }}>
                     {area.name}
-=======
-          <div className="col-span-1 flex items-center">
-            {event.life_areas.map(
-              (area) =>
-                area && (
-                  <div
-                    key={area}
-                    className="rounded-full bg-cyan-400 p-1 pr-2 pl-2">
-                    {area}
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
                   </div>
                 )
             )}
@@ -225,7 +208,6 @@ export default function ToDoItem({ event, task, reminder, onEventModified }) {
           onEdit={onEdit}
           setOnEdit={setOnEdit}
           event={event}
-          task={task}
           onEventModified={onEventModified}
         />
       )}

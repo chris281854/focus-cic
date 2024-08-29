@@ -1,8 +1,10 @@
 import { React, useState, useEffect } from "react"
 import DayDiv from "./DayDiv"
 import dayjs from "dayjs"
+import NewEvent from "../../NewEvent"
+import EditItem from "../../EditItem"
 
-export default function MonthView({ events }) {
+export default function MonthView({ events, onEventCreated }) {
   const monthName = [
     "Enero",
     "Febrero",
@@ -33,21 +35,19 @@ export default function MonthView({ events }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date(`${year}-${month + 1}-${day}`)
   )
-  const [selectedDiv, setSelectedDiv] = useState(null)
+  const [selectedDiv, setSelectedDiv] = useState(null) //Debe eliminarse
+  const [eventsInThisMonth, setEventsInThisMonth] = useState([])
 
-  // const handleSelectedDiv = (dataDate) => {
-  //   setSelectedDiv(() => {
-  //     if (dataDate === selectedDiv) {
-  //       return null
-  //     } else {
-  //       setDay(() => parseInt(dataDate.split("-")[2]))
-  //       // console.log(day)
-  //       return dataDate
-  //     }
-  //   })
-  // }
+  useEffect(() => {
+    const eventsInMonth = events.filter((event) => {
+      const eventMonth = dayjs(event.date).format("M")
+      const thisMonth = dayjs(selectedDate).format("M")
+      return eventMonth === thisMonth
+    })
 
-  // Fechas en encabezados
+    setEventsInThisMonth(eventsInMonth)
+  }, [events, selectedDate])
+
   const handleSelectedDiv = (dataDate) => {
     setSelectedDiv((prevSelectedDiv) => {
       if (dataDate === prevSelectedDiv) {
@@ -130,13 +130,11 @@ export default function MonthView({ events }) {
   const getMatchingEvents = (events, dataDate) => {
     // Extrae año, mes y día de dataDate
     const [year, month, day] = dataDate.split("-").map(Number)
-
     // Ajusta el mes para que coincida con la indexación de 1-12
     const adjustedDataDate = `${year}-${month + 1}-${day}`
-
     const matchingEvents = events.filter((event) => {
       const eventDate = dayjs(event.date).format("YYYY-M-D")
-      console.log(eventDate, adjustedDataDate)
+      // console.log(eventDate, adjustedDataDate)
       return eventDate === adjustedDataDate
     })
 
@@ -147,11 +145,8 @@ export default function MonthView({ events }) {
   const monthDayCalList = []
   const monthDays = []
   const divClassname = {
-    actualDays: "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden",
-    prevDays:
-      "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
-    nextDays:
-      "celda row-span-1 h-36 col-span-1 border p-2 overflow-hidden opacity-50",
+    prevDays: "row-span-1 col-span-1 border p-1 h-full opacity-50",
+    nextDays: "row-span-1 col-span-1 border p-1 h-full opacity-50",
     selectedDay: "",
   }
 
@@ -189,6 +184,7 @@ export default function MonthView({ events }) {
         currentDate={currentDate}
         selectedDiv={selectedDiv}
         handleSelectedDiv={handleSelectedDiv}
+        onEventCreated={onEventCreated}
       />
     )
   }
@@ -228,68 +224,133 @@ export default function MonthView({ events }) {
     setDay(parsedDay)
   }
 
+  const [toggleAside, setToggleAside] = useState(true)
+  const handleToggleAside = () => {
+    setToggleAside(!toggleAside)
+  }
+  //NewEvent - EditItem variables
+  const [toggleNewEvent, setToggleNewEvent] = useState(false)
+  const [onEdit, setOnEdit] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const toggleEditEventVisibility = (event) => {
+    setSelectedEvent(event)
+    setOnEdit(true)
+  }
+  function handleNewEvent(dataDate) {
+    const eventTime = dayjs(`${dataDate} 8:00am`).format("YYYY-MM-DD HH:mm")
+    setTimedEvent(eventTime)
+    setToggleNewEvent(true)
+    console.log(eventTime)
+  }
+
   return (
     <>
-      <div className="container_calendar">
-        <div className="header_calendar flex">
-          <p className="text-xl flex self-center pr-3">Today:</p>
-          <h1 id="text_day" className="font-bold">
-            {textDay}
-          </h1>
-          <h5 id="text_month" className="flex self-center pl-4 text-xl">
-            {currentTextMonth} {currentYear}
-          </h5>
-        </div>
-        <div className="body_calendar border-2">
-          <div className="spans-div flex justify-center content-center">
-            <span className="p-2"> {textMonth} </span>
-            <span className="p-2"> {textYear} </span>
-          </div>
-          <div className="container_change_date flex items-center justify-center">
-            <button
-              className="last_year rounded-full bg-transparent selection:outline-none m-1 focus:outline-none"
-              onClick={getPrevYear}>
-              &lt;
-            </button>
-            <button
-              className="last_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getPrevMonth}>
-              &lt;
-            </button>
-            <div className="min-w-40 text-center">
-              <input
-                value={datePickValue.toISOString().split("T")[0]}
-                onChange={handleDatePickChange}
-                type="date"
-                name="date-input"
-                id="date-input"
-                className="border-none outline-none bg-transparent text-white"
-              />
+      {toggleNewEvent && (
+        <NewEvent setToggleNewEvent={setToggleNewEvent}></NewEvent>
+      )}
+      {onEdit && (
+        <EditItem
+          onEdit={onEdit}
+          setOnEdit={setOnEdit}
+          event={selectedEvent}
+          onEventModified={onEventCreated}
+        />
+      )}
+      <div className="flex">
+        <div className="relative grid grid-flow-row grid-rows-[80px,30px,100%] max-h-screen h-screen w-full overflow-y-scroll">
+          <header className="flex content-center items-center gap-1">
+            <div className="flex ml-auto">
+              <span className="text-2xl">
+                {" "}
+                {textMonth} {textYear}{" "}
+              </span>
             </div>
-            <button
-              className="next_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getNextMonth}>
-              &gt;
-            </button>
-            <button
-              className="next_year rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getNextYear}>
-              &gt;
-            </button>
+            <section className="flex items-center justify-center">
+              <button
+                className="last_year rounded-full bg-transparent selection:outline-none m-1 focus:outline-none"
+                onClick={getPrevYear}>
+                &lt;&lt;
+              </button>
+              <button
+                className="last_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+                onClick={getPrevMonth}>
+                &lt;
+              </button>
+              <div className="min-w-40 text-center">
+                <input
+                  value={datePickValue.toISOString().split("T")[0]}
+                  onChange={handleDatePickChange}
+                  type="date"
+                  name="date-input"
+                  id="date-input"
+                  className="border-none outline-none bg-transparent text-white"
+                />
+              </div>
+              <button
+                className="rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+                onClick={getNextMonth}>
+                &gt;
+              </button>
+              <button
+                className="next_year rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
+                onClick={getNextYear}>
+                &gt;&gt;
+              </button>
+            </section>
+          </header>
+          <div className="grid grid-rows-1 grid-cols-7 text-center">
+            {["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"].map((day) => (
+              <span key={day}>{day}</span>
+            ))}
           </div>
-          <div className="container_weedays grid grid-rows-1 grid-cols-7 text-center">
-            <span className="week_days_item">DOM</span>
-            <span className="week_days_item">LUN</span>
-            <span className="week_days_item">MAR</span>
-            <span className="week_days_item">MIÉ</span>
-            <span className="week_days_item">JUE</span>
-            <span className="week_days_item">VIE</span>
-            <span className="week_days_item">SÁB</span>
-          </div>
-          <div className="grid grid-rows-5 grid-cols-7 grid-flow-row border-2 text-xs">
+          <div className="grid grid-rows-6 grid-cols-7 grid-flow-row text-xs">
             {monthDayCalList}
           </div>
         </div>
+        <aside
+          className={`${
+            !toggleAside ? "hidden" : "w-60 min-w-60"
+          } p-4 shadow-lg overflow-y-auto h-screen`}>
+          <header className="text-lg font-bold mb-4 text-gray-800 dark:text-white">
+            Eventos y Tareas
+          </header>
+          <main>
+            {eventsInThisMonth.length > 0 ? (
+              <ul>
+                {eventsInThisMonth.map((event) => (
+                  <li
+                    key={event.event_id}
+                    onClick={() => toggleEditEventVisibility(event)}
+                    className="mb-3 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md"
+                    style={{
+                      backgroundColor: event.life_areas[0]?.color || "#808080",
+                    }}>
+                    <h3 className="text-md font-semibold dark:text-white">
+                      {event.name}
+                    </h3>
+                    <div className="text-sm text-gray-950 mt-2">
+                      <p className="font-bold">
+                        {dayjs(event.date).format("dddd")}
+                      </p>
+                      <p className="text-gray-950">
+                        {dayjs(event.date).format("h:mm A")}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No hay tareas para este día.</p>
+            )}
+          </main>
+        </aside>
+        <button
+          className={`${
+            toggleAside ? "" : "text-accent"
+          } bg-blue-950 fixed z-10 bottom-3 right-5 rounded-full`}
+          onClick={handleToggleAside}>
+          {toggleAside ? <p>&gt;</p> : <p>&lt;</p>}
+        </button>
       </div>
     </>
   )

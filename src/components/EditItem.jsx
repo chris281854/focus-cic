@@ -3,20 +3,20 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { useUser } from "../context/UserContext"
 import dayjs from "dayjs"
+import { parse } from "uuid"
 
 export default function EditItem({
   onEdit,
   setOnEdit,
   event,
-  task,
   onEventModified,
 }) {
   const { user, lifeAreas } = useUser()
-  const [state, setState] = useState(0)
+  const [state, setState] = useState(event?.state)
   //Eventos
   const [eventId, setEventId] = useState(event?.event_id)
   const [eventDate, setEventDate] = useState(
-    dayjs(event?.date).format("YYYY-MM-DDThh:mm")
+    dayjs(event?.date).format("YYYY-MM-DD hh:mm")
   )
   const [endDate, setEndDate] = useState(null)
   const [eventName, setEventName] = useState(event?.name ?? "")
@@ -29,10 +29,14 @@ export default function EditItem({
   const [eventMail, setEventMail] = useState(event?.reminder_id ? true : false)
   const [eventReminderId, setEventReminderId] = useState(event?.reminder_id)
   const [eventLifeArea, setEventLifeArea] = useState(event?.life_areas)
-  const [selectedAreas, setSelectedAreas] = useState([])
+  const [selectedAreas, setSelectedAreas] = useState(
+    event.life_areas
+      .map((area) => area.life_area_id)
+      .filter((id) => id !== null)
+  )
 
   const [eventReminderDate, setEventReminderDate] = useState(
-    event.reminder_date
+    event?.reminder_date || undefined
   )
 
   const toggleEditVisibility = () => {
@@ -63,6 +67,7 @@ export default function EditItem({
         return [...prevSelectedAreas, value]
       }
     })
+    console.log(selectedAreas)
   }
 
   const handleEventUpdate = async (e) => {
@@ -74,7 +79,7 @@ export default function EditItem({
       endDate: endDate || eventDate,
       eventName,
       category,
-      lifeAreaIds: selectedAreas,
+      lifeAreaIds: selectedAreas || null,
       eventDate,
       eventPriority,
       eventDescription,
@@ -101,33 +106,16 @@ export default function EditItem({
       })
   }
 
-  const handleTaskUpdate = async (e) => {
-    e.preventDefault()
-    axios
-      .patch(`http://localhost:3001/api/task/update`, {
-        taskReminderDate: addTaskReminder ? taskReminderDate : null,
-        state,
-        endDate: endDate || null,
-        taskName,
-        taskCategory,
-        taskDate,
-        taskPriority,
-        taskDescription,
-        userId: user.user_id,
-        taskMail,
-        taskId: event.event_id,
-        taskReminderId,
-      })
-      .then((response) => {
-        console.log("Item actualizado: ", response.data)
-        reset()
+  //Close with esc key
+  useEffect(() => {
+    const close = (e) => {
+      if (e.keyCode === 27) {
         toggleEditVisibility()
-        onEventModified()
-      })
-      .catch((error) => {
-        console.error("Error al actualizar el item: ", error)
-      })
-  }
+      }
+    }
+    window.addEventListener("keydown", close)
+    return () => window.removeEventListener("keydown", close)
+  }, [])
 
   return (
     <>
@@ -288,12 +276,15 @@ export default function EditItem({
                 {lifeAreas.map((area) => (
                   <button
                     key={area.life_area_id}
-                    onClick={() => handleSeleccion(area.life_area_id)}
-                    className={`block w-40 text-center p-2 rounded-lg hover:border-blue-700 m-2 border-none outline-none transition duration-300 ${
-                      selectedAreas.includes(area.life_area_id)
-                        ? "bg-blue-600"
-                        : "bg-gray-700"
-                    }`}>
+                    onClick={() => handleSeleccion(parseInt(area.life_area_id))}
+                    className={`block w-40 text-center p-2 rounded-lg m-2 border-none transition duration-300 text-neutral-950 focus:outline-none ${
+                      selectedAreas.includes(parseInt(area.life_area_id))
+                        ? "opacity-100 text-opacity-100"
+                        : "opacity-50 text-opacity-75"
+                    }`}
+                    style={{
+                      backgroundColor: `${area.color}`,
+                    }}>
                     {area.name}
                   </button>
                 ))}

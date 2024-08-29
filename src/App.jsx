@@ -13,8 +13,16 @@ import Register from "./components/pages/Register"
 import ProtectedRoute from "./components/ProtectedRoute"
 import "@fortawesome/fontawesome-free/css/all.min.css"
 import Habits from "./components/pages/home/habits/Habits"
+import dayjs from "dayjs"
+import es from "dayjs/locale/es"
 
 function App() {
+  dayjs.locale("es")
+  dayjs.locale({
+    ...es,
+    weekStart: 0,
+  })
+
   return (
     <>
       <UserProvider>

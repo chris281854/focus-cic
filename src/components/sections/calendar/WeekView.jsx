@@ -1,363 +1,228 @@
-import { React, useState, useEffect } from "react"
-import DayDiv from "./DayDiv"
+import { useState, useEffect, useMemo } from "react"
+import dayjs from "dayjs"
+// import "dayjs/locale/es"
+// import isoWeek from "dayjs/plugin/isoWeek"
+import WeekDayDiv from "./WeekDayDiv"
+import EditItem from "../../EditItem"
+import NewEvent from "../../NewEvent"
 
-export default function WeekView() {
-  const monthName = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ]
-  //Variables de fecha
-  const now = new Date()
+export default function WeekView({ events, onEventCreated }) {
+  const today = dayjs().locale("es").format("YYYY-MM-DD")
 
-  const currentDay = now.getDate()
-  const currentMonth = now.getMonth()
-  const currentYear = now.getFullYear()
+  const [selectedDate, setSelectedDate] = useState(dayjs())
+  const startOfWeek = selectedDate.startOf("week") // domingo es el inicio de semana
+  const weekEnd = dayjs(selectedDate).endOf("week")
 
-  const [day, setDay] = useState(currentDay)
-  const [month, setMonth] = useState(now.getMonth())
-  const [year, setYear] = useState(now.getFullYear())
-
-  //Datos de la Tabla:
-  const currentDate = `${currentYear}-${currentMonth}-${currentDay}`
-  const [selectedDate, setSelectedDate] = useState(
-    new Date(`${year}-${month + 1}-${day}`)
+  const daysOfWeek = Array.from({ length: 7 }).map((_, i) =>
+    startOfWeek.add(i, "day")
   )
-  const [selectedDiv, setSelectedDiv] = useState(null)
-  const handleSelectedDiv = (dataDate) => {
-    setSelectedDiv(() => {
-      if (dataDate === selectedDiv) {
-        return null
-      } else {
-        setDay(() => parseInt(dataDate.split("-")[2]))
-        return dataDate
-      }
+  const [content, setcontent] = useState([])
+
+  const goToNextWeek = () => setSelectedDate(selectedDate.add(1, "week"))
+  const goToNextMonth = () => setSelectedDate(selectedDate.add(1, "month"))
+  const goToNextYear = () => setSelectedDate(selectedDate.add(1, "year"))
+  const goToPreviousWeek = () =>
+    setSelectedDate(selectedDate.subtract(1, "week"))
+  const goToPreviousMonth = () =>
+    setSelectedDate(selectedDate.subtract(1, "month"))
+  const goToPreviousYear = () =>
+    setSelectedDate(selectedDate.subtract(1, "year"))
+
+  const [toggleAside, setToggleAside] = useState(true)
+  const [toggleNewEvent, setToggleNewEvent] = useState(false)
+
+  const hours = Array.from({ length: 24 }, (_, i) => {
+    const hour = i % 12 === 0 ? 12 : i % 12 // Convierte 0 en 12 y mantiene el resto en formato 12h
+    const period = i < 12 ? "am" : "pm" // Determina si es AM o PM
+    return `${hour}:00 ${period}` // Devuelve la hora en formato 12h con AM o PM
+  })
+  const handleDivClick = (event) => {
+    setSelectedDate(dayjs(event.currentTarget.dataset.date))
+  }
+
+  const handleDateInputChange = (e) => {
+    const newDate = dayjs(e.target.value)
+    if (newDate.isValid() && !newDate.isSame(selectedDate, "day")) {
+      setSelectedDate(newDate)
+    }
+  }
+
+  const getMatchingEvents = (day, events) => {
+    return events.filter((event) => dayjs(event.date).isSame(day, "day"))
+  }
+  const getEventsInWeek = () => {
+    return events.filter((event) => {
+      const eventDate = dayjs(event.date)
+      return eventDate.isAfter(startOfWeek) && eventDate.isBefore(weekEnd)
     })
   }
+  const eventsThisWeek = getEventsInWeek()
 
-  const monthDayCalList = []
-  const monthDays = []
-
-  // Fechas en encabezados
-  let textMonth = monthName[month]
-  let currentTextMonth = monthName[currentMonth]
-  let textDay = day
-  let textYear = year
-
-  //UseEffect para la actualización de los valores de selectedDate:
-  useEffect(() => {
-    const newDate = new Date(`${year}-${month + 1}-${day}`)
-    setSelectedDate(newDate)
-    setDatePickValue(newDate)
-  }, [year, month, day])
-
-  function getNextMonth() {
-    if (month !== 11) setMonth(month + 1)
-    else {
-      setYear(year + 1)
-      setMonth(0)
-    }
-    setWeek(weekOfMonth.primera)
-    setSelectedWeek(1)
+  const handleToggleAside = () => {
+    setToggleAside(!toggleAside)
   }
 
-  function getPrevMonth() {
-    if (month !== 0) setMonth(month - 1)
-    else {
-      setYear(year - 1)
-      setMonth(11)
-    }
-  }
-  function getPrevYear() {
-    setYear(year - 1)
-  }
-  function getNextYear() {
-    setYear(year + 1)
-  }
+  const [onEdit, setOnEdit] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
-  //Calcula el primer día de la semana
-  function startDay() {
-    let start = new Date(year, month, 1)
-    return start.getDate() - 1 === -1 ? 6 : start.getDay()
-  }
-
-  function leapYear() {
-    return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0)
-  }
-
-  function getTotalDays(monthValue) {
-    if (monthValue === -1) monthValue = 11
-    if (
-      monthValue == 3 ||
-      monthValue == 5 ||
-      monthValue == 8 ||
-      monthValue == 10
-    )
-      return 30
-    else if (
-      monthValue == 0 ||
-      monthValue == 2 ||
-      monthValue == 4 ||
-      monthValue == 6 ||
-      monthValue == 7 ||
-      monthValue == 9 ||
-      monthValue == 11
-    )
-      return 31
-    else return leapYear() ? 29 : 28
-  }
-
-  // Días del mes pasado
-  for (let i = startDay(); i > 0; i--) {
-    const dayOfPrevMonth = getTotalDays(month - 1) - (i - 1)
-
-    monthDayCalList.push(
-      <div
-        key={`prev-${dayOfPrevMonth}`}
-        className="celda row-span-1 col-span-1 border p-2 opacity-50">
-        <p> {dayOfPrevMonth} </p>
-        {/* <p>{content}</p> */}
-        {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-      </div>
-    )
-  }
-  // Días del mes actual:
-  for (let i = 1; i <= getTotalDays(month); i++) {
-    monthDays.push({ id: i, content: `Descripción para el día ${i}` })
-  }
-  for (let i = 0; i < monthDays.length; i++) {
-    const { id, content } = monthDays[i]
-    const dataDate = `${year}-${month}-${id}`
-
-    monthDayCalList.push(
-      <DayDiv
-        key={id}
-        id={id}
-        content={content}
-        dataDate={dataDate}
-        currentDate={currentDate}
-        selectedDiv={selectedDiv}
-        handleSelectedDiv={handleSelectedDiv}
-      />
-    )
-  }
-
-  //Días del mes siguiente
-  const daysInNextMonth = (() => {
-    return 7 * 5 - monthDayCalList.length
-  })()
-
-  if (daysInNextMonth >= 0) {
-    for (let i = 1; i <= daysInNextMonth; i++) {
-      const dataDate = `${year}-${month + 1}-${i}`
-
-      monthDayCalList.push(
-        <div
-          key={`next-${i}`}
-          data-date={dataDate}
-          className={`celda row-span-1 col-span-1 border p-2 next-month-day opacity-50`}>
-          <p>{i}</p>
-          {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-        </div>
-      )
-    }
-  }
-
-  //Manejar semanas
-  const weekOfMonth = {
-    primera: monthDayCalList.slice(0, 7),
-    segunda: monthDayCalList.slice(7, 14),
-    tercera: monthDayCalList.slice(14, 21),
-    cuarta: monthDayCalList.slice(21, 28),
-    quinta: monthDayCalList.slice(28, 35),
-  }
-  const [week, setWeek] = useState([])
-
-  // //Primera render
-  useEffect(() => {
-    setWeek(weekOfMonth.primera)
-  }, [])
-
-  // Semana correspondiente con la fecha actual, establecida por defecto (no funciona)
-  // useEffect(() => {
-  //   const currentWeekKey = Object.keys(weekOfMonth).find((key) =>
-  //     weekOfMonth[key].some((day) => day.props["data-date"] === currentDate)
-  //   )
-  //   setWeek(weekOfMonth[currentWeekKey])
-  // }, [])
-
-  const [selectedWeek, setSelectedWeek] = useState(1)
-
-  async function getPrevWeek() {
-    if (selectedWeek > 1) {
-      switch (selectedWeek) {
-        case 5:
-          setWeek(weekOfMonth.cuarta)
-          setSelectedWeek(4)
-          break
-        case 4:
-          setWeek(weekOfMonth.tercera)
-          setSelectedWeek(3)
-          break
-        case 3:
-          setWeek(weekOfMonth.segunda)
-          setSelectedWeek(2)
-          break
-        case 2:
-          setWeek(weekOfMonth.primera)
-          setSelectedWeek(1)
-          break
-      }
-    } else {
-      await getPrevMonth()
-      setWeek(weekOfMonth.quinta)
-      setSelectedWeek(5)
-    }
-  }
-
-  function getNextWeek() {
-    if (selectedWeek <= 4) {
-      switch (selectedWeek) {
-        case 1:
-          setWeek(weekOfMonth.segunda)
-          setSelectedWeek(2)
-          break
-        case 2:
-          setWeek(weekOfMonth.tercera)
-          setSelectedWeek(3)
-          break
-        case 3:
-          setWeek(weekOfMonth.cuarta)
-          setSelectedWeek(4)
-          break
-        case 4:
-          setWeek(weekOfMonth.quinta)
-          setSelectedWeek(5)
-          break
-      }
-    } else {
-      getNextMonth()
-    }
-  }
-
-  //Date picker:
-  const [datePickValue, setDatePickValue] = useState(selectedDate)
-  const handleDatePickChange = (event) => {
-    const date = event.target.value
-
-    //parsear para obtener año, mes y día por separado
-    const parsedDate = new Date(date)
-    const parsedYear = parsedDate.getFullYear()
-    const parsedMonth = parsedDate.getMonth()
-    const parsedDay = parsedDate.getDate() + 1
-
-    setYear(parsedYear)
-    setMonth(parsedMonth)
-    setDay(parsedDay)
+  const toggleEditEventVisibility = (event) => {
+    setSelectedEvent(event)
+    setOnEdit(true)
   }
 
   return (
     <>
-      <div className="container_calendar">
-        <div className="header_calendar flex">
-          <h1 id="text_day" className="font-bold">
-            {textDay}
-          </h1>
-          <h5 id="text_month" className="flex self-center pl-4 text-xl">
-            {currentTextMonth} {currentYear}
-          </h5>
-        </div>
-        <div className="body_calendar w-full border-2 h-fit">
-          <div className="container_details">
-            <div className="detail_1">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
+      {toggleNewEvent && (
+        <NewEvent setToggleNewEvent={setToggleNewEvent}></NewEvent>
+      )}
+      {onEdit && (
+        <EditItem
+          onEdit={onEdit}
+          setOnEdit={setOnEdit}
+          event={selectedEvent}
+          onEventModified={onEventCreated}
+        />
+      )}
+      <div className="flex">
+        <article className="overflow-y-scroll h-screen">
+          <article className="w-full h-full min-h-screen">
+            <section className="backdrop-blur-2xl dark:bg-bg-main-color bg-bg-main-color/50 rounded-b-lg">
+              <section className="flex items-center justify-end pt-3 mr-4">
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToPreviousYear()}>
+                  &lt;&lt;&lt;
+                </button>
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToPreviousMonth()}>
+                  &lt;&lt;
+                </button>
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToPreviousWeek()}>
+                  &lt;
+                </button>
+
+                <input
+                  value={selectedDate.format("YYYY-MM-DD")}
+                  onChange={handleDateInputChange}
+                  type="date"
+                  className="border-none outline-none bg-transparent text-white"
+                />
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToNextWeek()}>
+                  &gt;
+                </button>
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToNextMonth()}>
+                  &gt;&gt;
+                </button>
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToNextYear()}>
+                  &gt;&gt;&gt;
+                </button>
+              </section>
+              <section className="grid grid-cols-8 h-8 pt-3 text-center top-[0px] z-10">
+                <button
+                  className="grid-rows-1 z-10 bg-slate-600 m-2"
+                  onClick={() => {
+                    setToggleNewEvent(true)
+                  }}>
+                  Nuevo Evento
+                </button>
+                {["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"].map(
+                  (day) => (
+                    <span key={day}>{day}</span>
+                  )
+                )}
+              </section>
+              <section className="grid grid-cols-8 py-2 z-10  border-b">
+                <span></span> {/* Placeholder para el primer espacio */}
+                {daysOfWeek.map((day, index) => (
+                  <span
+                    key={index}
+                    className="rounded-full h-12 w-12 text-center content-center bg-blue-900 justify-self-center">
+                    {day.format("D")} {/* Día del mes */}
+                  </span>
+                ))}
+              </section>
+            </section>
+            <div className="grid grid-cols-8">
+              <div className="grid grid-cols-1 max-w-28 max-h-12">
+                {hours.map((hour, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-end border-r p-3 border-b-gray-300 dark:border-b-gray-700 h-12 text-gray-600 dark:text-gray-300">
+                    {hour}
+                  </div>
+                ))}
               </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
+              {daysOfWeek.map((day, index) => {
+                const matchingEvents = getMatchingEvents(day, events)
+                return (
+                  <WeekDayDiv
+                    today={today}
+                    key={index}
+                    day={day.format("YYYY-MM-DD")}
+                    onClick={handleDivClick}
+                    content={content}
+                    selectedDate={selectedDate.format("YYYY-MM-DD")}
+                    matchingEvents={matchingEvents}
+                    onEventCreated={onEventCreated}
+                  />
+                )
+              })}
             </div>
-            <div className="detail_2">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="container_change_date flex items-center justify-center">
-            <button
-              className="last_year rounded-full bg-transparent selection:outline-none m-1 focus:outline-none"
-              onClick={getPrevYear}>
-              &lt;
-            </button>
-            <button
-              className="last_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getPrevMonth}>
-              &lt;
-            </button>
-            <button
-              className="prev_week rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getPrevWeek}>
-              &lt;
-            </button>
-            <div className="min-w-40 text-center">
-              <input
-                value={datePickValue.toISOString().split("T")[0]}
-                onChange={handleDatePickChange}
-                type="date"
-                name="date-input"
-                id="date-input"
-                className="border-none outline-none bg-transparent text-white"
-              />
-            </div>
-            <button
-              className="next_week rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getNextWeek}>
-              &gt;
-            </button>
-            <button
-              className="next_month rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getNextMonth}>
-              &gt;
-            </button>
-            <button
-              className="next_year rounded-full bg-transparent focus:outline-1 selection:outline-none m-1 focus:outline-none"
-              onClick={getNextYear}>
-              &gt;
-            </button>
-          </div>
-          <div className="container_weedays grid grid-rows-1 grid-cols-7 text-center">
-            <span className="week_days_item">DOM</span>
-            <span className="week_days_item">LUN</span>
-            <span className="week_days_item">MAR</span>
-            <span className="week_days_item">MIÉ</span>
-            <span className="week_days_item">JUE</span>
-            <span className="week_days_item">VIE</span>
-            <span className="week_days_item">SÁB</span>
-          </div>
-          <div className="grid grid-rows-5 grid-cols-7 grid-flow-row w-full border-2">
-            {week}
-          </div>
-        </div>
+          </article>
+        </article>
+        <aside
+          className={`${
+            !toggleAside ? "hidden" : "w-60 min-w-60"
+          } p-4 shadow-lg overflow-y-auto h-screen`}>
+          <header className="text-lg font-bold mb-4 text-gray-800 dark:text-white">
+            Eventos y Tareas
+          </header>
+          <main>
+            {eventsThisWeek.length > 0 ? (
+              <ul>
+                {eventsThisWeek.map((event) => (
+                  <li
+                    key={event.event_id}
+                    onClick={() => toggleEditEventVisibility(event)}
+                    className="mb-3 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md"
+                    style={{
+                      backgroundColor: event.life_areas[0]?.color || "#808080",
+                    }}>
+                    <h3 className="text-md font-semibold dark:text-white">
+                      {event.name}
+                    </h3>
+                    <div className="text-sm text-gray-950 mt-2">
+                      <p className="font-bold">
+                        {dayjs(event.date).format("dddd")}
+                      </p>
+                      <p className="text-gray-950">
+                        {dayjs(event.date).format("h:mm A")}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No hay tareas para este día.</p>
+            )}
+          </main>
+        </aside>
+        <button
+          className={`${
+            toggleAside ? "" : "text-accent"
+          } bg-blue-950 fixed z-10 bottom-3 right-5 rounded-full`}
+          onClick={handleToggleAside}>
+          {toggleAside ? <p>&gt;</p> : <p>&lt;</p>}
+        </button>
       </div>
     </>
   )

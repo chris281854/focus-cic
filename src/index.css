@@ -89,9 +89,9 @@
 }
 
 @layer base {
-  
   * {
     @apply border-border;
+    @apply scrollbar dark:scrollbar-thumb-slate-800 scrollbar-thumb-slate-600;
   }
   body {
     @apply bg-background text-foreground;
@@ -160,10 +160,6 @@ button {
 }
 button:hover {
   border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (prefers-color-scheme: light) {

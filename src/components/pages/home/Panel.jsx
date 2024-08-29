@@ -1,5 +1,6 @@
 import { NavLink, useMatch } from "react-router-dom"
 import React from "react"
+import { useState, useEffect } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   faHouse,
@@ -9,7 +10,12 @@ import {
   faFolder,
   faChevronLeft,
   faChevronRight,
+  faSun,
+  faMoon,
+  faArrowRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons"
+import { Moon, Sun } from "lucide-react"
+import { useUser } from "../../../context/UserContext"
 
 export default function Panel({ panelVisibility, setPanelVisibility }) {
   const wtActiveLinks = "bg-slate-500 text-accent"
@@ -20,11 +26,34 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
   const contactsMatch = useMatch("/home/contacts")
   const habitsMatch = useMatch("home/habits")
   const settingsMatch = useMatch("/home/settings")
+  const { user, logout } = useUser()
+  const handleLogOut = () => {
+    logout()
+  }
+
+  //dark mode
+  const [darkMode, setDarkMode] = useState(() => {
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark"
+    }
+    return "light"
+  })
+
+  const handleDarkMode = () => {
+    setDarkMode((prevMode) => (prevMode === "light" ? "dark" : "light"))
+  }
+  useEffect(() => {
+    if (darkMode === "dark") {
+      document.querySelector("html").classList.add("dark")
+    } else {
+      document.querySelector("html").classList.remove("dark")
+    }
+  }, [darkMode])
 
   return (
     <nav
       className={
-        "bg-bg-main-color/95 dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none " +
+        "flex-1 bg-bg-main-color/95 dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen max-w-14 flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none " +
         (panelVisibility ? "w-56 min-w-56" : "w-14 min-w-14")
       }>
       <button
@@ -110,6 +139,30 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
           Configuración
         </div>
       </NavLink>
+      <section className="mt-auto mb-2">
+        <button
+          className={`w-full bg-transparent text-white hover:text-blue-700 transition-all duration-300 content-center`}
+          onClick={handleDarkMode}>
+          <FontAwesomeIcon icon={darkMode === "light" ? faMoon : faSun} />
+        </button>
+        <NavLink
+          onClick={handleLogOut}
+          to="/login"
+          className={`h-14 transition-all duration-300 flex rounded-2xl`}>
+          <div className="flex h-full min-w-14 justify-center items-center">
+            <FontAwesomeIcon icon={faArrowRightFromBracket} />
+          </div>
+          <div
+            className={`content-center ${
+              panelVisibility
+                ? "opacity-100 mr-2 overflow-hidden"
+                : "opacity-0 transition-all duration-200"
+            }
+            `}>
+            Cerrar Sesión
+          </div>
+        </NavLink>
+      </section>
     </nav>
   )
 }

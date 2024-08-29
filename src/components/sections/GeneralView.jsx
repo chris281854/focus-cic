@@ -93,46 +93,42 @@ export default function GeneralView() {
     completed: events.filter((event) => event.state === 0),
     overdue: events.filter((event) => event.state === 1),
     today: events.filter((event) => event.state === 2),
-<<<<<<< HEAD
     tomorrow: events.filter((event) => event.state === 6),
-=======
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
     thisWeek: events.filter((event) => event.state === 3),
     thisMonth: events.filter((event) => event.state === 4),
     later: events.filter((event) => event.state === 5),
   }
-<<<<<<< HEAD
   const hasOverdueEvents = categorizedEvents.overdue.length > 0
+  const hasTomorrowEvents = categorizedEvents.tomorrow.length > 0
+  const hasThisWeekEvents = categorizedEvents.thisWeek.length > 0
+  const hasThisMonthEvents = categorizedEvents.thisMonth.length > 0
+  const hasLaterEvents = categorizedEvents.later.length > 0
 
-=======
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
   const toggleSection = (section) => {
     setExpandedSections((prevState) => ({
       ...prevState,
       [section]: !prevState[section],
     }))
   }
+  const [toggleNewEvent, setToggleNewEvent] = useState(false)
 
   return (
-<<<<<<< HEAD
     <div className="flex relative p-5 flex-col w-full select-none">
-=======
-    <div className="flex relative p-5 flex-col w-full">
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
       <h2>Tareas y Eventos</h2>
       <div className="flex p-4">
-        <NewEvent onEventCreated={handleTableModified}></NewEvent>
+        <button
+          className="new-event bg-slate-800 m-2"
+          onClick={() => (setToggleNewEvent(true))}>
+          Nuevo evento
+        </button>
+        {toggleNewEvent && (
+          <NewEvent onEventCreated={handleTableModified} setToggleNewEvent={setToggleNewEvent}></NewEvent>
+        )}
         <NewReminder onReminderCreated={handleTableModified}></NewReminder>
       </div>
-<<<<<<< HEAD
       <div className="todo-list w-full">
         {hasOverdueEvents && (
-=======
-
-      <div className="todo-list w-full">
-        {expandedSections.overdue && (
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
-          <div className="mb-6 transition-all duration-300">
+          <div className="mb-6">
             <h3
               onClick={() => toggleSection("overdue")}
               className="font-bold bg-gray-900 p-2 rounded-md">
@@ -150,52 +146,49 @@ export default function GeneralView() {
           </h3>
           {expandedSections.today && generateEvents(categorizedEvents.today)}
         </div>
-        <div className="mb-6">
-          <h3
-<<<<<<< HEAD
-            onClick={() => toggleSection("tomorrow")}
-            className="font-bold bg-gray-900 p-2 rounded-md">
-            Mañana {expandedSections.tomorrow ? "▲" : "▼"}
-          </h3>
-          {expandedSections.tomorrow && generateEvents(categorizedEvents.tomorrow)}
-        </div>
-        <div className="mb-6">
-          <h3
-            onClick={() => toggleSection("thisWeek")}
-            className="font-bold bg-gray-900 p-2 rounded-md">
-            Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
-          </h3>
-          {expandedSections.thisWeek &&
-            generateEvents(categorizedEvents.thisWeek)}
-        </div>
-        <div className="mb-6">
-          <h3
-=======
-            onClick={() => toggleSection("thisWeek")}
-            className="font-bold bg-gray-900 p-2 rounded-md">
-            Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
-          </h3>
-          {expandedSections.thisWeek &&
-            generateEvents(categorizedEvents.thisWeek)}
-        </div>
-        <div className="mb-6">
-          <h3
->>>>>>> b699f55b392063a13a4d15e985bf21dcc46f2460
-            onClick={() => toggleSection("thisMonth")}
-            className="font-bold bg-gray-900 p-2 rounded-md">
-            Este Mes {expandedSections.thisMonth ? "▲" : "▼"}
-          </h3>
-          {expandedSections.thisMonth &&
-            generateEvents(categorizedEvents.thisMonth)}
-        </div>
-        <div className="mb-6">
-          <h3
-            onClick={() => toggleSection("later")}
-            className="font-bold bg-gray-900 p-2 rounded-md">
-            Más Adelante {expandedSections.later ? "▲" : "▼"}
-          </h3>
-          {expandedSections.later && generateEvents(categorizedEvents.later)}
-        </div>
+        {hasTomorrowEvents && (
+          <div className="mb-6">
+            <h3
+              onClick={() => toggleSection("tomorrow")}
+              className="font-bold bg-gray-900 p-2 rounded-md">
+              Mañana {expandedSections.tomorrow ? "▲" : "▼"}
+            </h3>
+            {expandedSections.tomorrow &&
+              generateEvents(categorizedEvents.tomorrow)}
+          </div>
+        )}
+        {hasThisWeekEvents && (
+          <div className="mb-6">
+            <h3
+              onClick={() => toggleSection("thisWeek")}
+              className="font-bold bg-gray-900 p-2 rounded-md">
+              Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
+            </h3>
+            {expandedSections.thisWeek &&
+              generateEvents(categorizedEvents.thisWeek)}
+          </div>
+        )}
+        {hasThisMonthEvents && (
+          <div className="mb-6">
+            <h3
+              onClick={() => toggleSection("thisMonth")}
+              className="font-bold bg-gray-900 p-2 rounded-md">
+              Este Mes {expandedSections.thisMonth ? "▲" : "▼"}
+            </h3>
+            {expandedSections.thisMonth &&
+              generateEvents(categorizedEvents.thisMonth)}
+          </div>
+        )}
+        {hasLaterEvents && (
+          <div className="mb-6">
+            <h3
+              onClick={() => toggleSection("later")}
+              className="font-bold bg-gray-900 p-2 rounded-md">
+              Más Adelante {expandedSections.later ? "▲" : "▼"}
+            </h3>
+            {expandedSections.later && generateEvents(categorizedEvents.later)}
+          </div>
+        )}
       </div>
 
       <div className="">

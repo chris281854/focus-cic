@@ -1,244 +1,221 @@
 import { React, useState, useEffect } from "react"
+import NewEvent from "../../NewEvent"
+import EditItem from "../../EditItem"
+import dayjs from "dayjs"
+import "dayjs/locale/es"
 
+export default function DayView({ events, onEventCreated }) {
+  dayjs.locale("es")
 
-export default function DayView({ events }) {
-  const monthName = [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
-  ]
-  const weekDayName = [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-  ]
+  const today = dayjs().locale("es").format("YYYY-MM-DD")
+  const [selectedDate, setSelectedDate] = useState(dayjs())
 
-  function leapYear(year) {
-    return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0)
-  }
-
-  //Variables de fecha
-  const now = new Date()
-  const currentDay = now.getDate()
-  const [day, setDay] = useState(currentDay)
-  const [month, setMonth] = useState(now.getMonth())
-  const [year, setYear] = useState(now.getFullYear())
-
-  let currentMonth = now.getMonth()
-  let currentYear = now.getFullYear()
-
-  //Datos de la Tabla:
-  const currentDate = `${currentYear}-${currentMonth + 1}-${day}`
-  const [selectedDate, setSelectedDate] = useState(
-    new Date(`${year}-${month + 1}-${day}`)
+  const [weekDayName, setWeekDayName] = useState(
+    dayjs(selectedDate).format("dddd")
   )
-  const dataWeekDay = selectedDate.getDay()
 
-  //UseEffect para la actualización de los valores de selectedDate:
+  const [content, setcontent] = useState([])
+
+  const goToNextWeek = () => setSelectedDate(selectedDate.add(1, "week"))
+  const goToNextDay = () => setSelectedDate(selectedDate.add(1, "day"))
+  const goToPreviousWeek = () =>
+    setSelectedDate(selectedDate.subtract(1, "week"))
+  const goToPreviousDay = () => setSelectedDate(selectedDate.subtract(1, "day"))
+
+  const hoursSpan = Array.from({ length: 24 }, (_, i) => {
+    const hour = i % 12 === 0 ? 12 : i % 12 // Convierte 0 en 12 y mantiene el resto en formato 12h
+    const period = i < 12 ? "am" : "pm" // Determina si es AM o PM
+    return `${hour}:00 ${period}` // Devuelve la hora en formato 12h con AM o PM
+  })
+  const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`)
+
+  const [onEdit, setOnEdit] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [timedEvent, setTimedEvent] = useState(null)
+  const [toggleNewEvent, setToggleNewEvent] = useState(false)
+  const getMatchingEvents = (day, events) => {
+    return events.filter((event) => dayjs(event.date).isSame(day, "day"))
+  }
+  const matchingEvents = getMatchingEvents(selectedDate, events)
+
+  function handleNewEvent(hour) {
+    const formattedDate = dayjs(selectedDate).format("YYYY-MM-DD")
+    const eventTime = dayjs(`${formattedDate} ${hour}`).format(
+      "YYYY-MM-DD HH:mm"
+    )
+    setTimedEvent(eventTime)
+    setToggleNewEvent(true)
+  }
+
   useEffect(() => {
-    const newDate = new Date(`${year}-${month + 1}-${day}`)
-    setSelectedDate(newDate)
-    setDatePickValue(newDate)
-  }, [year, month, day])
-
-  // Fechas en encabezados
-  const textMonth = monthName[month]
-  const currentTextMonth = monthName[currentMonth]
-  const textCurrentDay = now.getDate()
-  const textYear = year
-
-  function getNextDay() {
-    const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
-    if (day < lastDayOfMonth) {
-      setDay(day + 1)
-    } else {
-      setDay(1)
-      getNextMonth()
-    }
-  }
-  function getPrevDay() {
-    const firstDayOfMonth = new Date(year, month + 1, 1).getDate()
-    if (day !== firstDayOfMonth) {
-      setDay(day - 1)
-    } else {
-      getPrevMonth()
-      const lastDayOfMonth = new Date(year, month, 0).getDate()
-      setDay(lastDayOfMonth)
-    }
-    const newDate = new Date(selectedDate)
-    newDate.setDate(selectedDate.getDate() - 1)
-  }
-  function getNextMonth() {
-    if (month !== 11) {
-      setMonth(month + 1)
-      setDay(1)
-    } else {
-      setYear(year + 1)
-      setMonth(0)
-      setDay(1)
-    }
-    //se deben actualizar fechas en encabezados
-  }
-  function getPrevMonth() {
-    if (month !== 0) {
-      const lastDayOfMonth = new Date(year, month, 0).getDate()
-      setMonth((oldMonth) => oldMonth - 1)
-      setDay(lastDayOfMonth)
-    } else {
-      const lastDayOfMonth = new Date(year, month, 0).getDate()
-      setYear((oldYear) => oldYear - 1)
-      setMonth(11)
-      setDay(lastDayOfMonth)
-    }
-  }
-  function getPrevYear() {
-    setYear((oldYear) => {
-      const prevYear = oldYear - 1
-      if (!leapYear(prevYear) && month === 1 && day === 29) setDay(1)
-      return prevYear
-    })
-  }
-  function getNextYear() {
-    setYear((oldYear) => {
-      const nextYear = oldYear + 1
-      if (!leapYear(nextYear) && month === 1 && day === 29) setDay(1)
-      return nextYear
-    })
-  }
-  const getHours = () => {
-    const hours = []
-    for (let i = 1; i <= 12; i++) {
-      hours.push(
-        <div key={i} className="flex items-center justify-between">
-          {i}
-          <div className="h-2 w-2 rounded-full bg-gray-300 ml-2"></div>
-        </div>
-      )
-    }
-    return hours
-  }
-
-  const dayBox = [
-    <div
-      key={selectedDate}
-      data-date={selectedDate}
-      data-week-day={dataWeekDay}
-      className={`celda row-span-1 col-span-1 border p-2 overflow-hidden ${
-        selectedDate == currentDate ? "bg-green-400" : ""
-      }`}>
-      <p>{day}</p>
-      <div className="grid grid-rows-12 grid-cols-1">{getHours()}</div>
-      {/* Aquí puedes agregar tu lógica para las listas de tareas */}
-    </div>,
-  ]
+    setWeekDayName(dayjs(selectedDate).format("dddd"))
+  }, [selectedDate])
 
   //Date picker:
   const [datePickValue, setDatePickValue] = useState(selectedDate)
 
-  const handleDatePickChange = (event) => {
-    const date = event.target.value
+  const handleDateInputChange = (e) => {
+    const newDate = dayjs(e.target.value)
+    if (newDate.isValid() && !newDate.isSame(selectedDate, "day")) {
+      setSelectedDate(newDate)
+    }
+  }
 
-    //parsear para obtener año, mes y día por separado
-    const parsedDate = new Date(date)
-    const parsedYear = parsedDate.getFullYear()
-    const parsedMonth = parsedDate.getMonth()
-    const parsedDay = parsedDate.getDate() + 1
-
-    setYear(parsedYear)
-    setMonth(parsedMonth)
-    setDay(parsedDay)
+  const [toggleAside, setToggleAside] = useState(true)
+  const handleToggleAside = () => {
+    setToggleAside(!toggleAside)
+  }
+  const toggleEditEventVisibility = (event) => {
+    setSelectedEvent(event)
+    setOnEdit(true)
   }
 
   return (
     <>
-      <div className="container_calendar">
-        <div className="header_calendar flex">
-          <h1 id="text_day" className="font-bold">
-            {textCurrentDay}
-          </h1>
-          <h5 id="text_month" className="flex self-center pl-4 text-xl">
-            {currentTextMonth} {currentYear}
-          </h5>
-        </div>
-        <div className="body_calendar w-full border-2 h-fit">
-          <div className="container_details">
-            <div className="detail_1">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
+      {toggleNewEvent && (
+        <NewEvent
+          setToggleNewEvent={setToggleNewEvent}
+          timedEvent={timedEvent}
+          onEventCreated={onEventCreated}
+        />
+      )}
+      {onEdit && selectedEvent && (
+        <EditItem
+          onEdit={onEdit}
+          setOnEdit={setOnEdit}
+          event={selectedEvent}
+          onEventModified={onEventCreated}
+        />
+      )}
+      <div className="flex max-h-screen">
+        <article className="overflow-y-scroll w-full">
+          <article className="h-full min-h-screen">
+            <header className="flex border-b pb-4 pt-3 dark:bg-bg-main-color bg-bg-main-color/50">
+              <h2 className="ml-auto mr-3">
+                {weekDayName} {dayjs(selectedDate).format("D")}
+              </h2>
+              <section className="items-center mr-3">
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToPreviousWeek()}>
+                  &lt;&lt;
+                </button>
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToPreviousDay()}>
+                  &lt;
+                </button>
+                <input
+                  value={selectedDate.format("YYYY-MM-DD")}
+                  onChange={handleDateInputChange}
+                  type="date"
+                  className="border-none outline-none bg-transparent text-white"
+                />
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToNextDay()}>
+                  &gt;
+                </button>
+                <button
+                  className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
+                  onClick={() => goToNextWeek()}>
+                  &gt;&gt;
+                </button>
+              </section>
+            </header>
+            <div className="flex">
+              <div className="w-28">
+                {hoursSpan.map((hour, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-end border-r p-3 border-b-gray-300 dark:border-b-gray-700 h-12 text-gray-600 dark:text-gray-300">
+                    {hour}
+                  </div>
+                ))}
               </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
+              <div
+                className={`flex-1 border-r font-bold overflow-hidden w-full`}>
+                {hours.map((hour, index) => {
+                  // Crear la hora actual en el formato adecuado
+                  const hourString = index.toString().padStart(2, "0") // Por ejemplo: "08", "14"
+                  // Y filtrar eventos que coincidan con la hora actual
+                  const eventsAtThisHour = matchingEvents.filter(
+                    (event) => dayjs(event.date).format("HH") === hourString
+                  )
+
+                  return (
+                    <div
+                      key={index}
+                      className="border-b h-12 hover:bg-slate-800 flex p-1"
+                      onClick={(e) => {
+                        if (!onEdit) handleNewEvent(hourString)
+                      }}>
+                      {eventsAtThisHour.map((event) => {
+                        return (
+                          <div
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              toggleEditEventVisibility(event)
+                            }}
+                            key={event.event_id}
+                            style={{
+                              backgroundColor:
+                                event.life_areas[0]?.color || "#808080",
+                            }}
+                            className="rounded-md max-h-full w-full p-1 mx-1 font-thin text-sm overflow-hidden">
+                            {event.name}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
               </div>
             </div>
-            <div className="detail_2">
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-              <div className="detail">
-                <div className="circle">
-                  <div className="column"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="container_change_date flex items-center justify-around">
-            <button id="last_year" onClick={getPrevYear}>
-              &lt;
-            </button>
-            <button id="last_month" onClick={getPrevMonth}>
-              &lt;
-            </button>
-            <button id="last_day" onClick={getPrevDay}>
-              &lt;
-            </button>
-            <div className="date-picker">
-              <span id="text_month_02"> {textMonth} </span>
-              <span id="text_year"> {textYear} </span>
-              <input
-                value={datePickValue.toISOString().split("T")[0]}
-                onChange={handleDatePickChange}
-                type="date"
-                name="date-input"
-                id="date-input"
-                className="border-none outline-none bg-transparent text-white"
-              />
-            </div>
-            <button id="next_day" onClick={getNextDay}>
-              &gt;
-            </button>
-            <button id="next_month" onClick={getNextMonth}>
-              &gt;
-            </button>
-            <button id="next_year" onClick={getNextYear}>
-              &gt;
-            </button>
-          </div>
-          <div className="container_weedays grid grid-rows-1 grid-cols-1 text-center">
-            <span className="week_days_item">{weekDayName[dataWeekDay]}</span>
-          </div>
-          <div className="grid grid-rows-1 grid-cols-1 grid-flow-row w-full border-2">
-            {dayBox}
-          </div>
-        </div>
+          </article>
+        </article>
+        <aside
+          className={`${
+            !toggleAside ? "hidden" : "w-60 min-w-60"
+          } p-4 shadow-lg overflow-y-auto h-screen`}>
+          <header className="text-lg font-bold mb-4 text-gray-800 dark:text-white">
+            Eventos y Tareas
+          </header>
+          <main>
+            {matchingEvents.length > 0 ? (
+              <ul>
+                {matchingEvents.map((event) => (
+                  <li
+                    key={event.event_id}
+                    onClick={() => toggleEditEventVisibility(event)}
+                    className="mb-3 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md"
+                    style={{
+                      backgroundColor: event.life_areas[0]?.color || "#808080",
+                    }}>
+                    <h3 className="text-md font-semibold dark:text-white">
+                      {event.name}
+                    </h3>
+                    <div className="text-sm text-gray-950 mt-2">
+                      <p className="text-gray-950">
+                        {dayjs(event.date).format("h:mm A")}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No hay eventos este día.</p>
+            )}
+          </main>
+        </aside>
+        <button
+          className={`${
+            toggleAside ? "" : "text-accent"
+          } bg-blue-950 fixed z-10 bottom-3 right-5 rounded-full`}
+          onClick={handleToggleAside}>
+          {toggleAside ? <p>&gt;</p> : <p>&lt;</p>}
+        </button>
       </div>
     </>
   )
