@@ -16,7 +16,7 @@ export default function Home() {
           panelVisibility={panelVisibility}
           setPanelVisibility={setPanelVisibility}
         />
-        <article className="section static flex-grow flex transition-all duration-300 h-fit">
+        <article className="section static flex-grow flex transition-all duration-300 h-fit overflow-hidden">
           <Outlet />
         </article>
       </main>

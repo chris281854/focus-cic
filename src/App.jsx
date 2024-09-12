@@ -1,4 +1,4 @@
-import { UserProvider } from "./context/UserContext"
+import { useUser } from "./context/UserContext"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import "./App.css"
 import Welcome from "./components/pages/Welcome"
@@ -15,6 +15,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css"
 import Habits from "./components/pages/home/habits/Habits"
 import dayjs from "dayjs"
 import es from "dayjs/locale/es"
+import { useEffect } from "react"
 
 function App() {
   dayjs.locale("es")
@@ -23,9 +24,13 @@ function App() {
     weekStart: 0,
   })
 
+  const verifyToken = useUser((state) => state.verifyToken)
+  useEffect(() => {
+    verifyToken()
+  }, [verifyToken])
+
   return (
     <>
-      <UserProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Welcome />} />
@@ -49,7 +54,6 @@ function App() {
             <Route path="/register" element={<Register />} />
           </Routes>
         </BrowserRouter>
-      </UserProvider>
     </>
   )
 }

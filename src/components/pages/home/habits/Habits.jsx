@@ -24,11 +24,26 @@ import getRandomColor from "../../../../../server/RandomColor"
 
 export default function Habits() {
   // Manejar eventos base
-  const baseAreas = ["Social", "Intelectual", "Físico", "Espiritual"]
+  const baseAreas = [
+    "Relaciones Sociales",
+    "Intelecto",
+    "Salud Física",
+    "Espiritualidad",
+  ]
   const optionalAreas = [
     { id: 1, value: "Finanzas" },
     { id: 2, value: "Familia" },
     { id: 3, value: "Carrera" },
+    { id: 5, value: "Salud Mental" },
+    { id: 6, value: "Ejercicio" },
+    { id: 8, value: "Relaciones Sociales" },
+    { id: 9, value: "Crecimiento Personal" },
+    { id: 10, value: "Trabajo" },
+    { id: 11, value: "Educación" },
+    { id: 12, value: "Espiritualidad" },
+    { id: 16, value: "Hobbies" },
+    { id: 18, value: "Relación Amorosa" },
+    { id: 20, value: "Desarrollo Profesional" },
   ]
 
   const [latestScores, setLatestScores] = useState([])
@@ -97,7 +112,7 @@ export default function Habits() {
           score: newScore,
           longTermGoal: longTermGoal,
           date: dayjs(),
-          color: getRandomColor()
+          color: getRandomColor(),
         },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -210,42 +225,47 @@ export default function Habits() {
   }))
 
   return (
-    <div className="w-full min-h-screen text-white flex flex-col items-center justify-center py-10 px-4">
-      <Card>
-        <CardHeader className="items-center">
-          <CardTitle>Facetas</CardTitle>
-          <CardDescription>
-            Satisfacción percibida en cada una de sus facetas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pb-0">
-          <ChartContainer className="mx-auto aspect-square max-h-[250px]">
-            <RadarChart data={chartData}>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              <PolarAngleAxis dataKey="area" />
-              <PolarGrid />
-              <Radar
-              dataKey="score"
-              fill="#4299e1"
-              fillOpacity={0.7}
-              dot={{
-                r: 4,
-                fillOpacity: 1,
-              }}
-            />
-            </RadarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-      <h1 className="text-4xl font-bold mb-8">Facetas</h1>
-      <div className="w-full max-w-4xl">
-        <div className="mb-8 rounded-md bg-slate-900 p-4 w-fit">
-          <h2 className="text-2xl font-semibold mb-4">
-            Añadir nueva área de vida
-          </h2>
-          <div>
-            <form onSubmit={addLifeArea} className="flex flex-col gap-4 mb-4">
-              <div className="flex items-center flex-col sm:flex-row gap-4">
+    <div className="w-full max-w-full min-h-screen text-white flex flex-col p-4 select-none gap-1">
+      <div className="flex gap-3 p-1 flex-wrap w-full justify-center">
+        <Card
+          className={
+            "lg:w-4/12 min-w-96 max-h-96 sm:max-w-full flex-grow 2xl:flex-none"
+          }>
+          <CardHeader className="items-center">
+            <CardTitle>Facetas</CardTitle>
+            <CardDescription>
+              Satisfacción percibida en cada una de sus facetas
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pb-0">
+            <ChartContainer className="mx-auto aspect-square max-h-[250px] w-full">
+              <RadarChart data={chartData}>
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent />}
+                />
+                <PolarAngleAxis dataKey="area" />
+                <PolarGrid />
+                <Radar
+                  dataKey="score"
+                  fill="#4299e1"
+                  fillOpacity={0.7}
+                  dot={{
+                    r: 4,
+                    fillOpacity: 1,
+                  }}
+                />
+              </RadarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-900 lg:w-6/12 min-w-min max-w-fit max-h-96 overflow-hidden 2xl:flex-none">
+          <CardHeader className="text-2xl font-semibold">
+            <CardTitle>Añadir nueva área de vida</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={addLifeArea} className="flex flex-col gap-4">
+              <div className="flex items-center flex-col sm:flex-row gap-4 flex-wrap">
                 <input
                   type="text"
                   placeholder="Nombre"
@@ -294,42 +314,28 @@ export default function Habits() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-        <div className="grid gap-4 mb-8">
-          {lifeAreas.map((area) => (
-            <LifeAreaCard area={area} key={area.life_area_id} />
-          ))}
-        </div>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h2 className="text-2xl font-semibold mb-4">Escoge tus facetas</h2>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-4 justify-center">
-              {baseAreas.map((baseArea, index) => (
-                <button
-                  key={index}
-                  className={`block w-auto text-left p-4 rounded-lg transition duration-300 bg-blue-800 hover:bg-blue-700`}>
-                  {baseArea}
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-4 justify-center">
-              {optionalAreas.map((optionalArea) => (
-                <button
-                  key={optionalArea.id}
-                  onClick={() => handleSeleccion(optionalArea.value)}
-                  className={`block w-auto text-left p-4 rounded-lg hover:border-blue-700 border-none outline-none transition duration-300 ${
-                    selectedValues.includes(optionalArea.value)
-                      ? "bg-blue-600"
-                      : "bg-gray-700"
-                  }`}>
-                  {optionalArea.value}
-                </button>
-              ))}
-              <div></div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+          <CardFooter
+            className={
+              "h-fit bg-slate-950 flex gap-1 overflow-hidden w-full flex-wrap pt-6 mt-auto "
+            }>
+            {optionalAreas.map((area) => (
+              <div
+                className="h-8 w-fit p-1 bg-emerald-700 hover:bg-emerald-800 transition-all rounded-xl text-center"
+                onClick={() => setNewLifeArea(area.value)}>
+                {area.value}
+              </div>
+            ))}
+          </CardFooter>
+        </Card>
+      </div>
+
+
+
+      <div className="w-full flex flex-wrap border gap-3">
+        {lifeAreas.map((area) => (
+          <LifeAreaCard area={area} key={area.life_area_id} />
+        ))}
       </div>
     </div>
   )

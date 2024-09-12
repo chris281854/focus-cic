@@ -1,26 +1,26 @@
-import React, { useContext, useState } from "react"
-import { UserContext } from "../../context/UserContext"
-import { useNavigate, Link } from "react-router-dom"
-import Header from "../Header"
-import Footer from "../Footer"
-import sendEmail from "../EmailSender"
+import React, { useState } from "react";
+import { useUser } from "../../context/UserContext"
+import { useNavigate, Link } from "react-router-dom";
+import Header from "../Header";
+import Footer from "../Footer";
+import sendEmail from "../EmailSender";
 
 export default function Register() {
-  const { login } = useContext(UserContext)
-  const [error, setError] = useState("")
+  const { login } = useUser(); // Usamos Zustand en lugar de useContext
+  const [error, setError] = useState("");
 
-  const [nickName, setNickName] = useState("")
-  const [name, setName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [birthDate, setBirthDate] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [nickName, setNickName] = useState("");
+  const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       const response = await fetch("http://localhost:3001/api/register", {
         method: "POST",
@@ -36,28 +36,29 @@ export default function Register() {
           email,
           password,
         }),
-      })
+      });
+
       if (response.ok) {
-        const userData = await response.json()
-        login(userData)
+        const userData = await response.json();
+        login(userData); // Llama a la función de login del store de Zustand
         try {
           await sendEmail({
             to: email,
             type: "welcome",
             variables: { name, lastName, email },
-          })
-          console.log("Welcome email sent successfully")
+          });
+          console.log("Welcome email sent successfully");
         } catch (error) {
-          console.error("Failed to send welcome email", error)
+          console.error("Failed to send welcome email", error);
         }
-        navigate("/home")
+        navigate("/home");
       } else {
-        throw new Error("Registro fallido")
+        throw new Error("Registro fallido");
       }
     } catch (error) {
-      setError("Datos inválidos")
+      setError("Datos inválidos");
     }
-  }
+  };
 
   const emailSender = async () => {
     try {
@@ -69,12 +70,12 @@ export default function Register() {
           lastName: "G",
           email: "josedgonzalez02@gmail.com",
         },
-      })
-      return console.log("Welcome email sent successfully")
+      });
+      return console.log("Welcome email sent successfully");
     } catch (error) {
-      console.error("Failed to send welcome email", error)
+      console.error("Failed to send welcome email", error);
     }
-  }
+  };
 
   return (
     <>

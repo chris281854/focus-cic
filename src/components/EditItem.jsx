@@ -67,7 +67,6 @@ export default function EditItem({
         return [...prevSelectedAreas, value]
       }
     })
-    console.log(selectedAreas)
   }
 
   const handleEventUpdate = async (e) => {
@@ -91,9 +90,7 @@ export default function EditItem({
 
     axios
       .patch(`http://localhost:3001/api/event/update`, updateData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        withCredentials: true,
       })
       .then((response) => {
         console.log("Item actualizado: ", response.data)

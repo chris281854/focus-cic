@@ -40,8 +40,8 @@ export default function MonthView({ events, onEventCreated }) {
 
   useEffect(() => {
     const eventsInMonth = events.filter((event) => {
-      const eventMonth = dayjs(event.date).format("M")
-      const thisMonth = dayjs(selectedDate).format("M")
+      const eventMonth = dayjs(event.date).format("M YYYY")
+      const thisMonth = dayjs(selectedDate).format("M YYYY")
       return eventMonth === thisMonth
     })
 
@@ -283,7 +283,7 @@ export default function MonthView({ events, onEventCreated }) {
                   type="date"
                   name="date-input"
                   id="date-input"
-                  className="border-none outline-none bg-transparent text-white"
+                  className="border-none outline-none bg-transparent text-white rounded p-1"
                 />
               </div>
               <button

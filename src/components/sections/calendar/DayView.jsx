@@ -109,7 +109,7 @@ export default function DayView({ events, onEventCreated }) {
                   value={selectedDate.format("YYYY-MM-DD")}
                   onChange={handleDateInputChange}
                   type="date"
-                  className="border-none outline-none bg-transparent text-white"
+                  className="border-none outline-none bg-transparent text-white rounded p-1"
                 />
                 <button
                   className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"

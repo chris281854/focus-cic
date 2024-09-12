@@ -1,16 +1,15 @@
-import React, { useContext, useState, useEffect } from "react"
-import { Await, useNavigate, Link } from "react-router-dom"
-import { UserContext } from "../../context/UserContext"
+import React, { useState, useEffect } from "react"
 import { useUser } from "../../context/UserContext"
+import { useNavigate, Link } from "react-router-dom"
 import Header from "../Header"
 import Footer from "../Footer"
 import axios from "axios"
 
 export default function Login() {
-  const { user, login, loading, updateLifeAreas } = useUser()
+  const { user, login, loading } = useUser() // Usa Zustand en lugar de useContext
   const navigate = useNavigate()
   const [error, setError] = useState("")
-
+  const [rememberMe, setRememberMe] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
@@ -19,21 +18,20 @@ export default function Login() {
     if (user) {
       navigate("/home")
     }
-  }, [loading])
+  }, [user, navigate]) // Ahora dependemos de "user" en lugar de "loading"
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("http://localhost:3001/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
-      if (response.ok) {
-        const userData = await response.json()
-        await login(userData)
+      const response = await axios.post(
+        "http://localhost:3001/api/login",
+        { email, password },
+        { withCredentials: true } //Envía la cookie
+      )
+
+      if (response.status === 200) {
+        const userData = response.data
+        await login(userData, rememberMe) // Llama a la función de login de Zustand
         console.log("Iniciando sesión")
         navigate("/home")
       } else {
@@ -42,11 +40,15 @@ export default function Login() {
         console.error(errorData.error)
       }
     } catch (error) {
-      setError("Error de red o problema con el servidor")
-      console.error(error)
+      if (error.response && error.response.data) {
+        setError(error.response.data.error) // Error del servidor
+        console.error(error.response.data.error)
+      } else {
+        setError("Error de red o problema con el servidor", error) // Error de red u otro
+        console.error("Error de red o problema con el servidor", error)
+      }
     }
   }
-
   return (
     <>
       <Header />
@@ -65,7 +67,9 @@ export default function Login() {
           <form onSubmit={handleSubmit}>
             {/* <!-- Username Input --> */}
             <div className="mb-4">
-              <label for="email" className="block text-gray-600 dark:text-white">
+              <label
+                htmlFor="email"
+                className="block text-gray-600 dark:text-white">
                 Correo Electrónico
               </label>
               <input
@@ -80,7 +84,9 @@ export default function Login() {
             </div>
             {/* <!-- Password Input --> */}
             <div className="mb-4">
-              <label for="password" className="block text-gray-600 dark:text-white">
+              <label
+                htmlFor="password"
+                className="block text-gray-600 dark:text-white">
                 Contraseña
               </label>
               <input
@@ -88,7 +94,7 @@ export default function Login() {
                 id="password"
                 name="password"
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
-                autocomplete="off"
+                autoComplete="off"
                 placeholder="Contaseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -101,8 +107,12 @@ export default function Login() {
                 id="remember"
                 name="remember"
                 className="text-blue-500"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
               />
-              <label for="remember" className="text-gray-600 ml-2 dark:text-white">
+              <label
+                htmlFor="remember"
+                className="text-gray-600 ml-2 dark:text-white">
                 Recordarme
               </label>
             </div>
@@ -121,7 +131,7 @@ export default function Login() {
           </form>
           {/* <!-- Sign up  Link --> */}
           <div className="mt-6 text-blue-500 text-center">
-            <Link to="/register" classNameName="hover:underline">
+            <Link to="/register" className="hover:underline">
               Registrarse
             </Link>
           </div>

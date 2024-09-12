@@ -6,9 +6,9 @@ import axios from "axios"
 import { useUser } from "../../../context/UserContext"
 
 export default function Calendar() {
-  const { user } = useUser()
+  const { user, lifeAreas, fetchEvents, fetchReminders, events, reminders, allEvents } =
+    useUser()
   const [viewSelector, setViewSelector] = useState("mes")
-  const [events, setEvents] = useState([])
   const [togglePosition, setTogglePosition] = useState("left")
   const [eventCount, setEventCount] = useState(0)
 
@@ -21,22 +21,7 @@ export default function Calendar() {
   }
 
   useEffect(() => {
-    const fetchEvents = async (userId) => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3001/api/get/events?userId=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        )
-        setEvents(response.data)
-      } catch (error) {
-        console.error("Error al obtener los eventos: ", error)
-      }
-    }
-    fetchEvents(user.user_id)
+    fetchEvents()
   }, [eventCount])
 
   const handleEventCreated = () => {
@@ -72,7 +57,9 @@ export default function Calendar() {
           </button>
         </div>
         <div>
-          {viewSelector === "mes" && <MonthView events={events} onEventCreated={handleEventCreated} />}
+          {viewSelector === "mes" && (
+            <MonthView events={events} onEventCreated={handleEventCreated} />
+          )}
           {viewSelector === "semana" && (
             <WeekView events={events} onEventCreated={handleEventCreated} />
           )}

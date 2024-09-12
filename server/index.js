@@ -7,9 +7,17 @@ const jwt = require("jsonwebtoken")
 
 const app = express()
 const SECRET_KEY = "1234"
+const cookieParser = require("cookie-parser")
+app.use(cookieParser())
 
 //MIDDLEWARE
-app.use(cors()) // Permite solicitudes desde el front-end
+app.use(
+  // Permite solicitudes desde el front-end
+  cors({
+    origin: "http://localhost:5173", //Dominio frontend
+    credentials: true, //permitir envío de cookies
+  })
+)
 app.use(express.json()) // Permite parsear JSON en solicitudes
 app.use(bodyParser.json())
 
@@ -24,13 +32,18 @@ const pool = new Pool({
 
 // Función para autenticar el token
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"]
-  const token = authHeader && authHeader.split(" ")[1]
+  const token = req.cookies.token
 
-  if (token == null) return res.sendStatus(401)
+  if (!token) {
+    return res.status(401).json({ error: "Token not found" })
+  }
+  console.log("Token en cookies:", token)
 
   jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.sendStatus(403)
+    if (err) {
+      console.error("Token verification error:", err)
+      return res.sendStatus(403).json({ error: "invalid token" })
+    }
     req.user = user
     next()
   })
@@ -88,6 +101,7 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
       LEFT JOIN "Event_Life_Areas" ela ON e.event_id = ela.event_id
       LEFT JOIN "Life_Areas" la ON ela.life_area_id = la.life_area_id
       WHERE e.user_id = $1
+      AND e.state != 0
       GROUP BY e.event_id, er.reminder_id, r.date, r.mail`,
       [userId]
     )
@@ -121,12 +135,15 @@ app.get("/api/get/allEvents", authenticateToken, async (req, res) => {
       `
       UPDATE "Events" 
       SET "state" = CASE
-        WHEN "date" < NOW() THEN 0
-        WHEN "date" < NOW() + INTERVAL '1 day' THEN 1
-        WHEN "date" < NOW() + INTERVAL '1 week' THEN 2
-        ELSE 3
+        WHEN "date" < NOW() THEN 1  -- Atrasado
+        WHEN "date" >= NOW() AND "date" < date_trunc('day', NOW() + INTERVAL '1 day') THEN 2  -- Para hoy
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 day') AND "date" < date_trunc('day', NOW() + INTERVAL '2 days') THEN 6  -- Para mañana
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '2 days') AND "date" < date_trunc('day', NOW() + INTERVAL '1 week') THEN 3  -- Para esta semana
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 week') AND "date" < date_trunc('day', NOW() + INTERVAL '1 month') THEN 4  -- Para este mes
+        ELSE 5  -- Después
       END
-      WHERE "user_id" = $1`,
+      WHERE "user_id" = $1
+      AND "state" != 0`,
       [userId]
     )
 
@@ -202,8 +219,7 @@ app.get("/api/get/reminders", async (req, res) => {
 })
 
 app.get("/api/get/lifeAreas", async (req, res) => {
-  const userId = 2
-  // req.query.userId
+  req.query.userId
 
   try {
     const query = `
@@ -807,7 +823,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
     console.log("lifeAreaIds:", lifeAreaIds)
 
     if (lifeAreaIds && lifeAreaIds.length > 0) {
-      console.log("lifeAreaIds:", lifeAreaIds);
+      console.log("lifeAreaIds:", lifeAreaIds)
       const lifeAreasQuery = `
       INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
       VALUES ${lifeAreaIds.map((_, i) => `($1, $${i + 2})`).join(", ")}
@@ -864,7 +880,7 @@ app.patch("api/update/lifeAreas/:id", authenticateToken, async (req, res) => {
 
 //Iniciar sesión
 app.post("/api/login", async (req, res) => {
-  const { email, password } = req.body
+  const { email, password, rememberMe } = req.body
 
   try {
     const result = await pool.query('SELECT * FROM "Users" WHERE email = $1', [
@@ -887,24 +903,33 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "1h" }
     )
 
-    res.json({ token, user: { user_id: user.user_id, email: user.email } })
+    // Enviar el token como una cookie
+    res.cookie("token", token, {
+      httpOnly: true, // La cookie no puede ser leída por JavaScript
+      // secure: process.env.NODE_ENV === "production", // Solo se envía sobre HTTPS en producción
+      secure: false, //Mi servidor es http, no https
+      sameSite: "lax", // Permite el envío en solicitudes solo en el mismo dominio
+      maxAge: rememberMe ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 60,
+    })
+
+    res.json({ user: { user_id: user.user_id, email: user.email } })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: "Internal server error" })
   }
 })
 
-app.post("/api/verifyToken", (req, res) => {
-  const token = req.headers.authorization.split(" ")[1]
-
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ error: "Token inválido" })
-    } else {
-      //decoded debe poseer los datos del usuario
-      return res.json({ user: decoded })
-    }
+app.post("/api/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
   })
+  res.sendStatus(200)
+})
+
+app.post("/api/verifyToken", authenticateToken, (req, res) => {
+  res.json({ user: req.user }) // El usuario ya estará en `req.user`
 })
 
 app.post("/api/register", async (req, res) => {
@@ -928,8 +953,17 @@ app.post("/api/register", async (req, res) => {
   }
 })
 
-app.get("/api/protected", authenticateToken, (req, res) => {
-  res.json({ message: "This is a protected route", user: req.user })
+app.get("/api/protected", (req, res) => {
+  const token = req.cookies.token
+  if (!token) {
+    return res.status(403).send("No token, acces no authorized")
+  }
+  // res.json({ message: "This is a protected route", user: req.user, token })
+
+  try {
+    const data = jwt.verify(token, SECRET_KEY)
+    res.render("protected", data)
+  } catch (error) {}
 })
 
 //Actualizar perfil

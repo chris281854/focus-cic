@@ -5,11 +5,14 @@ import ToDoItem from "../ToDoItem"
 import axios from "axios"
 import { useUser } from "../../context/UserContext"
 import dayjs from "dayjs"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faP, faPlus } from "@fortawesome/free-solid-svg-icons"
 
 export default function GeneralView() {
-  const { user, lifeAreas } = useUser()
+  const { user, lifeAreas, fetchEvents, fetchReminders, events, reminders } =
+    useUser()
 
-  const [events, setEvents] = useState([])
+  // const [events, setEvents] = useState([])
   const [alarms, setAlarms] = useState([])
   const [tasks, setTasks] = useState([])
   const [tableModified, setTableModified] = useState(false)
@@ -47,23 +50,9 @@ export default function GeneralView() {
 
   useEffect(() => {
     // Obtener eventos del servidor
-    const fetchEvents = async (userId) => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3001/api/get/events?userId=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        )
-
-        setEvents(response.data)
-      } catch (error) {
-        console.error("Error al obtener los eventos: ", error)
-      }
+    if (user) {
+      fetchEvents(user.user_id)
     }
-    fetchEvents(user.user_id)
 
     const fetchReminders = async (userId) => {
       try {
@@ -117,12 +106,14 @@ export default function GeneralView() {
       <h2>Tareas y Eventos</h2>
       <div className="flex p-4">
         <button
-          className="new-event bg-slate-800 m-2"
-          onClick={() => (setToggleNewEvent(true))}>
-          Nuevo evento
+          className="bg-slate-800 m-2"
+          onClick={() => setToggleNewEvent(true)}>
+          <FontAwesomeIcon icon={faPlus} /> <span>Evento</span>
         </button>
         {toggleNewEvent && (
-          <NewEvent onEventCreated={handleTableModified} setToggleNewEvent={setToggleNewEvent}></NewEvent>
+          <NewEvent
+            onEventCreated={handleTableModified}
+            setToggleNewEvent={setToggleNewEvent}></NewEvent>
         )}
         <NewReminder onReminderCreated={handleTableModified}></NewReminder>
       </div>

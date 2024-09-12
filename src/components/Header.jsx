@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { useUser } from "../context/UserContext"
 
 const Header = () => {
-  const { user, logout } = useUser()
+  const { user, logout, darkMode, toggleDarkMode } = useUser()
 
   const handleLogOut = () => {
     logout()
@@ -21,25 +21,13 @@ const Header = () => {
     }
   }, [])
 
-  //dark mode
-  const [theme, setTheme] = useState(() => {
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark"
-    }
-    return "light"
-  })
-
   useEffect(() => {
-    if (theme === "dark") {
+    if (darkMode === "dark") {
       document.querySelector("html").classList.add("dark")
     } else {
       document.querySelector("html").classList.remove("dark")
     }
-  }, [theme])
-
-  const handleChangeTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"))
-  }
+  }, [])
 
   //links styles
   const twLinks =
@@ -49,8 +37,7 @@ const Header = () => {
     <header
       className={`flex top-0 w-full pt-4 pb-4 items-center justify-between z-50 bg-primary transition-all duration-1000 flex-row 
         `}>
-
-        {/* Change color scroll => ${scrollY > 0 ? "bg-opacity-30 bg-black backdrop-blur" : ""} */}
+      {/* Change color scroll => ${scrollY > 0 ? "bg-opacity-30 bg-black backdrop-blur" : ""} */}
       <Link className="tittle-header hover:text-accent transition-all duration-500">
         <img src="/Focus Logo Vector Large.png" alt="Logo" />
         <h2>Focus</h2>
@@ -58,8 +45,8 @@ const Header = () => {
       <div>
         <button
           className="border-2 border-white bg-transparent focus:outline-none w-16 transition-all"
-          onClick={handleChangeTheme}>
-          {theme === "dark" ? "💡" : "🌙"}
+          onClick={toggleDarkMode}>
+          {darkMode === "dark" ? "💡" : "🌙"}
         </button>
         <Link to="/about-us" className={twLinks}>
           Sobre nosotros

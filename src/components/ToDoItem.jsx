@@ -3,6 +3,8 @@ import { useState, useEffect } from "react"
 import dayjs from "dayjs"
 import { useUser } from "../context/UserContext"
 import axios from "axios"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faCheck, faEdit, faXmark } from "@fortawesome/free-solid-svg-icons"
 
 export default function ToDoItem({ event, reminder, onEventModified }) {
   //Estados:
@@ -69,10 +71,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
           userId: user.user_id,
         },
         {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          withCredentials: true,
         }
       )
       if (response.status === 200) {
@@ -111,22 +110,32 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
     <>
       {event && (
         <div
-          className="grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] bg-black rounded-lg shadow-lg p-3 m-3 ml-0 cursor-pointer hover:bg-cyan-900 transition-all overflow-hidden"
+          className="grid grid-cols-[0px_1fr_0.5fr_1fr_1fr_auto] bg-slate-800 rounded-lg shadow-lg p-1 m-3 ml-0 cursor-pointer hover:bg-cyan-900 transition-all overflow-hidden"
           onClick={toggleOpen}>
           <div
             className={
               `${stateColor()}` +
-              "grid rounded-sm self-center min-h-full w-3 h-14 -ml-3 -mt-3 -mb-3 left-0"
+              "grid rounded-sm self-center min-h-full w-4 h-14 -ml-3 -mt-3 -mb-3 left-0"
             }></div>
-          <div className="col-span-1 flex items-center pl-2">
-            <h2 className="text-xl bgc font-light text-white">{event.name}</h2>
+          <div className="col-span-2 flex items-center ml-2 gap-3 max-w-48">
+            <div className="col-span-1 h-full w-12">
+              <button
+                className="flex text-center justify-center bg-emerald-400 text-white h-10 w-10 hover:bg-emerald-400 transition ease-in-out transform rounded-2xl hover:scale-110 duration-300"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleComplete(event.event_id, "event")
+                }}>
+                <FontAwesomeIcon icon={faCheck} />
+              </button>
+            </div>
+            <h3 className="font-light text-white col-span-2 min-w-max">{event.name}</h3>
           </div>
           <div className="col-span-1 flex items-center justify-center">
             <span className="text-base text-gray-500">
-              {dayjs(event.date).format("D MMMM | h:m a")}
+              {event.date ? dayjs(event.date).format("D MMMM | h:m a") : ""}
             </span>
           </div>
-          <div className="col-span-1 flex items-center max-w-80 overflow-x-scroll rounded-xl scrollbar-none">
+          <div className="col-span-1 flex items-center max-w-80 overflow-x-scroll rounded-xl scrollbar-none px-2">
             {event.life_areas.map(
               (area, index) =>
                 area && (
@@ -139,32 +148,22 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
                 )
             )}
           </div>
-          <div className="col-span-1 flex items-center justify-between pr-1">
-            <button
-              className="text-black bg-accent hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 rounded-full px-4 py-1 text-sm font-medium"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleComplete(event.event_id, "event")
-              }}>
-              Completar
-            </button>
-          </div>
           <div className="col-span-1 flex justify-end items-center space-x-2 pr-1">
             <button
-              className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
+              className="text-white bg-slate-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
               onClick={(e) => {
                 e.stopPropagation()
                 toggleEditVisibility()
               }}>
-              <i className="fas fa-edit"></i>
+              <FontAwesomeIcon icon={faEdit} />
             </button>
             <button
-              className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
+              className="text-white bg-slate-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
               onClick={(e) => {
                 e.stopPropagation()
                 handleDelete(event.event_id, "event")
               }}>
-              <i className="fa-solid fa-xmark"></i>
+              <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
           {isOpen && (

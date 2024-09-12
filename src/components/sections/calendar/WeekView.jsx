@@ -108,7 +108,7 @@ export default function WeekView({ events, onEventCreated }) {
                   value={selectedDate.format("YYYY-MM-DD")}
                   onChange={handleDateInputChange}
                   type="date"
-                  className="border-none outline-none bg-transparent text-white"
+                  className="border-none outline-none bg-transparent text-white rounded p-1"
                 />
                 <button
                   className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
@@ -127,13 +127,7 @@ export default function WeekView({ events, onEventCreated }) {
                 </button>
               </section>
               <section className="grid grid-cols-8 h-8 pt-3 text-center top-[0px] z-10">
-                <button
-                  className="grid-rows-1 z-10 bg-slate-600 m-2"
-                  onClick={() => {
-                    setToggleNewEvent(true)
-                  }}>
-                  Nuevo Evento
-                </button>
+                <span></span> {/* Crear un espacio vacío en el primer row */}
                 {["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"].map(
                   (day) => (
                     <span key={day}>{day}</span>

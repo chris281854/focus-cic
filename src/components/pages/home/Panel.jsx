@@ -19,36 +19,44 @@ import { useUser } from "../../../context/UserContext"
 
 export default function Panel({ panelVisibility, setPanelVisibility }) {
   const wtActiveLinks = "bg-slate-500 text-accent"
-  const wtInactiveLinks = "bg-bg-bg-main-color text-white"
+  const wtInactiveLinks = "bg-bg-main-color text-white"
   //Para isActive
   const homeMatch = useMatch("/home")
   const calendarMatch = useMatch("/home/calendar")
   const contactsMatch = useMatch("/home/contacts")
   const habitsMatch = useMatch("home/habits")
   const settingsMatch = useMatch("/home/settings")
-  const { user, logout } = useUser()
+  const { user, logout, darkMode, toggleDarkMode } = useUser()
   const handleLogOut = () => {
     logout()
   }
 
-  //dark mode
-  const [darkMode, setDarkMode] = useState(() => {
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark"
-    }
-    return "light"
-  })
-
-  const handleDarkMode = () => {
-    setDarkMode((prevMode) => (prevMode === "light" ? "dark" : "light"))
-  }
   useEffect(() => {
     if (darkMode === "dark") {
       document.querySelector("html").classList.add("dark")
     } else {
       document.querySelector("html").classList.remove("dark")
     }
-  }, [darkMode])
+  }),
+    []
+  // //dark mode
+  // const [darkMode, setDarkMode] = useState(() => {
+  //   if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+  //     return "dark"
+  //   }
+  //   return "light"
+  // })
+
+  // const handleDarkMode = () => {
+  //   setDarkMode((prevMode) => (prevMode === "light" ? "dark" : "light"))
+  // }
+  // useEffect(() => {
+  //   if (darkMode === "dark") {
+  //     document.querySelector("html").classList.add("dark")
+  //   } else {
+  //     document.querySelector("html").classList.remove("dark")
+  //   }
+  // }, [darkMode])
 
   return (
     <nav
@@ -142,7 +150,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       <section className="mt-auto mb-2">
         <button
           className={`w-full bg-transparent text-white hover:text-blue-700 transition-all duration-300 content-center`}
-          onClick={handleDarkMode}>
+          onClick={toggleDarkMode}>
           <FontAwesomeIcon icon={darkMode === "light" ? faMoon : faSun} />
         </button>
         <NavLink
