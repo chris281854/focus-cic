@@ -2,10 +2,9 @@ import React from "react"
 import { useState, useEffect } from "react"
 import LifeArea from "./pages/home/habits/LifeArea/LifeArea"
 import { useUser } from "../context/UserContext"
+import { Card, CardTitle, CardHeader, CardFooter, CardContent } from "./ui/card"
 
 export default function LifeAreaCard({ area }) {
-  
-
   const title = area.name
   const satisfaction = area.scores[0]?.score_value
   const longTermGoal = area.long_goal
@@ -31,11 +30,11 @@ export default function LifeAreaCard({ area }) {
 
   return (
     <>
-      <div
+      <Card
         onClick={handleOverview}
-        className="bg-gray-800 text-white p-6 rounded-lg shadow-lg mx-auto max-h-fit h-fit w-fit min-w-80 transition-all duration-300 hover:scale-105">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold mb-2">{title}</h2>
+        className="bg-gray-800 max-h-72 h-72 w-96 max-w-96 duration-300 hover:scale-105">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">{title}</CardTitle>
           <div className="w-full bg-gray-700 rounded-full h-4 mb-4">
             <div
               className="h-4 rounded-full"
@@ -44,14 +43,14 @@ export default function LifeAreaCard({ area }) {
                 backgroundColor: `${areaColor}`,
               }}></div>
           </div>
-        </div>
-        <div>
+        </CardHeader>
+        <CardContent>
           <h3 className="text-xl font-semibold mb-1">Metas</h3>
           {longTermGoal}
           {relatedGoals &&
             relatedGoals.map((goal) => <p className="text-gray-300">{goal}</p>)}
-        </div>
-        <div className="flex">
+        </CardContent>
+        <CardFooter className="flex">
           {/* <input
           type="text"
           placeholder="Meta a corto plazo"
@@ -66,8 +65,8 @@ export default function LifeAreaCard({ area }) {
           onChange={(e) => setLongTermGoal(e.target.value)}
           className="sm:w-auto flex-grow px-4 py-2 rounded-lg bg-gray-800 text-white border-none inline p-0 w-auto"
         /> */}
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
       {overView && (
         <LifeArea area={area} overView={overView} setOverView={setOverView} />
       )}

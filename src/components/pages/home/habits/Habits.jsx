@@ -329,8 +329,7 @@ export default function Habits() {
           </CardFooter>
         </Card>
       </div>
-
-      <div className="w-full flex flex-wrap border gap-3">
+      <div className="w-full flex flex-wrap gap-3">
         {lifeAreas.map((area) => (
           <LifeAreaCard area={area} key={area.life_area_id} />
         ))}
