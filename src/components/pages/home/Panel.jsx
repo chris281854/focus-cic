@@ -39,33 +39,15 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
     }
   }),
     []
-  // //dark mode
-  // const [darkMode, setDarkMode] = useState(() => {
-  //   if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  //     return "dark"
-  //   }
-  //   return "light"
-  // })
-
-  // const handleDarkMode = () => {
-  //   setDarkMode((prevMode) => (prevMode === "light" ? "dark" : "light"))
-  // }
-  // useEffect(() => {
-  //   if (darkMode === "dark") {
-  //     document.querySelector("html").classList.add("dark")
-  //   } else {
-  //     document.querySelector("html").classList.remove("dark")
-  //   }
-  // }, [darkMode])
 
   return (
     <nav
       className={
-        "flex-1 bg-bg-main-color/95 dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen max-w-14 flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none " +
-        (panelVisibility ? "w-56 min-w-56" : "w-14 min-w-14")
+        "bg-bg-main-color dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen max-w-14 flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none" +
+        (panelVisibility ? "w-56 min-w-56" : "w-56 min-w-56")
       }>
       <button
-        className={`bg-bg-main-color dark:bg-bg-main-color/95 text-white rounded-none border-0 focus:outline-none ${
+        className={`bg-bg-main-color dark:bg-bg-main-color text-white rounded-none border-0 focus:outline-none ${
           panelVisibility ? "" : "text-accent"
         }`}
         onClick={() => setPanelVisibility(!panelVisibility)}>
@@ -77,7 +59,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </button>
       <NavLink
         to="/home"
-        className={`h-14 transition-all duration-300 flex rounded-2xl ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl select-none ${
           homeMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">

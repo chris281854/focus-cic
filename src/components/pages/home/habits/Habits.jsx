@@ -273,6 +273,11 @@ export default function Habits() {
                   onChange={(e) => setNewLifeArea(e.target.value.toUpperCase())}
                   className="w-full sm:w-1/2 px-4 py-2 rounded-lg bg-gray-800 text-white uppercase"
                 />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-300">
+                  Añadir
+                </button>
                 <div className="flex items-center w-full sm:w-1/2">
                   <label htmlFor="score" className="mr-2">
                     Satisfacción:
@@ -307,17 +312,12 @@ export default function Habits() {
                   onChange={(e) => setLongTermGoal(e.target.value)}
                   className="px-4 py-2 rounded-lg bg-gray-800 text-white max-h-40 min-h-20 w-3/4"
                 />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-300">
-                  Añadir
-                </button>
               </div>
             </form>
           </CardContent>
           <CardFooter
             className={
-              "h-fit bg-slate-950 flex gap-1 overflow-hidden w-full flex-wrap pt-6 mt-auto "
+              "h-fit bg-slate-950 flex gap-1 overflow-hidden w-full flex-wrap pt-6 mt-auto"
             }>
             {optionalAreas.map((area) => (
               <div
@@ -329,8 +329,6 @@ export default function Habits() {
           </CardFooter>
         </Card>
       </div>
-
-
 
       <div className="w-full flex flex-wrap border gap-3">
         {lifeAreas.map((area) => (
