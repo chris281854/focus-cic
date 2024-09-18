@@ -21,8 +21,15 @@ import { ChartContainer } from "../../../../ui/chart"
 import dayjs from "dayjs"
 import getRandomColor from "../../../../../../server/RandomColor"
 import { TypeOutline } from "lucide-react"
+import ToDoItem from "../../../../ToDoItem"
 
-export default function LifeArea({ area, overView, setOverView, areaEvents }) {
+export default function LifeArea({
+  area,
+  overView,
+  setOverView,
+  areaEvents,
+  areaHasEvents,
+}) {
   const satisfaction = area.scores[0]?.score_value
   const [newSatisfaction, setNewSatisfaction] = useState(satisfaction)
   const [longTermGoal, setLongTermGoal] = useState(area.long_goal)
@@ -71,17 +78,36 @@ export default function LifeArea({ area, overView, setOverView, areaEvents }) {
     },
   }
 
+  const [tableModified, setTableModified] = useState(false)
+
+  const handleTableModified = () => {
+    setTableModified(true)
+  }
+
+  function generateEvents(areaEvents) {
+    if (!areaHasEvents) {
+      return <p>No hay eventos para mostrar.</p>
+    }
+    return areaEvents.map((event) => (
+      <ToDoItem
+        key={event.event_id}
+        event={event}
+        onEventModified={handleTableModified}
+      />
+    ))
+  }
+
   return (
     <div
       className="flex fixed z-50 inset-0 bg-opacity-30 bg-black backdrop-blur"
       onClick={handleOverview}>
       <div
-        className="flex bg-slate-800 flex-col justify-start p-4 w-full sm:w-full md:w-11/12 lg:w-11/12 h-full sm:h-5/6 rounded-3xl mx-auto my-auto overflow-scroll no-scrollbar"
+        className="flex bg-bg-main-color flex-col justify-start p-4 w-full sm:w-full md:w-11/12 lg:w-11/12 h-full sm:h-5/6 rounded-3xl mx-auto my-auto overflow-scroll no-scrollbar"
         onClick={handleChildClick}>
-        <div className="flex p-4 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-900/70 hover:bg-slate-900 transition-all items-center justify-between">
+        <div className="flex p-4 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all items-center justify-between">
           <input
             type="text"
-            className="w-72 mr-3 text-2xl font-bold text-white bg-transparent"
+            className={`w-72 mr-3 text-2xl font-bold text-white !bg-transparent`}
             value={areaName}
             onChange={(e) => setAreaName(e.target.value.toUpperCase())}
           />
@@ -110,7 +136,7 @@ export default function LifeArea({ area, overView, setOverView, areaEvents }) {
             <label>{newSatisfaction}</label>
           </div>
         </div>
-        <div className="flex p-2 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-900/70 hover:bg-slate-900 transition-all items-center flex-col w-80 h-fit max-h-72">
+        <div className="flex p-2 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all items-center flex-col w-80 h-fit max-h-72">
           <label htmlFor="long_goal" className="text-xl font-semibold mb-1">
             Metas
           </label>
@@ -128,7 +154,7 @@ export default function LifeArea({ area, overView, setOverView, areaEvents }) {
             </div>
           ))}
 
-        <Card className={"shadow-md hover:bg-slate-900 transition-all w-10/12"}>
+        <Card className={"shadow-md bg-slate-900 transition-all w-4/12"}>
           <CardHeader>
             <CardTitle>Seguidor de Satisfacción</CardTitle>
             <CardDescription>Valoraciones del último mes</CardDescription>
@@ -178,6 +204,7 @@ export default function LifeArea({ area, overView, setOverView, areaEvents }) {
             </div>
           </CardFooter>
         </Card>
+        <div className="">{areaHasEvents && generateEvents(areaEvents)}</div>
       </div>
     </div>
   )

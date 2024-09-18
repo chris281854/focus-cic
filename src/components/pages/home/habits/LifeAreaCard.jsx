@@ -81,6 +81,7 @@ export default function LifeAreaCard({ area, allEvents, events }) {
           overView={overView}
           setOverView={setOverView}
           areaEvents={areaEvents}
+          areaHasEvents={areaHasEvents}
         />
       )}
     </>

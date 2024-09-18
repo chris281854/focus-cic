@@ -162,14 +162,14 @@ button:hover {
   border-color: #646cff;
 }
 
-input[type=text] {
-  @apply dark:bg-slate-800 text-white disabled:text-gray-400
+input[type="text"] {
+  @apply dark:bg-slate-800 text-white disabled:text-gray-400;
 }
-input[type=date] {
-  @apply dark:bg-slate-800 text-white disabled:text-gray-400
+input[type="date"] {
+  @apply dark:bg-slate-800 text-white disabled:text-gray-400;
 }
-input[type=email] {
-  @apply dark:bg-slate-800 text-white disabled:text-gray-400
+input[type="email"] {
+  @apply dark:bg-slate-800 text-white disabled:text-gray-400;
 }
 
 @media (prefers-color-scheme: light) {
@@ -184,5 +184,3 @@ input[type=email] {
     background-color: #f9f9f9;
   }
 }
-
-
