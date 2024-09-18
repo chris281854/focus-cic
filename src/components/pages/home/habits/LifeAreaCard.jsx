@@ -69,7 +69,7 @@ export default function LifeAreaCard({ area, allEvents, events }) {
             ))
           ) : (
             <p className="p-1 rounded text-base">
-              No tienes ninguna tarea o evento pendiente
+              Nada que mirar por aquí
             </p>
           )}
         </CardContent>
