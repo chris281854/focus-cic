@@ -84,7 +84,7 @@ export default function WeekView({ events, onEventCreated }) {
         />
       )}
       <div className="flex">
-        <article className="overflow-y-scroll h-screen">
+        <article className="overflow-y-scroll h-screen w-full">
           <article className="w-full h-full min-h-screen">
             <section className="backdrop-blur-2xl dark:bg-bg-main-color bg-bg-main-color/50 rounded-b-lg">
               <section className="flex items-center justify-end pt-3 mr-4">
@@ -176,7 +176,7 @@ export default function WeekView({ events, onEventCreated }) {
         <aside
           className={`${
             !toggleAside ? "hidden" : "w-60 min-w-60"
-          } p-4 shadow-lg overflow-y-auto h-screen`}>
+          } p-4 shadow-lg overflow-y-auto h-screen border`}>
           <header className="text-lg font-bold mb-4 text-gray-800 dark:text-white">
             Eventos y Tareas
           </header>
