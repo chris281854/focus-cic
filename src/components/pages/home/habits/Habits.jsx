@@ -2,7 +2,7 @@ import { React, useState, useEffect } from "react"
 import { useUser } from "../../../../context/UserContext"
 import axios, { formToJSON } from "axios"
 import dayjs from "dayjs"
-import LifeAreaCard from "../../../LifeAreaCard"
+import LifeAreaCard from "./LifeAreaCard"
 import { TrendingUp } from "lucide-react"
 import {
   PolarAngleAxis,
@@ -49,7 +49,15 @@ export default function Habits() {
   const [latestScores, setLatestScores] = useState([])
   const [selectedValues, setSelectedValues] = useState([])
 
-  const { user, lifeAreas, updateLifeAreas } = useUser()
+  const {
+    user,
+    lifeAreas,
+    updateLifeAreas,
+    allEvents,
+    fetchAllEvents,
+    events,
+    fetchEvents,
+  } = useUser()
   const [newLifeArea, setNewLifeArea] = useState("")
   const [newScore, setNewScore] = useState(5)
   const [editingLifeArea, setEditingLifeArea] = useState(null)
@@ -90,6 +98,8 @@ export default function Habits() {
   useEffect(() => {
     if (user) {
       fetchLifeAreas()
+      fetchAllEvents()
+      fetchEvents()
     }
   }, [user])
 
@@ -282,27 +292,24 @@ export default function Habits() {
                   <label htmlFor="score" className="mr-2">
                     Satisfacción:
                   </label>
-                  <div className="relative flex items-center max-w-[14rem] p-2">
-                    <button
-                      type="button"
-                      id="decrement-button"
-                      onClick={downScore}
-                      className="fa fa-angle-down rounded-none bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 rounded-s-lg h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"></button>
-                    <input
-                      type="text"
-                      placeholder="0-10"
-                      id="score"
-                      value={newScore}
-                      inputMode="numeric"
-                      onChange={handleScoreInput}
-                      className="rounded-none m-0 w-10 bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    />
-                    <button
-                      type="button"
-                      id="increment-button"
-                      onClick={upScore}
-                      className="fa fa-angle-up rounded-none bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 rounded-e-lg h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"></button>
-                  </div>
+                  <select
+                    name="score"
+                    id="score"
+                    className="rounded-none m-0 w-14 bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    onChange={handleScoreInput}
+                    placeholder="0-10">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                  </select>
                 </div>
               </div>
               <div className="flex gap-4 items-center">
@@ -319,8 +326,9 @@ export default function Habits() {
             className={
               "h-fit bg-slate-950 flex gap-1 overflow-hidden w-full flex-wrap pt-6 mt-auto"
             }>
-            {optionalAreas.map((area) => (
+            {optionalAreas.map((area, key) => (
               <div
+                key={key}
                 className="h-8 w-fit p-1 bg-emerald-700 hover:bg-emerald-800 transition-all rounded-xl text-center"
                 onClick={() => setNewLifeArea(area.value)}>
                 {area.value}
@@ -331,7 +339,12 @@ export default function Habits() {
       </div>
       <div className="w-full flex flex-wrap gap-3">
         {lifeAreas.map((area) => (
-          <LifeAreaCard area={area} key={area.life_area_id} />
+          <LifeAreaCard
+            area={area}
+            key={area.life_area_id}
+            allEvents={allEvents}
+            events={events}
+          />
         ))}
       </div>
     </div>

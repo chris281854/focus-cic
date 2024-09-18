@@ -46,7 +46,6 @@ export default function Settings() {
     fetchUserData(user.user_id)
   }, [])
 
-  console.log(name)
   const handleEdition = async (userId) => {
     axios
       .patch(

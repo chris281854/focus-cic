@@ -22,7 +22,7 @@ import dayjs from "dayjs"
 import getRandomColor from "../../../../../../server/RandomColor"
 import { TypeOutline } from "lucide-react"
 
-export default function LifeArea({ area, overView, setOverView }) {
+export default function LifeArea({ area, overView, setOverView, areaEvents }) {
   const satisfaction = area.scores[0]?.score_value
   const [newSatisfaction, setNewSatisfaction] = useState(satisfaction)
   const [longTermGoal, setLongTermGoal] = useState(area.long_goal)
@@ -91,7 +91,7 @@ export default function LifeArea({ area, overView, setOverView }) {
               style={{
                 width: `${scoreBar}%`,
                 outlineColor: `${areaColor}`,
-                backgroundColor: `${areaColor}`
+                backgroundColor: `${areaColor}`,
               }}
             />
             <input
@@ -105,7 +105,8 @@ export default function LifeArea({ area, overView, setOverView }) {
             />
             <label>Modifica el valor ⬆</label>
           </div>
-          <div className={`static ml-4 rounded-full h-14 w-14 bg-${areaColor} text-center content-center`}>
+          <div
+            className={`static ml-4 rounded-full h-14 w-14 bg-${areaColor} text-center content-center`}>
             <label>{newSatisfaction}</label>
           </div>
         </div>
