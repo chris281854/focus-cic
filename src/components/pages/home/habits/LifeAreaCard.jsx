@@ -68,9 +68,7 @@ export default function LifeAreaCard({ area, allEvents, events }) {
               </div>
             ))
           ) : (
-            <p className="p-1 rounded text-base">
-              Nada que mirar por aquí
-            </p>
+            <p className="p-1 rounded text-base">Nada que mirar por aquí</p>
           )}
         </CardContent>
         {/* <CardFooter className="flex"></CardFooter> */}

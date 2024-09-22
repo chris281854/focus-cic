@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useUser } from "../../context/UserContext"
+import { useUser } from "../../../../context/UserContext"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   faUser,
@@ -9,8 +9,9 @@ import {
   faGear,
 } from "@fortawesome/free-solid-svg-icons" // Importar íconos
 import axios from "axios"
-import Footer from "../Footer"
+import Footer from "../../../Footer"
 import dayjs from "dayjs"
+import TimezoneSelector from "./TimezoneSelector"
 
 export default function Settings() {
   const { user, userProfile, updateUserProfile, getUserProfile } = useUser()
@@ -140,22 +141,14 @@ export default function Settings() {
           <section className="mb-8 p-6 w-full">
             <h2>General</h2>
             <h3 className="text-2xl mb-2">Zona Horaria</h3>
-            <label className="block text-white">
-              Selecciona tu Zona Horaria
-            </label>
-            <select className="w-full p-2 border border-gray-300 rounded mt-1">
-              {/* Opciones de zona horaria */}
-              <option value="GMT-12">GMT-12:00</option>
-              <option value="GMT+12">GMT+12:00</option>
-              {/* Más opciones... */}
-            </select>
+            {<TimezoneSelector />}
           </section>
         )}
         {/* Perfil Section */}
         {activeSection === "perfil" && (
-          <section className="flex flex-col md:flex-row mb-8 p-6 w-full space-y-6 md:space-y-0 md:space-x-6">
+          <section className="flex flex-col md:flex-row p-6 w-full space-y-6 md:space-y-0 md:space-x-6">
             {/* Sección del formulario */}
-            <div className="md:w-2/3 space-y-6">
+            <div className="md:w-fit space-y-6">
               <h2>Editar perfil</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>

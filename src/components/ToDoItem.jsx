@@ -22,7 +22,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
   // 2: Importante
   // 3: Normal
 
-  const { user } = useUser()
+  const { user, timezone } = useUser()
   const [isOpen, setIsOpen] = useState(false)
   let eventState = ""
 
@@ -132,7 +132,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
           </div>
           <div className="col-span-1 flex items-center justify-center">
             <span className="text-base text-gray-500">
-              {event.date ? dayjs(event.date).format("D MMMM | h:m a") : ""}
+              {event.date ? dayjs(event.date).tz(timezone).format("D MMMM | h:m a") : ""}
             </span>
           </div>
           <div className="col-span-1 flex items-center max-w-80 overflow-x-scroll rounded-xl scrollbar-none px-2">

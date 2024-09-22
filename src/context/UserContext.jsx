@@ -18,6 +18,11 @@ const useUserStore = create((set) => ({
       return "dark"
     } else return "light"
   })(),
+  timezone: "UTC",
+  setTimezone: (timezone) => {
+    localStorage.setItem("timezone", timezone)
+    set({ timezone })
+  },
 
   login: async (userData) => {
     set({ user: userData.user })
