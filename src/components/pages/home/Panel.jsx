@@ -59,7 +59,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </button>
       <NavLink
         to="/home"
-        className={`h-14 transition-all duration-300 flex rounded-2xl select-none ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl ${
           homeMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">

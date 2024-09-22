@@ -138,8 +138,8 @@ export default function Settings() {
         {/* General Section */}
         {activeSection === "general" && (
           <section className="mb-8 p-6 w-full">
-            <h1 className="text-5xl font-semibold mb-4">General</h1>
-            <h2 className="text-2xl font-semibold mb-2">Zona Horaria</h2>
+            <h2>General</h2>
+            <h3 className="text-2xl mb-2">Zona Horaria</h3>
             <label className="block text-white">
               Selecciona tu Zona Horaria
             </label>
