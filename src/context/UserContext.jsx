@@ -4,6 +4,7 @@ import Cookies from "js-cookie"
 
 const useUserStore = create((set) => ({
   user: null,
+  userProfile: [],
   loading: true,
   lifeAreas: [],
   events: [],
@@ -76,6 +77,33 @@ const useUserStore = create((set) => ({
       set({ user: null })
     } catch (error) {
       console.error("Error al cerrar sesión:", error)
+    }
+  },
+
+  getUserProfile: async () => {
+    const user = useUserStore.getState().user
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/get/userData?userId=${user.user_id}`,
+        { withCredentials: true }
+      )
+      set({ userProfile: response.data })
+    } catch (error) {
+      console.error("Error al obtener los datos de usuario: ", error)
+    }
+  },
+
+  updateUserProfile: async () => {
+    const user = useUserStore.getState().user
+    try {
+      const response = await axios.put(
+        `http://localhost:3001/api/updateProfile`,
+        {},
+        { withCredentials: true }
+      )
+      set({ userProfile: response.data })
+    } catch (error) {
+      console.error("Error al actualizar los datos de usuario: ", error)
     }
   },
 

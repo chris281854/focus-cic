@@ -290,12 +290,11 @@ app.get("/api/get/itemData", async (req, res) => {
   }
 })
 
-app.get("/api/get/userData", async (req, res) => {
+app.get("/api/get/userData", authenticateToken, async (req, res) => {
   const userId = req.query.userId
   try {
     const result = await pool.query(
-      'SELECT name, last_name, nickname, phone_number, email, birthDate FROM "Users" WHERE USER_ID = $1',
-
+      'SELECT name, last_name, nickname, phone_number, email, birthDate FROM "Users" WHERE user_id = $1',
       [userId]
     )
 

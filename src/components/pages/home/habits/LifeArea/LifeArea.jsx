@@ -22,6 +22,7 @@ import dayjs from "dayjs"
 import getRandomColor from "../../../../../../server/RandomColor"
 import { TypeOutline } from "lucide-react"
 import ToDoItem from "../../../../ToDoItem"
+import { useUser } from "../../../../../context/UserContext"
 
 export default function LifeArea({
   area,
@@ -30,6 +31,8 @@ export default function LifeArea({
   areaEvents,
   areaHasEvents,
 }) {
+  const { user, fetchEvents, events } = useUser()
+
   const satisfaction = area.scores[0]?.score_value
   const [newSatisfaction, setNewSatisfaction] = useState(satisfaction)
   const [longTermGoal, setLongTermGoal] = useState(area.long_goal)
@@ -80,10 +83,10 @@ export default function LifeArea({
     },
   }
 
-  const [tableModified, setTableModified] = useState(false)
+  // const [tableModified, setTableModified] = useState(false)
 
   const handleTableModified = () => {
-    setTableModified(true)
+    fetchEvents(user.user_id)
   }
 
   function generateEvents(areaEvents) {
@@ -106,14 +109,14 @@ export default function LifeArea({
       <div
         className="flex bg-bg-main-color flex-col justify-start p-4 w-full sm:w-full md:w-11/12 lg:w-11/12 h-full sm:h-5/6 rounded-3xl mx-auto my-auto overflow-scroll no-scrollbar"
         onClick={handleChildClick}>
-        <div className="flex p-4 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-900 hover:bg-slate-900 transition-all items-center justify-between">
+        <div className="flex px-4 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-900 hover:bg-slate-900 transition-all items-center justify-between">
           <input
             type="text"
             className={`w-72 mr-3 text-2xl font-bold text-white !bg-transparent`}
             value={areaName}
             onChange={(e) => setAreaName(e.target.value.toUpperCase())}
           />
-          <div className="w-7/12 bg-gray-700 rounded-full h-4 mt-10 mb-10 relative">
+          <div className="w-11/12 bg-gray-700 rounded-full h-4 mt-10 mb-10 relative">
             <div
               className={`outline h-4 rounded-full transition-all`}
               style={{
@@ -138,36 +141,38 @@ export default function LifeArea({
             <label>{newSatisfaction}</label>
           </div>
         </div>
-        <div className="flex gap-1 flex-wrap">
-          <Card className="bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all w-80 h-fit max-h-72">
-            <CardHeader>
-              <label htmlFor="long_goal" className="text-xl font-semibold">
-                Metas
-              </label>
-            </CardHeader>
-            <CardContent>
-              <textarea
-                name="long_goal"
-                id="long_goal"
-                className="h-full w-full min-h-20 font-thin text-white bg-transparent scrollbar-none"
-                onChange={(e) => setLongTermGoal(e.target.value)}
-                value={longTermGoal}></textarea>
-            </CardContent>
-          </Card>
-          <Card className="bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all w-80 h-fit max-h-72">
-            <CardHeader>
-              <label htmlFor="week_goal">Objetivos de la semana</label>
-            </CardHeader>
-            <CardContent>
-              <textarea
-                name="week_goal"
-                id="week_goal"
-                className="h-full w-full min-h-20 font-thin text-white bg-transparent scrollbar-none"
-                onChange={(e) => setWeekGoal(e.target.value)}
-                value={weekGoal}></textarea>
-            </CardContent>
-          </Card>
-          <Card className={"shadow-md bg-slate-900 transition-all w-4/12"}>
+        <div className="flex gap-2 flex-wrap">
+          <div className="flex flex-col gap-2 flex-1">
+            <Card className="bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all h-fit max-h-72 min-w-80">
+              <CardHeader>
+                <label htmlFor="long_goal" className="text-xl font-semibold">
+                  Metas
+                </label>
+              </CardHeader>
+              <CardContent>
+                <textarea
+                  name="long_goal"
+                  id="long_goal"
+                  className="h-full w-full min-h-20 font-thin text-white bg-transparent scrollbar-none"
+                  onChange={(e) => setLongTermGoal(e.target.value)}
+                  value={longTermGoal}></textarea>
+              </CardContent>
+            </Card>
+            <Card className="bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all h-fit max-h-72">
+              <CardHeader>
+                <label htmlFor="week_goal">Objetivos de la semana</label>
+              </CardHeader>
+              <CardContent>
+                <textarea
+                  name="week_goal"
+                  id="week_goal"
+                  className="h-full w-full min-h-20 font-thin text-white bg-transparent scrollbar-none"
+                  onChange={(e) => setWeekGoal(e.target.value)}
+                  value={weekGoal}></textarea>
+              </CardContent>
+            </Card>
+          </div>
+          <Card className={"shadow-md bg-slate-900 transition-all min-w-96"}>
             <CardHeader>
               <CardTitle>Seguidor de Satisfacción</CardTitle>
               <CardDescription>Valoraciones del último mes</CardDescription>

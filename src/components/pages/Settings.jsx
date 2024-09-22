@@ -6,14 +6,14 @@ import {
   faPalette,
   faCalendarAlt,
   faDatabase,
-  faGear
+  faGear,
 } from "@fortawesome/free-solid-svg-icons" // Importar íconos
 import axios from "axios"
 import Footer from "../Footer"
 import dayjs from "dayjs"
 
 export default function Settings() {
-  const { user } = useUser()
+  const { user, userProfile, updateUserProfile, getUserProfile } = useUser()
 
   const [onEdition, setOnEdition] = useState(false)
   const [nickName, setNickName] = useState("")
@@ -28,28 +28,22 @@ export default function Settings() {
   const wtInactiveLinks = "bg-transparent text-white hover:text-blue-600"
 
   useEffect(() => {
-    const fetchUserData = async (userId) => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3001/api/get/userData?userId=${userId}`
-        )
-        setName(response.data.name)
-        setLastName(response.data.last_name)
-        setNickName(response.data.nickname)
-        setBirthDate(dayjs(response.data.birthdate).format("YYYY-MM-DD"))
-        setEmail(response.data.email)
-        setPhoneNumber(response.data.phone_number)
-      } catch (error) {
-        console.error("Error al obtener los datos de usuario: ", error)
-      }
-    }
-    fetchUserData(user.user_id)
-  }, [])
+    getUserProfile()
+  }, [onEdition])
 
-  const handleEdition = async (userId) => {
+  useEffect(() => {
+    setName(userProfile.name)
+    setLastName(userProfile.last_name)
+    setNickName(userProfile.nickname)
+    setBirthDate(dayjs(userProfile.birthdate).format("YYYY-MM-DD"))
+    setEmail(userProfile.email)
+    setPhoneNumber(userProfile.phone_number)
+  }, [userProfile])
+
+  const handleEdition = async () => {
     axios
       .patch(
-        `http://localhost:3001/api/updateProfile?userId=${userId}`,
+        `http://localhost:3001/api/updateProfile?userId=${user.user_id}`,
         {
           name,
           lastName,
@@ -57,15 +51,11 @@ export default function Settings() {
           phoneNumber,
           email,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { withCredentials: true }
       )
       .then((response) => {
         console.log("Actualización exitosa:", response.data)
-        fetchUserData(user.user_id)
+        setOnEdition(false)
       })
       .catch((error) => {
         console.error(
@@ -73,6 +63,11 @@ export default function Settings() {
           error.response ? error.response.data : error.message
         )
       })
+  }
+
+  const cancelEdition = () => {
+    getUserProfile()
+    setOnEdition(false)
   }
 
   const changePassword = async (userId) => {
@@ -106,7 +101,7 @@ export default function Settings() {
       <nav className="flex-1 bg-gray-800 dark:bg-gray-900 flex sticky top-0 h-screen max-h-screen flex-col transition-all duration-300 w-56 min-w-56 pt-11">
         <button
           onClick={() => handleButtonClick("general")}
-          className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 hover:none ${
+          className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 ${
             activeSection === "general" ? wtActiveLinks : wtInactiveLinks
           }`}>
           <FontAwesomeIcon icon={faGear} />
@@ -120,7 +115,6 @@ export default function Settings() {
           <FontAwesomeIcon icon={faUser} />
           <span>Perfil</span>
         </button>
-
         <button
           onClick={() => handleButtonClick("personalizacion")}
           className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 ${
@@ -190,10 +184,11 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-white ">Nombre de Usuario</label>
-                  <div title="No puedes modificar tu nombre de usuario" className="bg-slate-800 hover:bg-slate-900 transition-all w-full h-10 rounded mt-1 content-center p-2 text-slate-300 select-text">
+                  <div
+                    title="No puedes modificar tu nombre de usuario"
+                    className="bg-slate-800 hover:bg-slate-900 transition-all w-full h-10 rounded mt-1 content-center p-2 text-slate-300 select-text">
                     <label>@{nickName}</label>
                   </div>
-
                 </div>
                 <div>
                   <label className="block text-white">
@@ -238,12 +233,12 @@ export default function Settings() {
                 {onEdition ? (
                   <>
                     <button
-                      onClick={() => handleEdition(user.user_id)}
+                      onClick={() => handleEdition()}
                       className="bg-blue-500 text-white px-4 py-2 rounded">
                       Guardar
                     </button>
                     <button
-                      onClick={() => setOnEdition(false)}
+                      onClick={() => cancelEdition()}
                       className="bg-red-500 text-white px-4 py-2 rounded">
                       Cancelar
                     </button>
