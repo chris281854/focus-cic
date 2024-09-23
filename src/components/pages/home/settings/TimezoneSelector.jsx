@@ -81,25 +81,28 @@ const TimezoneSelector = () => {
   return (
     <div className="w-full">
       <label className="block text-slate-300 mb-2">
-        Selecciona una zona horaria:
+        Zona horaria actual: {timezone}
       </label>
-      <Select
-        options={filteredOptions}
-        value={selectedTimezone}
-        onChange={handleChange}
-        onInputChange={customFilter}
-        isSearchable={true}
-        placeholder="Buscar zona horaria..."
-        styles={customStyles}
-      />
-      {/* Tarjeta con la fecha en tiempo real */}
-      <div className="mt-4 p-4 bg-slate-700 text-white rounded-lg shadow-md w-fit">
-        <h3 className="text-lg font-semibold">Fecha y Hora Actual:</h3>
-        <p className="text-xl">
-          {dayjs(currentDate)
-            .tz(timezone || "UTC")
-            .format("MMMM DD - HH:mm")}
-        </p>
+      <div className="flex w-full gap-2 flex-wrap">
+        <Select
+          options={filteredOptions}
+          value={selectedTimezone}
+          onChange={handleChange}
+          onInputChange={customFilter}
+          isSearchable={true}
+          placeholder="Buscar zona horaria..."
+          styles={customStyles}
+          className="flex-1 self-end min-w-60"
+        />
+        {/* Tarjeta con la fecha en tiempo real */}
+        <div className="p-4 bg-slate-700 text-white rounded-lg shadow-md w-fit">
+          <h3 className="text-lg font-semibold">Fecha y Hora</h3>
+          <p className="text-xl">
+            {dayjs(currentDate)
+              .tz(timezone || "UTC")
+              .format("MMMM DD H:mm")}
+          </p>
+        </div>
       </div>
     </div>
   )

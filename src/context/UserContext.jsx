@@ -18,10 +18,45 @@ const useUserStore = create((set) => ({
       return "dark"
     } else return "light"
   })(),
-  timezone: "UTC",
-  setTimezone: (timezone) => {
+  timezone: localStorage.getItem("timezone") || "UTC",
+  themeColor: [],
+
+  setThemeColor: async (theme) => {
+    localStorage.setItem("themeColor", theme)
+    set({ themeColor })
+
+    const userId = useUserStore.getState().user.user_id
+
+    try {
+      await axios.patch(
+        `http://localhost:3001/api/update/userConfig`,
+        {
+          userId: userId,
+          theme: theme,
+        },
+        { withCredentials: true }
+      )
+      console.log(`User theme updated to ${theme} successfully`)
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  setTimezone: async (timezone) => {
     localStorage.setItem("timezone", timezone)
     set({ timezone })
+
+    const userId = useUserStore.getState().user.user_id
+    try {
+      await axios.patch(
+        `http://localhost:3001/api/update/userConfig`,
+        { userId: userId, timezone: timezone },
+        { withCredentials: true }
+      )
+      console.log(`User timezone updated to ${timezone} successfully`)
+    } catch (error) {
+      console.error(error)
+    }
   },
 
   login: async (userData) => {

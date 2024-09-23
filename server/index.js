@@ -37,7 +37,7 @@ function authenticateToken(req, res, next) {
   if (!token) {
     return res.status(401).json({ error: "Token not found" })
   }
-  console.log("Token en cookies:", token)
+  // console.log("Token en cookies:", token)
 
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) {
@@ -849,7 +849,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
   }
 })
 
-app.patch("api/update/lifeAreas/:id", authenticateToken, async (req, res) => {
+app.patch("/api/update/lifeAreas/:id", authenticateToken, async (req, res) => {
   const { id } = req.params
   const { userId, name } = req.body
 
@@ -874,6 +874,40 @@ app.patch("api/update/lifeAreas/:id", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Error al actualizar life area: ", error)
     res.status(500).json({ error: "Error al actualizar life area" })
+  }
+})
+
+app.patch("/api/update/userConfig", authenticateToken, async (req, res) => {
+  const { userId, timezone, theme } = req.body
+
+  if (timezone) {
+    try {
+      const userConfigResult = await pool.query(
+        `UPDATE "User_Config" SET "timezone" = $1 WHERE user_id = $2 RETURNING *`,
+        [timezone, userId]
+      )
+      res.status(200).json(userConfigResult.rows[0])
+    } catch (error) {
+      console.error("Error al actualizar configuración del usuario: ", error)
+      res.status(500).json({
+        error: "Error al actualizar configuración del usuario",
+        details: error.message,
+      })
+    }
+  }
+  if (theme) {
+    try {
+      const userConfigResult = await pool.query(
+        `UPDATE "User_Config" SET "theme" = $1 WHERE user_id = $2
+        RETURNING *`,
+        [theme, userId]
+      )
+    } catch (error) {
+      console.error("Error al actualizar configuración del usuario: ", error)
+      res
+        .status(500)
+        .json({ error: "Error al actualizar configuración del usuario" })
+    }
   }
 })
 
@@ -937,13 +971,18 @@ app.post("/api/register", async (req, res) => {
 
   try {
     // Genera un hash seguro de la contraseña
-
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    await pool.query(
-      'INSERT INTO "Users" (name, birthdate, last_name, password, nickname, phone_number, email) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+    const result = await pool.query(
+      'INSERT INTO "Users" (name, birthdate, last_name, password, nickname, phone_number, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id',
       [name, birthDate, lastName, hashedPassword, nickName, phoneNumer, email]
     )
+
+    const userId = result.rows[0].user_id
+
+    await pool.query(`INSERT INTO "User_Config" (user_id) VALUES ($1)`, [
+      userId,
+    ])
 
     res.status(201).json({ message: "Usuario registrado exitosamente" })
   } catch (error) {
