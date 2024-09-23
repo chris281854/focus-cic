@@ -21,6 +21,8 @@ import timezone from "dayjs/plugin/timezone"
 import { useEffect } from "react"
 
 function App() {
+  const { themeColor } = useUser()
+
   dayjs.locale("es")
   dayjs.locale({
     ...es,
@@ -33,6 +35,11 @@ function App() {
   useEffect(() => {
     verifyToken()
   }, [verifyToken])
+
+  useEffect(() => {
+    // Actualiza la variable CSS --primary con el valor de themeColor
+    document.documentElement.style.setProperty("--primary", themeColor)
+  }, [themeColor])
 
   return (
     <>

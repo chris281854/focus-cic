@@ -4,10 +4,10 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
     "./index.html",
-    './pages/**/*.{js,jsx}',
-    './components/**/*.{js,jsx}',
-    './app/**/*.{js,jsx}',
-    './src/**/*.{js,jsx}',
+    "./pages/**/*.{js,jsx}",
+    "./components/**/*.{js,jsx}",
+    "./app/**/*.{js,jsx}",
+    "./src/**/*.{js,jsx}",
   ],
   prefix: "",
   theme: {
@@ -15,10 +15,7 @@ module.exports = {
       colors: {
         "text-main-color": "#eef1f4",
         "bg-main-color": "#000910",
-        primary: {
-          DEFAULT: "#041028",
-          foreground: "#041028", // Asegúrate de que este color se ajuste a tus necesidades
-        },
+        primary: "var(--primary)",
         secondary: {
           DEFAULT: "#3099FF",
           foreground: "#3099FF", // Asegúrate de que este color se ajuste a tus necesidades
@@ -58,8 +55,8 @@ module.exports = {
         ".no-scrollbar::-webkit-scrollbar": {
           display: "none",
         },
-      };
-      addUtilities(newUtilities);
+      }
+      addUtilities(newUtilities)
     },
   ],
-};
+}

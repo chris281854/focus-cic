@@ -10,6 +10,10 @@
   margin: 0;
   height: 100%;
   min-height: 100%;
+
+  .text-primary {
+    color: var(--primary);
+  }
 }
 
 @layer base {
@@ -159,7 +163,6 @@ button {
   transition: border-color 0.25s;
   user-select: none;
 }
-
 
 button:hover {
   border-color: #646cff;

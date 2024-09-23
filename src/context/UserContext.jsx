@@ -19,14 +19,13 @@ const useUserStore = create((set) => ({
     } else return "light"
   })(),
   timezone: localStorage.getItem("timezone") || "UTC",
-  themeColor: [],
+  themeColor: "#3099ff",
 
   setThemeColor: async (theme) => {
     localStorage.setItem("themeColor", theme)
-    set({ themeColor })
+    set({ themeColor: theme })
 
     const userId = useUserStore.getState().user.user_id
-
     try {
       await axios.patch(
         `http://localhost:3001/api/update/userConfig`,
