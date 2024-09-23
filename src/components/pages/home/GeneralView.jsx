@@ -1,9 +1,9 @@
 import { React, useEffect, useState } from "react"
-import NewEvent from "../NewEvent"
-import NewReminder from "../NewReminder"
-import ToDoItem from "../ToDoItem"
+import NewEvent from "../../NewEvent"
+import NewReminder from "../../NewReminder"
+import ToDoItem from "../../ToDoItem"
 import axios from "axios"
-import { useUser } from "../../context/UserContext"
+import { useUser } from "../../../context/UserContext"
 import dayjs from "dayjs"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faP, faPlus } from "@fortawesome/free-solid-svg-icons"
@@ -106,7 +106,7 @@ export default function GeneralView() {
       <h2>Tareas y Eventos</h2>
       <div className="flex p-4">
         <button
-          className="bg-slate-800 m-2"
+          className="bg-primary dark:bg-slate-800 m-2"
           onClick={() => setToggleNewEvent(true)}>
           <FontAwesomeIcon icon={faPlus} /> <span>Evento</span>
         </button>
@@ -122,7 +122,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h3
               onClick={() => toggleSection("overdue")}
-              className="font-bold bg-gray-900 p-2 rounded-md">
+              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
               Atrasados {expandedSections.overdue ? "▲" : "▼"}
             </h3>
             {expandedSections.overdue &&
@@ -132,7 +132,7 @@ export default function GeneralView() {
         <div className="mb-6">
           <h3
             onClick={() => toggleSection("today")}
-            className="font-bold bg-gray-900 p-2 rounded-md">
+            className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
             Hoy {expandedSections.today ? "▲" : "▼"}
           </h3>
           {expandedSections.today && generateEvents(categorizedEvents.today)}
@@ -141,7 +141,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h3
               onClick={() => toggleSection("tomorrow")}
-              className="font-bold bg-gray-900 p-2 rounded-md">
+              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
               Mañana {expandedSections.tomorrow ? "▲" : "▼"}
             </h3>
             {expandedSections.tomorrow &&
@@ -152,7 +152,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h3
               onClick={() => toggleSection("thisWeek")}
-              className="font-bold bg-gray-900 p-2 rounded-md">
+              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
               Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
             </h3>
             {expandedSections.thisWeek &&
@@ -163,7 +163,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h3
               onClick={() => toggleSection("thisMonth")}
-              className="font-bold bg-gray-900 p-2 rounded-md">
+              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
               Este Mes {expandedSections.thisMonth ? "▲" : "▼"}
             </h3>
             {expandedSections.thisMonth &&
@@ -174,7 +174,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h3
               onClick={() => toggleSection("later")}
-              className="font-bold bg-gray-900 p-2 rounded-md">
+              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
               Más Adelante {expandedSections.later ? "▲" : "▼"}
             </h3>
             {expandedSections.later && generateEvents(categorizedEvents.later)}

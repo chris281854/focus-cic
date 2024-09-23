@@ -3,7 +3,7 @@ import MonthView from "./MonthView"
 import WeekView from "./WeekView"
 import DayView from "./DayView"
 import axios from "axios"
-import { useUser } from "../../../context/UserContext"
+import { useUser } from "../../../../context/UserContext"
 
 export default function Calendar() {
   const { user, lifeAreas, fetchEvents, fetchReminders, events, reminders, allEvents } =

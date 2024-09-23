@@ -1,8 +1,8 @@
 import { React, useState, useEffect } from "react"
 import DayDiv from "./DayDiv"
 import dayjs from "dayjs"
-import NewEvent from "../../NewEvent"
-import EditItem from "../../EditItem"
+import NewEvent from "../../../NewEvent"
+import EditItem from "../../../EditItem"
 
 export default function MonthView({ events, onEventCreated }) {
   const monthName = [

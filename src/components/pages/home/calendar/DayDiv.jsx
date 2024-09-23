@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import React from "react"
 import dayjs from "dayjs"
-import NewEvent from "../../NewEvent"
-import EditItem from "../../EditItem"
+import NewEvent from "../../../NewEvent"
+import EditItem from "../../../EditItem"
 
 const DayDiv = React.memo(
   ({

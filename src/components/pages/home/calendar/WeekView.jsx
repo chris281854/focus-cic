@@ -3,8 +3,8 @@ import dayjs from "dayjs"
 // import "dayjs/locale/es"
 // import isoWeek from "dayjs/plugin/isoWeek"
 import WeekDayDiv from "./WeekDayDiv"
-import EditItem from "../../EditItem"
-import NewEvent from "../../NewEvent"
+import EditItem from "../../../EditItem"
+import NewEvent from "../../../NewEvent"
 
 export default function WeekView({ events, onEventCreated }) {
   const today = dayjs().locale("es").format("YYYY-MM-DD")

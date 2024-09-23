@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from "react"
-import NewEvent from "../../NewEvent"
-import EditItem from "../../EditItem"
+import NewEvent from "../../../NewEvent"
+import EditItem from "../../../EditItem"
 import dayjs from "dayjs"
 import "dayjs/locale/es"
 

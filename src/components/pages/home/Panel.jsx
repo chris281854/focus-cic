@@ -43,11 +43,11 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
   return (
     <nav
       className={
-        "bg-bg-main-color dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen max-w-14 flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none" +
+        "bg-primary dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen max-w-14 flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none" +
         (panelVisibility ? "w-56 min-w-56" : "w-14 min-w-14")
       }>
       <button
-        className={`bg-bg-main-color dark:bg-bg-main-color text-white rounded-none border-0 focus:outline-none ${
+        className={`bg-primary dark:bg-bg-main-color text-white rounded-none border-0 focus:outline-none ${
           panelVisibility ? "" : "text-accent"
         }`}
         onClick={() => setPanelVisibility(!panelVisibility)}>

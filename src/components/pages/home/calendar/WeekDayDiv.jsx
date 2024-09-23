@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import dayjs from "dayjs"
-import NewEvent from "../../NewEvent"
-import EditItem from "../../EditItem"
+import NewEvent from "../../../NewEvent"
+import EditItem from "../../../EditItem"
 
 export default function WeekDayDiv({
   today,
