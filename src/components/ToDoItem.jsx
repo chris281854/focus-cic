@@ -128,7 +128,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
                 <FontAwesomeIcon icon={faCheck} />
               </button>
             </div>
-            <h3 className="font-light text-white col-span-2 min-w-max">{event.name}</h3>
+            <p className="font-light text-white col-span-2 min-w-max">{event.name}</p>
           </div>
           <div className="col-span-1 flex items-center justify-center">
             <span className="text-base text-gray-500">

@@ -20,10 +20,12 @@ const useUserStore = create((set) => ({
   })(),
   timezone: localStorage.getItem("timezone") || "UTC",
   themeColor: "#3099ff",
+  secondaryColor: "#3099ff",
 
-  setThemeColor: async (theme) => {
+  setThemeColor: async (theme, secondary) => {
     localStorage.setItem("themeColor", theme)
-    set({ themeColor: theme })
+    localStorage.setItem("secondaryColor", secondary)
+    set({ themeColor: theme, secondaryColor: secondary })
 
     const userId = useUserStore.getState().user.user_id
     try {
@@ -32,10 +34,13 @@ const useUserStore = create((set) => ({
         {
           userId: userId,
           theme: theme,
+          secondaryTheme: secondary,
         },
         { withCredentials: true }
       )
-      console.log(`User theme updated to ${theme} successfully`)
+      console.log(
+        `User theme updated to ${theme} and ${secondary} successfully`
+      )
     } catch (error) {
       console.error(error)
     }

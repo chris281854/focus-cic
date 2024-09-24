@@ -19,7 +19,7 @@ import { useUser } from "../../../context/UserContext"
 
 export default function Panel({ panelVisibility, setPanelVisibility }) {
   const wtActiveLinks = "bg-slate-500 text-accent"
-  const wtInactiveLinks = "bg-bg-main-color text-white"
+  const wtInactiveLinks = "bg-transparent text-white"
   //Para isActive
   const homeMatch = useMatch("/home")
   const calendarMatch = useMatch("/home/calendar")
@@ -47,7 +47,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
         (panelVisibility ? "w-56 min-w-56" : "w-14 min-w-14")
       }>
       <button
-        className={`bg-primary dark:bg-bg-main-color text-white rounded-none border-0 focus:outline-none ${
+        className={`bg-transparent text-white rounded-none border-0 focus:outline-none ${
           panelVisibility ? "" : "text-accent"
         }`}
         onClick={() => setPanelVisibility(!panelVisibility)}>

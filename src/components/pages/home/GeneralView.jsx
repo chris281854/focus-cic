@@ -103,7 +103,7 @@ export default function GeneralView() {
 
   return (
     <div className="flex relative p-5 flex-col w-full select-none">
-      <h2>Tareas y Eventos</h2>
+      <h3>Tareas y Eventos</h3>
       <div className="flex p-4">
         <button
           className="bg-primary dark:bg-slate-800 m-2"
@@ -120,70 +120,70 @@ export default function GeneralView() {
       <div className="todo-list w-full">
         {hasOverdueEvents && (
           <div className="mb-6">
-            <h3
+            <h5
               onClick={() => toggleSection("overdue")}
-              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
               Atrasados {expandedSections.overdue ? "▲" : "▼"}
-            </h3>
+            </h5>
             {expandedSections.overdue &&
               generateEvents(categorizedEvents.overdue)}
           </div>
         )}
         <div className="mb-6">
-          <h3
+          <h5
             onClick={() => toggleSection("today")}
-            className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
+            className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
             Hoy {expandedSections.today ? "▲" : "▼"}
-          </h3>
+          </h5>
           {expandedSections.today && generateEvents(categorizedEvents.today)}
         </div>
         {hasTomorrowEvents && (
           <div className="mb-6">
-            <h3
+            <h5
               onClick={() => toggleSection("tomorrow")}
-              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
               Mañana {expandedSections.tomorrow ? "▲" : "▼"}
-            </h3>
+            </h5>
             {expandedSections.tomorrow &&
               generateEvents(categorizedEvents.tomorrow)}
           </div>
         )}
         {hasThisWeekEvents && (
           <div className="mb-6">
-            <h3
+            <h5
               onClick={() => toggleSection("thisWeek")}
-              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
               Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
-            </h3>
+            </h5>
             {expandedSections.thisWeek &&
               generateEvents(categorizedEvents.thisWeek)}
           </div>
         )}
         {hasThisMonthEvents && (
           <div className="mb-6">
-            <h3
+            <h5
               onClick={() => toggleSection("thisMonth")}
-              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
               Este Mes {expandedSections.thisMonth ? "▲" : "▼"}
-            </h3>
+            </h5>
             {expandedSections.thisMonth &&
               generateEvents(categorizedEvents.thisMonth)}
           </div>
         )}
         {hasLaterEvents && (
           <div className="mb-6">
-            <h3
+            <h5
               onClick={() => toggleSection("later")}
-              className="font-bold bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
               Más Adelante {expandedSections.later ? "▲" : "▼"}
-            </h3>
+            </h5>
             {expandedSections.later && generateEvents(categorizedEvents.later)}
           </div>
         )}
       </div>
 
       <div className="">
-        <mark>Alarmas</mark>
+        <h4>Alarmas</h4>
         {generateAlarms()}
       </div>
     </div>

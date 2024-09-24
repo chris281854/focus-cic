@@ -16,10 +16,7 @@ module.exports = {
         "text-main-color": "#eef1f4",
         "bg-main-color": "#000910",
         primary: "var(--primary)",
-        secondary: {
-          DEFAULT: "#3099FF",
-          foreground: "#3099FF", // Asegúrate de que este color se ajuste a tus necesidades
-        },
+        secondary: "var(--secondary)",
         accent: {
           DEFAULT: "#07ed2a",
           foreground: "#07ed2a", // Asegúrate de que este color se ajuste a tus necesidades

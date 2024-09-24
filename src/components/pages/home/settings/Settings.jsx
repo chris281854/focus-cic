@@ -100,7 +100,7 @@ export default function Settings() {
 
   return (
     <div className="flex select-none w-full h-screen">
-      <nav className="flex-1 bg-gray-800 dark:bg-gray-900 flex sticky top-0 h-screen max-h-screen flex-col transition-all duration-300 w-56 min-w-56 pt-11">
+      <nav className="flex-1 bg-secondary dark:bg-gray-900 flex sticky top-0 h-screen max-h-screen flex-col transition-all duration-300 w-56 min-w-56 pt-11">
         <button
           onClick={() => handleButtonClick("general")}
           className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 ${
