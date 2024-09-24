@@ -7,6 +7,7 @@ import { useUser } from "../../../context/UserContext"
 import dayjs from "dayjs"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faP, faPlus } from "@fortawesome/free-solid-svg-icons"
+import ThemeSelector from "./settings/ThemeSelector"
 
 export default function GeneralView() {
   const { user, lifeAreas, fetchEvents, fetchReminders, events, reminders } =
@@ -26,7 +27,7 @@ export default function GeneralView() {
 
   function generateEvents(eventList) {
     if (!eventList | (eventList.length === 0)) {
-      return <p>No hay eventos para mostrar.</p>
+      return <p>Sin tareas pendientes</p>
     }
 
     return eventList.map((event) => (
@@ -102,11 +103,11 @@ export default function GeneralView() {
   const [toggleNewEvent, setToggleNewEvent] = useState(false)
 
   return (
-    <div className="flex relative p-5 flex-col w-full select-none">
-      <h3>Tareas y Eventos</h3>
-      <div className="flex p-4">
+    <div className="flex relative flex-col w-full select-none">
+      <header className="border-b dark:border-white border-secondary dark:bg-transparent flex p-4 items-center gap-2 mx-5">
+        <h4 className="dark:text-white">Tareas y eventos pendientes</h4>
         <button
-          className="bg-primary dark:bg-slate-800 m-2"
+          className="bg-primary text-white dark:bg-slate-800 ml-auto"
           onClick={() => setToggleNewEvent(true)}>
           <FontAwesomeIcon icon={faPlus} /> <span>Evento</span>
         </button>
@@ -115,14 +116,13 @@ export default function GeneralView() {
             onEventCreated={handleTableModified}
             setToggleNewEvent={setToggleNewEvent}></NewEvent>
         )}
-        <NewReminder onReminderCreated={handleTableModified}></NewReminder>
-      </div>
-      <div className="todo-list w-full">
+      </header>
+      <section className="todo-list w-full p-5">
         {hasOverdueEvents && (
           <div className="mb-6">
             <h5
               onClick={() => toggleSection("overdue")}
-              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
               Atrasados {expandedSections.overdue ? "▲" : "▼"}
             </h5>
             {expandedSections.overdue &&
@@ -132,7 +132,7 @@ export default function GeneralView() {
         <div className="mb-6">
           <h5
             onClick={() => toggleSection("today")}
-            className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
+            className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
             Hoy {expandedSections.today ? "▲" : "▼"}
           </h5>
           {expandedSections.today && generateEvents(categorizedEvents.today)}
@@ -141,7 +141,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h5
               onClick={() => toggleSection("tomorrow")}
-              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
               Mañana {expandedSections.tomorrow ? "▲" : "▼"}
             </h5>
             {expandedSections.tomorrow &&
@@ -152,7 +152,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h5
               onClick={() => toggleSection("thisWeek")}
-              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
               Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
             </h5>
             {expandedSections.thisWeek &&
@@ -163,7 +163,7 @@ export default function GeneralView() {
           <div className="mb-6">
             <h5
               onClick={() => toggleSection("thisMonth")}
-              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
               Este Mes {expandedSections.thisMonth ? "▲" : "▼"}
             </h5>
             {expandedSections.thisMonth &&
@@ -174,18 +174,25 @@ export default function GeneralView() {
           <div className="mb-6">
             <h5
               onClick={() => toggleSection("later")}
-              className=" bg-primary dark:bg-gray-900 p-2 rounded-md">
+              className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
               Más Adelante {expandedSections.later ? "▲" : "▼"}
             </h5>
             {expandedSections.later && generateEvents(categorizedEvents.later)}
           </div>
         )}
-      </div>
-
-      <div className="">
-        <h4>Alarmas</h4>
-        {generateAlarms()}
-      </div>
+      </section>
+      <header className="border-b dark:border-white border-secondary dark:bg-transparent flex p-4 items-center gap-2 mx-5">
+        <h4 className="dark:text-white">Recordatorios activos</h4>
+        <button
+          className="bg-primary text-white dark:bg-slate-800 ml-auto"
+          // onClick={() => setToggleNewEvent(true)}
+          >
+          <FontAwesomeIcon icon={faPlus} /> <span>Recordatorio</span>
+        </button>
+        <NewReminder onReminderCreated={handleTableModified}></NewReminder>
+      </header>
+      <div className="">{generateAlarms()}</div>
+      <ThemeSelector />
     </div>
   )
 }

@@ -15,9 +15,9 @@ const DayDiv = React.memo(
     onEventCreated,
   }) => {
     const divClassnames = {
-      base: "row-span-1 col-span-1 border p-1 font-bold overflow-hidden hover:bg-slate-900 h-full min-h-full",
+      base: "row-span-1 col-span-1 border p-1 font-bold overflow-hidden hover:bg-primary/50 dark:hover:bg-slate-900 h-full min-h-full",
       otherMonthDays: "opacity-50",
-      today: "bg-blue-900/40",
+      today: "bg-secondary",
     }
 
     const computeDivClass = () => {

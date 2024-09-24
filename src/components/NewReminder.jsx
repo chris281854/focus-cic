@@ -37,7 +37,7 @@ export default function NewReminder({ onReminderCreated }) {
     <>
       <div className="relative">
         <button
-          className="new-Reminder bg-slate-800 m-2"
+          className="new-Reminder bg-slate-800"
           onClick={toggleNewReminder}>
           Nuevo Recordatorio
         </button>

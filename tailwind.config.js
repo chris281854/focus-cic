@@ -15,8 +15,24 @@ module.exports = {
       colors: {
         "text-main-color": "#eef1f4",
         "bg-main-color": "#000910",
-        primary: "var(--primary)",
-        secondary: "var(--secondary)",
+        primary: ({ opacityValue }) => {
+          if (opacityValue !== undefined) {
+            return `rgba(var(--primary), ${opacityValue})`
+          }
+          return "var(--primary)"
+        },
+        secondary: ({ opacityValue }) => {
+          if (opacityValue !== undefined) {
+            return `rgba(var(--secondary), ${opacityValue})`
+          }
+          return "var(--secondary)"
+        },
+        tertiary: ({ opacityValue }) => {
+          if (opacityValue !== undefined) {
+            return `rgba(var(--tertiary), ${opacityValue})`
+          }
+          return "var(--tertiary)"
+        },
         accent: {
           DEFAULT: "#07ed2a",
           foreground: "#07ed2a", // Asegúrate de que este color se ajuste a tus necesidades

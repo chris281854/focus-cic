@@ -18,8 +18,10 @@ import { Moon, Sun } from "lucide-react"
 import { useUser } from "../../../context/UserContext"
 
 export default function Panel({ panelVisibility, setPanelVisibility }) {
-  const wtActiveLinks = "bg-slate-500 text-accent"
-  const wtInactiveLinks = "bg-transparent text-white"
+  const wtActiveLinks =
+    "bg-tertiary text-white hover:text-primary dark:hover:text-white dark:bg-slate-500 dark:text-accent"
+  const wtInactiveLinks =
+    "bg-transparent text-gray-700 hover:text-tertiary dark:hover:text-blue-500"
   //Para isActive
   const homeMatch = useMatch("/home")
   const calendarMatch = useMatch("/home/calendar")
@@ -43,23 +45,23 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
   return (
     <nav
       className={
-        "bg-primary dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen max-w-14 flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none" +
+        "bg-secondary/70 dark:bg-bg-main-color flex sticky whitespace-nowrap top-0 h-screen max-h-screen max-w-14 flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none" +
         (panelVisibility ? "w-56 min-w-56" : "w-14 min-w-14")
       }>
       <button
-        className={`bg-transparent text-white rounded-none border-0 focus:outline-none ${
-          panelVisibility ? "" : "text-accent"
+        className={`bg-transparent text-primary dark:text-accent rounded-none border-0 focus:outline-none ${
+          panelVisibility ? "" : "text-tertiary"
         }`}
         onClick={() => setPanelVisibility(!panelVisibility)}>
         {panelVisibility ? (
           <FontAwesomeIcon icon={faChevronLeft} />
         ) : (
-          <FontAwesomeIcon icon={faChevronRight} className="text-accent" />
+          <FontAwesomeIcon icon={faChevronRight} className="dark:text-accent" />
         )}
       </button>
       <NavLink
         to="/home"
-        className={`h-14 transition-all duration-300 flex rounded-2xl ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
           homeMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
@@ -77,7 +79,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </NavLink>
       <NavLink
         to="/home/calendar"
-        className={`h-14 transition-all duration-300 flex rounded-2xl ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
           calendarMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
@@ -95,7 +97,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </NavLink>
       <NavLink
         to="/home/habits"
-        className={`h-14 transition-all duration-300 flex rounded-2xl ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
           habitsMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
@@ -113,7 +115,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </NavLink>
       <NavLink
         to="/home/settings"
-        className={`h-14 transition-all duration-300 flex rounded-2xl ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
           settingsMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
@@ -129,16 +131,16 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
           Configuración
         </div>
       </NavLink>
-      <section className="mt-auto mb-2">
+      <section className="mt-auto bg-secondary dark:bg-bg-main-color">
         <button
-          className={`w-full bg-transparent text-white hover:text-blue-700 transition-all duration-300 content-center`}
+          className={`w-full bg-transparent text-gray-900 dark:text-white hover:text-blue-700 transition-all duration-300 content-center`}
           onClick={toggleDarkMode}>
           <FontAwesomeIcon icon={darkMode === "light" ? faMoon : faSun} />
         </button>
         <NavLink
           onClick={handleLogOut}
           to="/login"
-          className={`h-14 transition-all duration-300 flex rounded-2xl`}>
+          className={`h-14 text-gray-900  dark:text-white transition-all duration-300 flex rounded-2xl`}>
           <div className="flex h-full min-w-14 justify-center items-center">
             <FontAwesomeIcon icon={faArrowRightFromBracket} />
           </div>

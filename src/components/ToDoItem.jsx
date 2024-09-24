@@ -45,10 +45,10 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
       return "bg-orange-500 "
     } else if (state === 4) {
       eventState = "Para este mes"
-      return "bg-white "
+      return "bg-green-400 "
     } else if (state === 5) {
       eventState = "Después"
-      return "bg-white "
+      return "bg-green-400 "
     }
   }
 
@@ -110,7 +110,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
     <>
       {event && (
         <div
-          className="grid grid-cols-[0px_1fr_0.5fr_1fr_1fr_auto] bg-slate-800 rounded-lg shadow-lg p-1 m-3 ml-0 cursor-pointer hover:bg-cyan-900 transition-all overflow-hidden"
+          className="grid grid-cols-[0px_1fr_0.5fr_1fr_1fr_auto] bg-tertiary dark:bg-slate-800 rounded-lg shadow-lg p-1 m-3 ml-0 cursor-pointer dark:hover:bg-cyan-900 transition-all overflow-hidden"
           onClick={toggleOpen}>
           <div
             className={
@@ -131,7 +131,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
             <p className="font-light text-white col-span-2 min-w-max">{event.name}</p>
           </div>
           <div className="col-span-1 flex items-center justify-center">
-            <span className="text-base text-gray-500">
+            <span className="text-base text-white">
               {event.date ? dayjs(event.date).tz(timezone).format("D MMMM | h:m a") : ""}
             </span>
           </div>
@@ -150,7 +150,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
           </div>
           <div className="col-span-1 flex justify-end items-center space-x-2 pr-1">
             <button
-              className="text-white bg-slate-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
+              className="text-white bg-primary dark:bg-slate-800 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
               onClick={(e) => {
                 e.stopPropagation()
                 toggleEditVisibility()
@@ -158,7 +158,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
               <FontAwesomeIcon icon={faEdit} />
             </button>
             <button
-              className="text-white bg-slate-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
+              className="text-white bg-primary dark:bg-slate-800 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
               onClick={(e) => {
                 e.stopPropagation()
                 handleDelete(event.event_id, "event")
@@ -169,10 +169,10 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
           {isOpen && (
             <div className="grid col-span-6 row-start-2">
               <div className="col-span-3 row-start-2">
-                <p className="text-gray-400 mt-2 p-2">{event.description}</p>
+                <p className="text-white mt-2 p-2">{event.description}</p>
               </div>
               <div className="col-start-4 col-span-3 row-start-2">
-                <p className="text-gray-400 mt-2 p-2 place-self-end">
+                <p className="text-white mt-2 p-2 place-self-end">
                   {eventState}
                 </p>
               </div>

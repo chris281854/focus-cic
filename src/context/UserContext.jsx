@@ -19,13 +19,19 @@ const useUserStore = create((set) => ({
     } else return "light"
   })(),
   timezone: localStorage.getItem("timezone") || "UTC",
-  themeColor: "#3099ff",
-  secondaryColor: "#3099ff",
+  themeColor: "100, 116, 139",
+  secondaryColor: "148, 163, 184",
+  tertiaryColor: "",
 
-  setThemeColor: async (theme, secondary) => {
+  setThemeColor: async (theme, secondary, tertiary) => {
     localStorage.setItem("themeColor", theme)
     localStorage.setItem("secondaryColor", secondary)
-    set({ themeColor: theme, secondaryColor: secondary })
+    localStorage.setItem("tertiaryColor", tertiary)
+    set({
+      themeColor: theme,
+      secondaryColor: secondary,
+      tertiaryColor: tertiary,
+    })
 
     const userId = useUserStore.getState().user.user_id
     try {
@@ -34,7 +40,6 @@ const useUserStore = create((set) => ({
         {
           userId: userId,
           theme: theme,
-          secondaryTheme: secondary,
         },
         { withCredentials: true }
       )
