@@ -146,7 +146,7 @@ export default function DayView({ events, onEventCreated }) {
                   return (
                     <div
                       key={index}
-                      className="border-b h-12 hover:bg-secondary dark:hover:bg-slate-800 flex p-1"
+                      className="border-b h-12 hover:bg-secondary dark:hover:bg-slate-800 flex p-1 pr-8"
                       onClick={(e) => {
                         if (!onEdit) handleNewEvent(hourString)
                       }}>
@@ -163,8 +163,9 @@ export default function DayView({ events, onEventCreated }) {
                               backgroundColor:
                                 event.life_areas[0]?.color || "#808080",
                             }}
-                            className="rounded-md max-h-full w-full p-1 mx-1 font-thin text-sm overflow-hidden">
-                            {event.name}
+                            className="rounded-md max-h-full w-full p-1 mx-1 text-xs font-light text-black truncate overflow-hidden whitespace-nowrap shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <span className="font-semibold">{event.name}</span>{" "}
+                            - {event.description}
                           </div>
                         )
                       })}
@@ -187,40 +188,40 @@ export default function DayView({ events, onEventCreated }) {
               <ul>
                 {matchingEvents.map((event) => (
                   <li
-                  key={event.event_id}
-                  onClick={() => toggleEditEventVisibility(event)}
-                  className="mb-3 p-4 rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg shadow-sm overflow-hidden"
-                  style={{
-                    background: `linear-gradient(135deg, ${
-                      event.life_areas[0]?.color || "#808080"
-                    } 0%, #f0f0f0 150%)`,
-                  }}>
-                  <h6 className="text-lg font-semibold mb-2">{event.name}</h6>
-                  <div className="flex items-center justify-between text-gray-900 rounded">
-                    <div className="flex items-center space-x-2">
-                      <i className="fas fa-calendar-alt text-gray-900"></i>
-                      <p className="text-sm">
-                        {dayjs(event.date).format("dddd")}
-                      </p>
+                    key={event.event_id}
+                    onClick={() => toggleEditEventVisibility(event)}
+                    className="mb-3 p-4 rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg shadow-sm overflow-hidden"
+                    style={{
+                      background: `linear-gradient(135deg, ${
+                        event.life_areas[0]?.color || "#808080"
+                      } 0%, #f0f0f0 150%)`,
+                    }}>
+                    <h6 className="text-lg font-semibold mb-2">{event.name}</h6>
+                    <div className="flex items-center justify-between text-gray-900 rounded">
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-calendar-alt text-gray-900"></i>
+                        <p className="text-sm">
+                          {dayjs(event.date).format("dddd")}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-clock text-gray-900"></i>
+                        <p className="text-sm">
+                          {dayjs(event.date).format("h:mm A")}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <i className="fas fa-clock text-gray-900"></i>
-                      <p className="text-sm">
-                        {dayjs(event.date).format("h:mm A")}
-                      </p>
+                    <div className="flex space-x-2 mt-2">
+                      {event.life_areas.map((area, index) => (
+                        <span
+                          key={index}
+                          className="inline-block px-2 py-1 text-xs font-medium rounded bg-white text-black"
+                          style={{ backgroundColor: area.color || "#ddd" }}>
+                          {area.name}
+                        </span>
+                      ))}
                     </div>
-                  </div>
-                  <div className="flex space-x-2 mt-2">
-                    {event.life_areas.map((area, index) => (
-                      <span
-                        key={index}
-                        className="inline-block px-2 py-1 text-xs font-medium rounded bg-white text-black"
-                        style={{ backgroundColor: area.color || "#ddd" }}>
-                        {area.name}
-                      </span>
-                    ))}
-                  </div>
-                </li>
+                  </li>
                 ))}
               </ul>
             ) : (

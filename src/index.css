@@ -190,7 +190,7 @@ input[type="text"] {
   @apply dark:bg-slate-800 dark:text-white disabled:text-gray-400;
 }
 input[type="date"] {
-  @apply dark:bg-slate-800 dark:text-white disabled:text-gray-400;
+  @apply bg-tertiary dark:bg-slate-800 dark:text-white disabled:text-gray-400;
 }
 input[type="email"] {
   @apply dark:bg-slate-800 dark:text-white disabled:text-gray-400;

@@ -1,9 +1,9 @@
-import { React, useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useUser } from "../../../../context/UserContext"
-import axios, { formToJSON } from "axios"
+import axios from "axios"
 import dayjs from "dayjs"
 import LifeAreaCard from "./LifeAreaCard"
-import { TrendingUp } from "lucide-react"
+import { PlusCircle, TrendingUp } from "lucide-react"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -20,7 +20,6 @@ import {
   CardTitle,
 } from "../../../ui/card"
 import { ChartContainer } from "../../../ui/chart"
-import getRandomColor from "../../../../../server/RandomColor"
 
 export default function Habits() {
   // Manejar eventos base
@@ -83,17 +82,17 @@ export default function Habits() {
     }
   }
 
-  // manejar eventos base:
-  const handleSeleccion = (value) => {
-    setSelectedValues((prevSelectedValues) => {
-      if (prevSelectedValues.includes(value)) {
-        //Retirar valores seleccionados
-        return prevSelectedValues.filter((item) => item !== value)
-      } else {
-        return [...prevSelectedValues, value]
-      }
-    })
-  }
+  // // manejar eventos base:
+  // const handleSeleccion = (value) => {
+  //   setSelectedValues((prevSelectedValues) => {
+  //     if (prevSelectedValues.includes(value)) {
+  //       //Retirar valores seleccionados
+  //       return prevSelectedValues.filter((item) => item !== value)
+  //     } else {
+  //       return [...prevSelectedValues, value]
+  //     }
+  //   })
+  // }
 
   useEffect(() => {
     if (user) {
@@ -235,109 +234,104 @@ export default function Habits() {
   }))
 
   return (
-    <div className="w-full max-w-full min-h-screen text-white flex flex-col p-4 select-none gap-1">
-      <div className="flex gap-3 p-1 flex-wrap w-full justify-center">
-        <Card
-          className={
-            "lg:w-4/12 min-w-96 max-h-96 sm:max-w-full flex-grow 2xl:flex-none"
-          }>
-          <CardHeader className="items-center">
-            <CardTitle>Facetas</CardTitle>
-            <CardDescription>
+    <div className="w-full max-w-full min-h-screen text-primary-foreground flex flex-col p-4 select-none gap-4">
+      <div className="flex gap-4 flex-wrap w-full justify-center">
+        <Card className="lg:w-5/12 min-w-[300px] max-h-[400px] flex-grow bg-primary/10 dark:bg-slate-900 border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-primary dark:text-white">
+              Facetas de Vida
+            </CardTitle>
+            <CardDescription className="text-primary dark:text-white">
               Satisfacción percibida en cada una de sus facetas
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-0">
-            <ChartContainer className="mx-auto aspect-square max-h-[250px] w-full">
+            <ChartContainer className="mx-auto aspect-square max-h-[300px] w-full">
               <RadarChart data={chartData}>
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}
                 />
-                <PolarAngleAxis dataKey="area" />
-                <PolarGrid />
+                <PolarAngleAxis
+                  dataKey="area"
+                  tick={{ fill: "currentColor" }}
+                />
+                <PolarGrid stroke="currentColor" opacity={0.2} />
                 <Radar
                   dataKey="score"
-                  fill="#4299e1"
-                  fillOpacity={0.7}
+                  fill="rgb(var(--primary))"
+                  fillOpacity={0.6}
+                  stroke="rgb(var(--primary))"
                   dot={{
                     r: 4,
                     fillOpacity: 1,
+                    fill: "rgb(var(--tertiary))",
+                    stroke: "rgb(var(--primary))",
                   }}
                 />
               </RadarChart>
             </ChartContainer>
           </CardContent>
         </Card>
-        <Card className="bg-slate-900 lg:w-6/12 min-w-min max-w-fit max-h-96 overflow-hidden 2xl:flex-none">
-          <CardHeader className="text-2xl font-semibold">
-            <CardTitle>Añadir nueva área de vida</CardTitle>
+        <Card className="bg-primary/10 dark:bg-slate-900 lg:w-6/12 min-w-[300px] max-h-[400px] border-primary/20 overflow-y-scroll !scrollbar-thumb-slate-800">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-primary dark:text-white">
+              Nueva Área de Vida
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={addLifeArea} className="flex flex-col gap-4">
-              <div className="flex items-center flex-col sm:flex-row gap-4 flex-wrap">
+              <div className="flex items-center flex-col sm:flex-row gap-4">
                 <input
                   type="text"
-                  placeholder="Nombre"
+                  placeholder="Nombre del área"
                   value={newLifeArea}
                   onChange={(e) => setNewLifeArea(e.target.value.toUpperCase())}
-                  className="w-full sm:w-1/2 px-4 py-2 rounded-lg bg-gray-800 text-white uppercase"
+                  className="w-full sm:w-1/2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-300">
-                  Añadir
-                </button>
-                <div className="flex items-center w-full sm:w-1/2">
-                  <label htmlFor="score" className="mr-2">
+                <div className="flex items-center w-full sm:w-1/2 gap-2">
+                  <label htmlFor="score" className="whitespace-nowrap">
                     Satisfacción:
                   </label>
                   <select
-                    name="score"
                     id="score"
-                    className="rounded-none m-0 w-14 bg-gray-50 border-x-0 border-gray-300 h-11 text-center text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    onChange={handleScoreInput}
-                    placeholder="0-10">
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
+                    value={newScore}
+                    onChange={(e) => setNewScore(Number(e.target.value))}
+                    className="w-[100px] px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    {[...Array(11)].map((_, i) => (
+                      <option key={i} value={i}>
+                        {i}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
-              <div className="flex gap-4 items-center">
-                <textarea
-                  placeholder="Objetivos de largo plazo"
-                  value={longTermGoal}
-                  onChange={(e) => setLongTermGoal(e.target.value)}
-                  className="px-4 py-2 rounded-lg bg-gray-800 text-white max-h-40 min-h-20 w-3/4"
-                />
-              </div>
+              <textarea
+                placeholder="Objetivos de largo plazo"
+                value={longTermGoal}
+                onChange={(e) => setLongTermGoal(e.target.value)}
+                className="w-full min-h-[100px] px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
+              />
+              <button
+                type="submit"
+                className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors">
+                <PlusCircle className="inline-block mr-2 h-4 w-4" /> Añadir Área
+              </button>
             </form>
           </CardContent>
-          <CardFooter
-            className={
-              "h-fit bg-slate-950 flex gap-1 overflow-hidden w-full flex-wrap pt-6 mt-auto"
-            }>
-            {optionalAreas.map((area, key) => (
-              <div
-                key={key}
-                className="h-8 w-fit p-1 bg-emerald-700 hover:bg-emerald-800 transition-all rounded-xl text-center"
-                onClick={() => setNewLifeArea(area.value)}>
+          <CardFooter className="flex flex-wrap gap-2 pt-4 border-t border-primary/20">
+            {optionalAreas.map((area) => (
+              <button
+                key={area.id}
+                onClick={() => setNewLifeArea(area.value.toUpperCase())}
+                className="px-2 py-1 text-xs bg-transparent border border-primary text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
                 {area.value}
-              </div>
+              </button>
             ))}
           </CardFooter>
         </Card>
       </div>
-      <div className="w-full flex flex-wrap gap-3">
+      <div className="w-full flex flex-wrap gap-3 justify-center">
         {lifeAreas.map((area) => (
           <LifeAreaCard
             area={area}

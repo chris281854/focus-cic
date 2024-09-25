@@ -283,7 +283,7 @@ export default function MonthView({ events, onEventCreated }) {
                   type="date"
                   name="date-input"
                   id="date-input"
-                  className="border-none outline-none bg-transparent text-white rounded p-1"
+                  className="border-none outline-none text-white rounded p-1"
                 />
               </div>
               <button

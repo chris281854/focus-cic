@@ -19,7 +19,6 @@ import {
 } from "../../../../ui/card"
 import { ChartContainer } from "../../../../ui/chart"
 import dayjs from "dayjs"
-import getRandomColor from "../../../../../../server/RandomColor"
 import { TypeOutline } from "lucide-react"
 import ToDoItem from "../../../../ToDoItem"
 import { useUser } from "../../../../../context/UserContext"
@@ -104,126 +103,125 @@ export default function LifeArea({
 
   return (
     <div
-      className="flex fixed z-50 inset-0 bg-opacity-30 bg-black backdrop-blur"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
       onClick={handleOverview}>
       <div
-        className="flex bg-bg-main-color flex-col justify-start p-4 w-full sm:w-full md:w-11/12 lg:w-11/12 h-full sm:h-5/6 rounded-3xl mx-auto my-auto overflow-scroll no-scrollbar"
+        className="flex flex-col w-full max-w-6xl h-full max-h-[90vh] p-6 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-900 dark:to-slate-800 rounded-lg shadow-xl overflow-auto scrollbar-thumb-slate-700 dark:scrollbar-thumb-slate-700"
         onClick={handleChildClick}>
-        <div className="flex px-4 mb-4 shadow-md rounded-md bg-primary/75 dark:bg-slate-900 hover:bg-slate-900 transition-all items-center justify-between">
+        <div className="flex items-center justify-between p-4 mb-6 bg-primary/50 dark:bg-slate-900 rounded-lg shadow-md transition-all">
           <input
             type="text"
-            className={`w-72 mr-3 text-2xl font-bold text-white !bg-transparent`}
+            className="w-72 mr-3 text-3xl font-bold text-white bg-transparent border-b-2 border-transparent focus:border-white focus:outline-none transition-all"
             value={areaName}
             onChange={(e) => setAreaName(e.target.value.toUpperCase())}
           />
-          <div className="w-11/12 bg-gray-700 rounded-full h-4 mt-10 mb-10 relative">
-            <div
-              className={`outline h-4 rounded-full transition-all`}
-              style={{
-                width: `${scoreBar}%`,
-                outlineColor: `${areaColor}`,
-                backgroundColor: `${areaColor}`,
-              }}
-            />
-            <input
-              type="range"
-              min="10"
-              max="100"
-              step={10}
-              value={scoreBar}
-              onChange={handleSliderChange}
-              className="absolute top-0 left-0 w-full h-4 opacity-0 cursor-pointer"
-            />
-            <label>Modifica el valor ⬆</label>
+          <div className="flex-grow mx-4">
+            <div className="w-full bg-gray-700 rounded-full h-4 relative">
+              <div
+                className="h-4 rounded-full transition-all"
+                style={{
+                  width: `${scoreBar}%`,
+                  backgroundColor: areaColor,
+                }}
+              />
+              <input
+                type="range"
+                min="10"
+                max="100"
+                step={10}
+                value={scoreBar}
+                onChange={handleSliderChange}
+                className="absolute top-0 left-0 w-full h-4 opacity-0 cursor-pointer"
+              />
+            </div>
+            <label className="text-sm text-white mt-1 block">
+              Modifica el valor ⬆
+            </label>
           </div>
           <div
-            className={`static ml-4 rounded-full h-14 w-14 bg-${areaColor} text-center content-center`}>
-            <label>{newSatisfaction}</label>
+            className="flex items-center justify-center w-16 h-16 rounded-full text-white text-2xl font-bold"
+            style={{ backgroundColor: areaColor }}>
+            {newSatisfaction}
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <div className="flex flex-col gap-2 flex-1">
-            <Card className="bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all h-fit max-h-72 min-w-80">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-6">
+            <Card className="bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all">
               <CardHeader>
-                <label htmlFor="long_goal" className="text-xl font-semibold">
+                <CardTitle className="text-xl font-semibold text-white">
                   Metas
-                </label>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <textarea
                   name="long_goal"
                   id="long_goal"
-                  className="h-full w-full min-h-20 font-thin text-white bg-transparent scrollbar-none"
+                  className="w-full h-32 p-2 text-white bg-transparent border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-white/50 resize-none"
                   onChange={(e) => setLongTermGoal(e.target.value)}
-                  value={longTermGoal}></textarea>
+                  value={longTermGoal}
+                />
               </CardContent>
             </Card>
-            <Card className="bg-primary/75 dark:bg-slate-800 hover:bg-slate-900 transition-all h-fit max-h-72">
+            <Card className="bg-primary/60 dark:bg-slate-800 hover:bg-slate-900 transition-all">
               <CardHeader>
-                <label htmlFor="week_goal">Objetivos de la semana</label>
+                <CardTitle className="text-xl font-semibold text-white">
+                  Objetivos de la semana
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <textarea
                   name="week_goal"
                   id="week_goal"
-                  className="h-full w-full min-h-20 font-thin text-white bg-transparent scrollbar-none"
+                  className="w-full h-32 p-2 text-white bg-transparent border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-white/50 resize-none"
                   onChange={(e) => setWeekGoal(e.target.value)}
-                  value={weekGoal}></textarea>
+                  value={weekGoal}
+                />
               </CardContent>
             </Card>
           </div>
-          <Card className={"shadow-md bg-slate-900 transition-all min-w-96"}>
+          <Card className="bg-primary/30 dark:bg-slate-800 transition-all">
             <CardHeader>
-              <CardTitle>Seguidor de Satisfacción</CardTitle>
-              <CardDescription>Valoraciones del último mes</CardDescription>
+              <CardTitle className="text-xl font-semibold text-white">
+                Seguidor de Satisfacción
+              </CardTitle>
+              <CardDescription className="text-white/70">
+                Valoraciones del último mes
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={chartConfig}
-                className="min-h-[200px] w-full">
+              <ChartContainer className="h-64 w-full">
                 <LineChart
-                  margin={{ top: 20, right: 20, bottom: 5, left: 0 }}
-                  accessibilityLayer
-                  data={chartData}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="Fecha"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                  />
-                  <YAxis type="number" domain={[0, 10]} />
-                  <Tooltip />
-                  <Line
-                    dataKey="Satisfacción"
-                    type="natural"
-                    stroke="var(--color-desktop)"
-                    strokeWidth={2}
-                    dot={({ payload, index, ...props }) => {
-                      return (
-                        <Dot
-                          key={`${payload.Fecha}-${index}`}
-                          r={5}
-                          cx={props.cx}
-                          cy={props.cy}
-                          fill="var(--color-desktop)"
-                          stroke="var(--color-desktop)"
-                        />
-                      )
+                  data={chartData}
+                  margin={{ top: 20, right: 20, bottom: 5, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="Fecha" stroke="#fff" />
+                  <YAxis type="number" domain={[0, 10]} stroke="#fff" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "none",
                     }}
                   />
-                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="Satisfacción"
+                    stroke={areaColor}
+                    strokeWidth={2}
+                    dot={{ fill: areaColor }}
+                  />
                 </LineChart>
               </ChartContainer>
             </CardContent>
             <CardFooter>
-              <div className="flex w-full items-start gap-2 text-sm">
-                {dayjs().format("MMM YYYY")}
+              <div className="text-sm text-white/70">
+                {dayjs().format("MMMM YYYY")}
               </div>
             </CardFooter>
           </Card>
         </div>
-        <div className="">{areaHasEvents && generateEvents(areaEvents)}</div>
+        <div className="mt-6 space-y-4">
+          {areaHasEvents && generateEvents(areaEvents)}
+        </div>
       </div>
     </div>
   )
