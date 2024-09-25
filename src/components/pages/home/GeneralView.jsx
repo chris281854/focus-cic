@@ -7,7 +7,6 @@ import { useUser } from "../../../context/UserContext"
 import dayjs from "dayjs"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faP, faPlus } from "@fortawesome/free-solid-svg-icons"
-import ThemeSelector from "./settings/ThemeSelector"
 
 export default function GeneralView() {
   const { user, lifeAreas, fetchEvents, fetchReminders, events, reminders } =
@@ -192,7 +191,6 @@ export default function GeneralView() {
         <NewReminder onReminderCreated={handleTableModified}></NewReminder>
       </header>
       <div className="">{generateAlarms()}</div>
-      <ThemeSelector />
     </div>
   )
 }
