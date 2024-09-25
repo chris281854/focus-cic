@@ -80,6 +80,28 @@ export default function Settings() {
     setActiveSection(section)
   }
 
+  const changePassword = async (userId) => {
+    try {
+      const response = await fetch("http://localhost:3001/api/changePassword", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ user_id: userId, password: newPassword }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Contraseña creada exitosamente", data)
+      } else {
+        const errorData = await response.json()
+        console.error("Error al cambiar la contraseña", errorData.error)
+      }
+    } catch (error) {
+      console.error("Error al cambiar la contraseña:", error)
+    }
+  }
+
   return (
     <div className="flex select-none w-full h-screen">
       <nav
@@ -197,7 +219,7 @@ export default function Settings() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
                   />
                 </div>
                 <div>
@@ -210,14 +232,16 @@ export default function Settings() {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
                   />
                 </div>
                 <div>
                   <label className="block text-gray-700 dark:text-white">
                     Nombre de Usuario
                   </label>
-                  <div className="bg-gray-200 dark:bg-gray-600 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                  <div
+                    title="No puede modificar su nombre de usuario"
+                    className="bg-gray-200 dark:bg-gray-600 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
                     @{nickName}
                   </div>
                 </div>
@@ -230,7 +254,7 @@ export default function Settings() {
                     onChange={(e) => setBirthDate(e.target.value)}
                     disabled={!onEdition}
                     type="date"
-                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full p-2 rounded mt-1 !bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
                   />
                 </div>
                 <div>
@@ -242,7 +266,7 @@ export default function Settings() {
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     disabled={!onEdition}
                     type="text"
-                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
                   />
                 </div>
                 <div>
@@ -255,7 +279,7 @@ export default function Settings() {
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={!onEdition}
                     type="email"
-                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
                   />
                 </div>
               </div>
@@ -263,20 +287,20 @@ export default function Settings() {
                 {onEdition ? (
                   <>
                     <button
-                      onClick={handleEdition}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition duration-300">
-                      Guardar
-                    </button>
-                    <button
                       onClick={cancelEdition}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-300">
                       Cancelar
+                    </button>
+                    <button
+                      onClick={handleEdition}
+                      className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white px-4 py-2 rounded transition duration-300">
+                      Guardar
                     </button>
                   </>
                 ) : (
                   <button
                     onClick={() => setOnEdition(true)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition duration-300">
+                    className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white px-4 py-2 rounded transition duration-300">
                     Editar
                   </button>
                 )}
