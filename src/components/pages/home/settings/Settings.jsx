@@ -14,6 +14,7 @@ import axios from "axios"
 import dayjs from "dayjs"
 import TimezoneSelector from "./TimezoneSelector"
 import ThemeSelector from "./ThemeSelector"
+import ProfileSection from "./ProfileSection"
 
 export default function Settings() {
   const { user, userProfile, updateUserProfile, getUserProfile } = useUser()
@@ -37,14 +38,7 @@ export default function Settings() {
     getUserProfile()
   }, [onEdition])
 
-  useEffect(() => {
-    setName(userProfile.name)
-    setLastName(userProfile.last_name)
-    setNickName(userProfile.nickname)
-    setBirthDate(dayjs(userProfile.birthdate).format("YYYY-MM-DD"))
-    setEmail(userProfile.email)
-    setPhoneNumber(userProfile.phone_number)
-  }, [userProfile])
+  
 
   const handleEdition = async () => {
     axios
@@ -202,112 +196,7 @@ export default function Settings() {
             </div>
           </section>
         )}
-        {activeSection === "perfil" && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
-              Editar perfil
-            </h2>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-gray-700 dark:text-white">
-                    Nombre
-                  </label>
-                  <input
-                    required
-                    disabled={!onEdition}
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-white">
-                    Apellido
-                  </label>
-                  <input
-                    required
-                    disabled={!onEdition}
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-white">
-                    Nombre de Usuario
-                  </label>
-                  <div
-                    title="No puede modificar su nombre de usuario"
-                    className="bg-gray-200 dark:bg-gray-600 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                    @{nickName}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-white">
-                    Fecha de Nacimiento
-                  </label>
-                  <input
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
-                    disabled={!onEdition}
-                    type="date"
-                    className="w-full p-2 rounded mt-1 !bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-white">
-                    Número de Teléfono
-                  </label>
-                  <input
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    disabled={!onEdition}
-                    type="text"
-                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 dark:text-white">
-                    Correo Electrónico
-                  </label>
-                  <input
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={!onEdition}
-                    type="email"
-                    className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex space-x-4">
-                {onEdition ? (
-                  <>
-                    <button
-                      onClick={cancelEdition}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-300">
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={handleEdition}
-                      className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white px-4 py-2 rounded transition duration-300">
-                      Guardar
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setOnEdition(true)}
-                    className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white px-4 py-2 rounded transition duration-300">
-                    Editar
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
+        {activeSection === "perfil" && <ProfileSection />}
         {activeSection === "personalizacion" && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">

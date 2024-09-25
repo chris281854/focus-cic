@@ -1077,23 +1077,46 @@ app.patch("/api/updateProfile", authenticateToken, async (req, res) => {
 })
 
 //Cambiar contraseña
-app.patch("/api/changePassword", authenticateToken, async (req, res) => {
-  const userId = req.query.userId
-  const { password } = req.body
+app.post("/api/verifyPassword", authenticateToken, async (req, res) => {
+  const { password, userId, userNickName } = req.body
 
-  if (!userId) {
-    return res.status(400).json({ error: "User ID is required" })
+  if (!userId || !password || !userNickName) {
+    return res
+      .status(400)
+      .json({ error: "User ID, password and Nickname are required" })
   }
 
-  if (!password) {
-    return res.status(400).json({ error: "Password is required" })
+  try {
+    const user = await pool.query(
+      `SELECT password FROM "Users" WHERE user_id = $1 AND nickname = $2`,
+      [userId, userNickName]
+    )
+    if (!user.rows[0]) {
+      return res.status(404).json({ error: "Usuario no encontrado" })
+    }
+
+    const hashedPassword = user.rows[0].password
+    const isPasswordValid = await bcrypt.compare(password, hashedPassword)
+
+    res.json({ verified: isPasswordValid })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
+})
+
+app.patch("/api/changePassword", authenticateToken, async (req, res) => {
+  const { userId, password } = req.body
+
+  if (!userId || !password) {
+    return res.status(400).json({ error: "User ID adn password are required" })
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     await pool.query(
-      `UPDATE "Users" SET password = $1 WHERE user_id  = $2 RETURNING *`,
+      `UPDATE "Users" SET password = $1 WHERE user_id = $2 RETURNING *`,
       [hashedPassword, userId]
     )
 
