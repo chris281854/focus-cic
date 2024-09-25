@@ -10,7 +10,6 @@
   margin: 0;
   height: 100%;
   min-height: 100%;
-
 }
 
 @layer base {
@@ -93,7 +92,16 @@
 @layer base {
   * {
     @apply border-border;
-    @apply scrollbar dark:scrollbar-thumb-slate-800 scrollbar-thumb-slate-600;
+  }
+  @media (prefers-color-scheme: light) {
+    * {
+      @apply scrollbar scrollbar-thumb-red-600;
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    * {
+      @apply scrollbar scrollbar-thumb-slate-800;
+    }
   }
   body {
     @apply bg-background text-foreground;

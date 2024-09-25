@@ -86,7 +86,7 @@ export default function WeekView({ events, onEventCreated }) {
       <div className="flex">
         <article className="overflow-y-scroll h-screen w-full">
           <article className="w-full h-full min-h-screen">
-            <section className="backdrop-blur-2xl dark:bg-bg-main-color bg-bg-main-color/50 rounded-b-lg">
+            <section className="backdrop-blur-2xl dark:bg-bg-main-color bg-secondary/50 rounded-b-lg">
               <section className="flex items-center justify-end pt-3 mr-4">
                 <button
                   className="rounded-full bg-transparent focus:outline-1 selection:outline-none focus:outline-none"
@@ -139,7 +139,7 @@ export default function WeekView({ events, onEventCreated }) {
                 {daysOfWeek.map((day, index) => (
                   <span
                     key={index}
-                    className="rounded-full h-12 w-12 text-center content-center bg-blue-900 justify-self-center">
+                    className="rounded-full h-12 w-12 text-center content-center bg-tertiary dark:bg-slate-500 justify-self-center">
                     {day.format("D")} {/* Día del mes */}
                   </span>
                 ))}
@@ -150,7 +150,7 @@ export default function WeekView({ events, onEventCreated }) {
                 {hours.map((hour, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-end border-r p-3 border-b-gray-300 dark:border-b-gray-700 h-12 text-gray-600 dark:text-gray-300">
+                    className="flex items-center justify-end border-r p-3 border-b-gray-300 dark:border-b-gray-700 h-12 dark:text-white">
                     {hour}
                   </div>
                 ))}
@@ -185,24 +185,40 @@ export default function WeekView({ events, onEventCreated }) {
               <ul>
                 {eventsThisWeek.map((event) => (
                   <li
-                    key={event.event_id}
-                    onClick={() => toggleEditEventVisibility(event)}
-                    className="mb-3 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md"
-                    style={{
-                      backgroundColor: event.life_areas[0]?.color || "#808080",
-                    }}>
-                    <h3 className="text-md font-semibold dark:text-white">
-                      {event.name}
-                    </h3>
-                    <div className="text-sm text-gray-950 mt-2">
-                      <p className="font-bold">
+                  key={event.event_id}
+                  onClick={() => toggleEditEventVisibility(event)}
+                  className="mb-3 p-4 rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg shadow-sm overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, ${
+                      event.life_areas[0]?.color || "#808080"
+                    } 0%, #f0f0f0 150%)`,
+                  }}>
+                  <h6 className="text-lg font-semibold mb-2">{event.name}</h6>
+                  <div className="flex items-center justify-between text-gray-900 rounded">
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-calendar-alt text-gray-900"></i>
+                      <p className="text-sm">
                         {dayjs(event.date).format("dddd")}
                       </p>
-                      <p className="text-gray-950">
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-clock text-gray-900"></i>
+                      <p className="text-sm">
                         {dayjs(event.date).format("h:mm A")}
                       </p>
                     </div>
-                  </li>
+                  </div>
+                  <div className="flex space-x-2 mt-2">
+                    {event.life_areas.map((area, index) => (
+                      <span
+                        key={index}
+                        className="inline-block px-2 py-1 text-xs font-medium rounded bg-white text-black"
+                        style={{ backgroundColor: area.color || "#ddd" }}>
+                        {area.name}
+                      </span>
+                    ))}
+                  </div>
+                </li>
                 ))}
               </ul>
             ) : (

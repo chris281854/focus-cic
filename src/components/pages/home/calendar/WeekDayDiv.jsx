@@ -49,8 +49,8 @@ export default function WeekDayDiv({
       )}
       <div
         data-date={day}
-        className={`${day === today ? "bg-emerald-600/40" : ""} ${
-          selectedDate === day ? "bg-slate-900" : ""
+        className={`${day === today ? "bg-primary/50 dark:bg-slate-500" : ""} ${
+          selectedDate === day ? "bg-secondary/90 dark:bg-slate-900" : ""
         } row-span-1 h-max col-span-1 border-r font-bold overflow-hidden`}>
         {hours.map((hour, index) => {
           // Crear la hora actual en el formato adecuado
@@ -63,7 +63,7 @@ export default function WeekDayDiv({
           return (
             <div
               key={index}
-              className="border-b h-12 max-h-12 hover:bg-slate-800 flex p-1"
+              className="border-b h-12 max-h-12 hover:bg-secondary dark:hover:bg-slate-800 flex p-1"
               onClick={(e) => {
                 if (!onEdit) handleNewEvent(hourString)
               }}>

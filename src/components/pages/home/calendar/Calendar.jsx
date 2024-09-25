@@ -6,8 +6,15 @@ import axios from "axios"
 import { useUser } from "../../../../context/UserContext"
 
 export default function Calendar() {
-  const { user, lifeAreas, fetchEvents, fetchReminders, events, reminders, allEvents } =
-    useUser()
+  const {
+    user,
+    lifeAreas,
+    fetchEvents,
+    fetchReminders,
+    events,
+    reminders,
+    allEvents,
+  } = useUser()
   const [viewSelector, setViewSelector] = useState("mes")
   const [togglePosition, setTogglePosition] = useState("left")
   const [eventCount, setEventCount] = useState(0)
@@ -35,7 +42,9 @@ export default function Calendar() {
           <button
             onClick={() => handleSelectView("mes")}
             className={`cursor-pointer py-1 px-4 rounded-l-full ${
-              viewSelector === "mes" ? "bg-primary text-white" : "bg-gray-400"
+              viewSelector === "mes"
+                ? "bg-primary dark:bg-slate-900 text-white"
+                : "bg-gray-400"
             }`}>
             Mes
           </button>
@@ -43,7 +52,7 @@ export default function Calendar() {
             onClick={() => handleSelectView("semana")}
             className={`cursor-pointer py-1 px-4 rounded-none ${
               viewSelector === "semana"
-                ? "bg-primary text-white"
+                ? "bg-primary dark:bg-slate-900 text-white"
                 : "bg-gray-400"
             }`}>
             Semana
@@ -51,7 +60,9 @@ export default function Calendar() {
           <button
             onClick={() => handleSelectView("dia")}
             className={`cursor-pointer py-1 px-4 rounded-r-full ${
-              viewSelector === "dia" ? "bg-primary text-white" : "bg-gray-400"
+              viewSelector === "dia"
+                ? "bg-primary dark:bg-slate-900 text-white"
+                : "bg-gray-400"
             }`}>
             Día
           </button>

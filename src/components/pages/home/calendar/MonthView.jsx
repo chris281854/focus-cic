@@ -258,7 +258,7 @@ export default function MonthView({ events, onEventCreated }) {
       )}
       <div className="flex">
         <div className="relative grid grid-flow-row grid-rows-[80px,30px,100%] max-h-screen h-screen w-full overflow-y-scroll">
-          <header className="flex content-center items-center gap-1">
+          <header className="flex content-center items-center gap-1 bg-secondary/50 dark:bg-transparent">
             <div className="flex ml-auto">
               <span className="text-2xl">
                 {" "}
@@ -298,7 +298,7 @@ export default function MonthView({ events, onEventCreated }) {
               </button>
             </section>
           </header>
-          <div className="grid grid-rows-1 grid-cols-7 text-center">
+          <div className="grid grid-rows-1 grid-cols-7 text-center bg-secondary/50 dark:bg-transparent">
             {["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"].map((day) => (
               <span key={day}>{day}</span>
             ))}
@@ -311,9 +311,6 @@ export default function MonthView({ events, onEventCreated }) {
           className={`${
             !toggleAside ? "hidden" : "w-60 min-w-60"
           } p-4 shadow-lg overflow-y-auto h-screen`}>
-          <header className="text-lg font-bold mb-4 text-gray-800 dark:text-white">
-            Eventos y Tareas
-          </header>
           <main>
             {eventsInThisMonth.length > 0 ? (
               <ul>
@@ -321,20 +318,36 @@ export default function MonthView({ events, onEventCreated }) {
                   <li
                     key={event.event_id}
                     onClick={() => toggleEditEventVisibility(event)}
-                    className="mb-3 p-3 rounded-lg transition-transform transform hover:scale-105 hover:shadow-md"
+                    className="mb-3 p-4 rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg shadow-sm overflow-hidden"
                     style={{
-                      backgroundColor: event.life_areas[0]?.color || "#808080",
+                      background: `linear-gradient(135deg, ${
+                        event.life_areas[0]?.color || "#808080"
+                      } 0%, #f0f0f0 150%)`,
                     }}>
-                    <h3 className="text-md font-semibold dark:text-white">
-                      {event.name}
-                    </h3>
-                    <div className="text-sm text-gray-950 mt-2">
-                      <p className="font-bold">
-                        {dayjs(event.date).format("dddd")}
-                      </p>
-                      <p className="text-gray-950">
-                        {dayjs(event.date).format("h:mm A")}
-                      </p>
+                    <h6 className="text-lg font-semibold mb-2">{event.name}</h6>
+                    <div className="flex items-center justify-between text-gray-900 rounded">
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-calendar-alt text-gray-900"></i>
+                        <p className="text-sm">
+                          {dayjs(event.date).format("dddd")}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <i className="fas fa-clock text-gray-900"></i>
+                        <p className="text-sm">
+                          {dayjs(event.date).format("h:mm A")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex space-x-2 mt-2">
+                      {event.life_areas.map((area, index) => (
+                        <span
+                          key={index}
+                          className="inline-block px-2 py-1 text-xs font-medium rounded bg-white text-black"
+                          style={{ backgroundColor: area.color || "#ddd" }}>
+                          {area.name}
+                        </span>
+                      ))}
                     </div>
                   </li>
                 ))}
