@@ -19,9 +19,9 @@ const useUserStore = create((set) => ({
     } else return "light"
   })(),
   timezone: localStorage.getItem("timezone") || "UTC",
-  themeColor: "100, 116, 139",
-  secondaryColor: "148, 163, 184",
-  tertiaryColor: "",
+  themeColor: localStorage.getItem("themeColor") || "54, 55, 58",
+  secondaryColor: localStorage.getItem("secondaryColor") || "193, 184, 179",
+  tertiaryColor: localStorage.getItem("tertiaryColor") || "151, 136, 122",
 
   setThemeColor: async (theme, secondary, tertiary) => {
     localStorage.setItem("themeColor", theme)
