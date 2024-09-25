@@ -7,9 +7,10 @@ import {
   faCalendarAlt,
   faDatabase,
   faGear,
-} from "@fortawesome/free-solid-svg-icons" // Importar íconos
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons"
 import axios from "axios"
-import Footer from "../../../Footer"
 import dayjs from "dayjs"
 import TimezoneSelector from "./TimezoneSelector"
 import ThemeSelector from "./ThemeSelector"
@@ -24,10 +25,13 @@ export default function Settings() {
   const [birthDate, setBirthDate] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
   const [email, setEmail] = useState("")
-  const [activeSection, setActiveSection] = useState("general") // Estado para controlar la sección activa
+  const [activeSection, setActiveSection] = useState("general")
+  const [panelVisibility, setPanelVisibility] = useState(true)
 
-  const wtActiveLinks = "bg-slate-500 text-accent"
-  const wtInactiveLinks = "bg-transparent text-white hover:text-blue-600"
+  const wtActiveLinks =
+    "bg-primary/70 text-white hover:text-primary dark:hover:text-white dark:bg-slate-500 dark:text-accent"
+  const wtInactiveLinks =
+    "bg-transparent text-gray-700 dark:text-white hover:text-tertiary dark:hover:text-blue-500"
 
   useEffect(() => {
     getUserProfile()
@@ -72,120 +76,153 @@ export default function Settings() {
     setOnEdition(false)
   }
 
-  const changePassword = async (userId) => {
-    try {
-      const response = await fetch("http://localhost:3001/api/changePassword", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ user_id: userId, password: newPassword }),
-      })
-      if (response.ok) {
-        const data = await response.json()
-        console.log("Contraseña creada exitosamente", data)
-      } else {
-        const errorData = await response.json()
-        console.error("Error al cambiar la contraseña", errorData.error)
-      }
-    } catch (error) {
-      console.error("Error al cambiar la contraseña:", error)
-    }
-  }
-
   const handleButtonClick = (section) => {
     setActiveSection(section)
   }
 
   return (
     <div className="flex select-none w-full h-screen">
-      <nav className="flex-1 bg-secondary dark:bg-gray-900 flex sticky top-0 h-screen max-h-screen flex-col transition-all duration-300 w-56 min-w-56 pt-11">
+      <nav
+        className={`bg-secondary dark:bg-gray-900 flex sticky top-0 h-screen max-h-screen flex-col transition-all duration-300 overflow-x-hidden justify-items-start text-left scrollbar-none ${
+          panelVisibility ? "w-56 min-w-56" : "w-14 min-w-14"
+        }`}>
+        <button
+          className={`bg-transparent text-primary dark:text-accent rounded-none border-0 focus:outline-none h-14 flex items-center justify-center ${
+            panelVisibility ? "" : "text-tertiary"
+          }`}
+          onClick={() => setPanelVisibility(!panelVisibility)}>
+          <FontAwesomeIcon
+            icon={panelVisibility ? faChevronLeft : faChevronRight}
+          />
+        </button>
         <button
           onClick={() => handleButtonClick("general")}
-          className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 ${
+          className={`h-14 flex items-center transition-all duration-300 rounded-2xl ${
             activeSection === "general" ? wtActiveLinks : wtInactiveLinks
           }`}>
-          <FontAwesomeIcon icon={faGear} />
-          <span>General</span>
+          <div className="flex h-full min-w-14 justify-start items-center">
+            <FontAwesomeIcon icon={faGear} />
+          </div>
+          <div
+            className={`content-center ${
+              panelVisibility
+                ? "opacity-100 mr-2 overflow-hidden"
+                : "opacity-0 transition-all duration-200"
+            }`}>
+            General
+          </div>
         </button>
         <button
           onClick={() => handleButtonClick("perfil")}
-          className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 ${
+          className={`h-14 flex items-center transition-all duration-300 rounded-2xl ${
             activeSection === "perfil" ? wtActiveLinks : wtInactiveLinks
           }`}>
-          <FontAwesomeIcon icon={faUser} />
-          <span>Perfil</span>
+          <div className="flex h-full min-w-14 justify-start items-center">
+            <FontAwesomeIcon icon={faUser} />
+          </div>
+          <div
+            className={`content-center ${
+              panelVisibility
+                ? "opacity-100 mr-2 overflow-hidden"
+                : "opacity-0 transition-all duration-200"
+            }`}>
+            Perfil
+          </div>
         </button>
         <button
           onClick={() => handleButtonClick("personalizacion")}
-          className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 ${
+          className={`h-14 flex items-center transition-all duration-300 rounded-2xl ${
             activeSection === "personalizacion"
               ? wtActiveLinks
               : wtInactiveLinks
           }`}>
-          <FontAwesomeIcon icon={faPalette} />
-          <span>Personalización</span>
+          <div className="flex h-full min-w-14 justify-start items-center">
+            <FontAwesomeIcon icon={faPalette} />
+          </div>
+          <div
+            className={`content-center ${
+              panelVisibility
+                ? "opacity-100 mr-2 overflow-hidden"
+                : "opacity-0 transition-all duration-200"
+            }`}>
+            Personalización
+          </div>
         </button>
         <button
           onClick={() => handleButtonClick("datos")}
-          className={`h-14 flex items-center transition-all duration-300 rounded-2xl space-x-2 px-4 ${
+          className={`h-14 flex items-center transition-all duration-300 rounded-2xl ${
             activeSection === "datos" ? wtActiveLinks : wtInactiveLinks
           }`}>
-          <FontAwesomeIcon icon={faDatabase} />
-          <span>Exportación de Datos</span>
+          <div className="flex h-full min-w-14 justify-start items-center">
+            <FontAwesomeIcon icon={faDatabase} />
+          </div>
+          <div
+            className={`content-center ${
+              panelVisibility
+                ? "opacity-100 mr-2 overflow-hidden"
+                : "opacity-0 transition-all duration-200"
+            }`}>
+            Exportación de Datos
+          </div>
         </button>
       </nav>
-      <div className="w-full overflow-scroll">
-        {/* General Section */}
+      <div className="w-full overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
         {activeSection === "general" && (
-          <section className="mb-8 p-6 w-full">
-            <h2>General</h2>
-            <h3 className="text-2xl mb-2">Zona Horaria</h3>
-            {<TimezoneSelector />}
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              General
+            </h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">
+                Zona Horaria
+              </h3>
+              <TimezoneSelector />
+            </div>
           </section>
         )}
-        {/* Perfil Section */}
         {activeSection === "perfil" && (
-          <section className="flex flex-col md:flex-row p-6 w-full space-y-6 md:space-y-0 md:space-x-6">
-            {/* Sección del formulario */}
-            <div className="md:w-fit space-y-6">
-              <h2>Editar perfil</h2>
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              Editar perfil
+            </h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-white">Nombre</label>
+                  <label className="block text-gray-700 dark:text-white">
+                    Nombre
+                  </label>
                   <input
                     required
                     disabled={!onEdition}
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 rounded mt-1"
+                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-white">Apellido</label>
+                  <label className="block text-gray-700 dark:text-white">
+                    Apellido
+                  </label>
                   <input
                     required
                     disabled={!onEdition}
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full p-2 rounded mt-1"
+                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-white ">Nombre de Usuario</label>
-                  <div
-                    title="No puedes modificar tu nombre de usuario"
-                    className="bg-slate-800 hover:bg-slate-900 transition-all w-full h-10 rounded mt-1 content-center p-2 text-slate-300 select-text">
-                    <label>@{nickName}</label>
+                  <label className="block text-gray-700 dark:text-white">
+                    Nombre de Usuario
+                  </label>
+                  <div className="bg-gray-200 dark:bg-gray-600 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                    @{nickName}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-white">
+                  <label className="block text-gray-700 dark:text-white">
                     Fecha de Nacimiento
                   </label>
                   <input
@@ -193,54 +230,53 @@ export default function Settings() {
                     onChange={(e) => setBirthDate(e.target.value)}
                     disabled={!onEdition}
                     type="date"
-                    className="w-full p-2 rounded mt-1"
+                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-white">Número de Teléfono</label>
+                  <label className="block text-gray-700 dark:text-white">
+                    Número de Teléfono
+                  </label>
                   <input
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     disabled={!onEdition}
                     type="text"
-                    className="w-full p-2 rounded mt-1 text-black"
+                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-white">Correo Electrónico</label>
+                  <label className="block text-gray-700 dark:text-white">
+                    Correo Electrónico
+                  </label>
                   <input
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={!onEdition}
                     type="email"
-                    className="w-full p-2 rounded mt-1 text-black"
+                    className="w-full p-2 rounded mt-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
-
-              {/* Botones de edición */}
-              <div className="flex space-x-4">
+              <div className="mt-6 flex space-x-4">
                 {onEdition ? (
                   <>
                     <button
-                      onClick={() => handleEdition()}
-                      className="bg-blue-500 text-white px-4 py-2 rounded">
+                      onClick={handleEdition}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition duration-300">
                       Guardar
                     </button>
                     <button
-                      onClick={() => cancelEdition()}
-                      className="bg-red-500 text-white px-4 py-2 rounded">
+                      onClick={cancelEdition}
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-300">
                       Cancelar
                     </button>
                   </>
                 ) : (
                   <button
                     onClick={() => setOnEdition(true)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded">
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition duration-300">
                     Editar
                   </button>
                 )}
@@ -248,19 +284,34 @@ export default function Settings() {
             </div>
           </section>
         )}
-        {/* Personalización Section */}
-        {activeSection === "personalizacion" && <ThemeSelector />}
-        {/* Datos Section */}
+        {activeSection === "personalizacion" && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              Personalización
+            </h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <ThemeSelector />
+            </div>
+          </section>
+        )}
         {activeSection === "datos" && (
-          <section className="mb-8 shadow rounded-lg p-6">
-            <h1 className="text-5xl font-semibold mb-4">Datos</h1>
-            <h2 className="text-2xl font-semibold mb-2">Google Calendar</h2>
-            <button className="bg-red-500 text-white px-4 py-2 rounded mr-2">
-              Importar
-            </button>
-            <button className="bg-green-500 text-white px-4 py-2 rounded">
-              Exportar
-            </button>
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+              Exportación de Datos
+            </h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">
+                Google Calendar
+              </h3>
+              <div className="flex space-x-4">
+                <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-300">
+                  Importar
+                </button>
+                <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition duration-300">
+                  Exportar
+                </button>
+              </div>
+            </div>
           </section>
         )}
       </div>

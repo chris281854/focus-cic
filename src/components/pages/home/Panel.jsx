@@ -21,7 +21,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
   const wtActiveLinks =
     "bg-tertiary text-white hover:text-primary dark:hover:text-white dark:bg-slate-500 dark:text-accent"
   const wtInactiveLinks =
-    "bg-transparent text-gray-700 hover:text-tertiary dark:hover:text-blue-500"
+    "bg-transparent text-gray-700 dark:text-white hover:text-tertiary dark:hover:text-blue-500"
   //Para isActive
   const homeMatch = useMatch("/home")
   const calendarMatch = useMatch("/home/calendar")
@@ -61,7 +61,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </button>
       <NavLink
         to="/home"
-        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl ${
           homeMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
@@ -79,7 +79,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </NavLink>
       <NavLink
         to="/home/calendar"
-        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl ${
           calendarMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
@@ -97,7 +97,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </NavLink>
       <NavLink
         to="/home/habits"
-        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl ${
           habitsMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
@@ -115,7 +115,7 @@ export default function Panel({ panelVisibility, setPanelVisibility }) {
       </NavLink>
       <NavLink
         to="/home/settings"
-        className={`h-14 transition-all duration-300 flex rounded-2xl dark:text-white ${
+        className={`h-14 transition-all duration-300 flex rounded-2xl ${
           settingsMatch ? wtActiveLinks : wtInactiveLinks
         }`}>
         <div className="flex h-full min-w-14 justify-center items-center">
