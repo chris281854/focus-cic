@@ -294,7 +294,7 @@ app.get("/api/get/userData", authenticateToken, async (req, res) => {
   const userId = req.query.userId
   try {
     const result = await pool.query(
-      'SELECT name, last_name, nickname, phone_number, email, birthDate FROM "Users" WHERE user_id = $1',
+      'SELECT name, last_name, nickname, email, birthDate FROM "Users" WHERE user_id = $1',
       [userId]
     )
 
@@ -966,7 +966,7 @@ app.post("/api/verifyToken", authenticateToken, (req, res) => {
 })
 
 app.post("/api/register", async (req, res) => {
-  const { name, lastName, birthDate, phoneNumer, nickName, email, password } =
+  const { name, lastName, birthDate, nickName, email, password } =
     req.body
 
   try {
@@ -974,8 +974,8 @@ app.post("/api/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     const result = await pool.query(
-      'INSERT INTO "Users" (name, birthdate, last_name, password, nickname, phone_number, email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id',
-      [name, birthDate, lastName, hashedPassword, nickName, phoneNumer, email]
+      'INSERT INTO "Users" (name, birthdate, last_name, password, nickname, email) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id',
+      [name, birthDate, lastName, hashedPassword, nickName, email]
     )
 
     const userId = result.rows[0].user_id
@@ -1008,7 +1008,7 @@ app.get("/api/protected", (req, res) => {
 app.patch("/api/updateProfile", authenticateToken, async (req, res) => {
   const userId = req.query.userId
 
-  const { name, lastName, birthDate, phoneNumber, email, password } = req.body
+  const { name, lastName, birthDate, email, password } = req.body
 
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" })
@@ -1032,11 +1032,6 @@ app.patch("/api/updateProfile", authenticateToken, async (req, res) => {
     if (birthDate) {
       updateFields.push(`birthdate = $${valueIndex}`)
       values.push(birthDate)
-      valueIndex++
-    }
-    if (phoneNumber) {
-      updateFields.push(`phone_number = $${valueIndex}`)
-      values.push(phoneNumber)
       valueIndex++
     }
     if (email) {

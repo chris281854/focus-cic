@@ -1,26 +1,40 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 import { useUser } from "../../context/UserContext"
-import { useNavigate, Link } from "react-router-dom";
-import Header from "../Header";
-import Footer from "../Footer";
-import sendEmail from "../EmailSender";
+import { useNavigate, Link } from "react-router-dom"
+import Header from "../Header"
+import Footer from "../Footer"
+import sendEmail from "../EmailSender"
 
 export default function Register() {
-  const { login } = useUser(); // Usamos Zustand en lugar de useContext
-  const [error, setError] = useState("");
+  const { login } = useUser() // Usamos Zustand en lugar de useContext
+  const [error, setError] = useState("")
 
-  const [nickName, setNickName] = useState("");
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [nickName, setNickName] = useState("")
+  const [name, setName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [birthDate, setBirthDate] = useState("")
+  const [email, setEmail] = useState("")
+  const [isValidEmail, setIsValidEmail] = useState(true)
+  const [password, setPassword] = useState("")
+  const [isValidPassword, setIsValidPassword] = useState(true)
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+
+  const handleEmailChange = (e) => {
+    const mail = e.target.value
+    setEmail(mail)
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    setIsValidEmail(emailPattern.test(mail))
+  }
+
+  const handlePasswordChange = (e) => {
+    const pwd = e.target.value
+    setPassword(pwd)
+    setIsValidPassword(pwd.length > 8)
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
       const response = await fetch("http://localhost:3001/api/register", {
         method: "POST",
@@ -31,34 +45,33 @@ export default function Register() {
           name,
           lastName,
           birthDate,
-          phoneNumber,
           nickName,
           email,
           password,
         }),
-      });
+      })
 
       if (response.ok) {
-        const userData = await response.json();
-        login(userData); // Llama a la función de login del store de Zustand
+        const userData = await response.json()
+        login(userData) // Llama a la función de login del store de Zustand
         try {
           await sendEmail({
             to: email,
             type: "welcome",
             variables: { name, lastName, email },
-          });
-          console.log("Welcome email sent successfully");
+          })
+          console.log("Welcome email sent successfully")
         } catch (error) {
-          console.error("Failed to send welcome email", error);
+          console.error("Failed to send welcome email", error)
         }
-        navigate("/home");
+        navigate("/home")
       } else {
-        throw new Error("Registro fallido");
+        throw new Error("Registro fallido")
       }
     } catch (error) {
-      setError("Datos inválidos");
+      setError("Datos inválidos")
     }
-  };
+  }
 
   const emailSender = async () => {
     try {
@@ -70,12 +83,12 @@ export default function Register() {
           lastName: "G",
           email: "josedgonzalez02@gmail.com",
         },
-      });
-      return console.log("Welcome email sent successfully");
+      })
+      return console.log("Welcome email sent successfully")
     } catch (error) {
-      console.error("Failed to send welcome email", error);
+      console.error("Failed to send welcome email", error)
     }
-  };
+  }
 
   return (
     <>
@@ -107,7 +120,7 @@ export default function Register() {
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
                 value={email}
                 placeholder="Correo Electrónico"
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
               />
             </div>
             {/* <!-- Password Input --> */}
@@ -123,13 +136,19 @@ export default function Register() {
                 name="password"
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
                 autoComplete="off"
+                minLength={8}
                 placeholder="Contraseña"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
               />
+              {password && !isValidPassword && (
+                <p>La contraseña debe tener más de 8 caracteres</p>
+              )}
             </div>
             <div className="mb-4">
-              <label htmlFor="name" className="block text-gray-600 dark:text-white">
+              <label
+                htmlFor="name"
+                className="block text-gray-600 dark:text-white">
                 Nombre
               </label>
               <input
@@ -172,21 +191,6 @@ export default function Register() {
             </div>
             <div className="mb-4">
               <label
-                htmlFor="phone"
-                className="block text-gray-600 dark:text-white">
-                Telefono
-              </label>
-              <input
-                type="number"
-                name="phone"
-                placeholder="Número de teléfono"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
-              />
-            </div>
-            <div className="mb-4">
-              <label
                 htmlFor="birthDate"
                 className="block text-gray-600 dark:text-white">
                 Fecha de Nacimiento
@@ -196,6 +200,7 @@ export default function Register() {
                 name="birthDate"
                 placeholder="Fecha de Nacimiento"
                 value={birthDate}
+                required
                 onChange={(e) => setBirthDate(e.target.value)}
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
               />
@@ -203,6 +208,7 @@ export default function Register() {
             {/* <!-- Sign up Button --> */}
             <button
               type="submit"
+              disabled={!isValidPassword || !isValidEmail}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full">
               Registrarse
             </button>

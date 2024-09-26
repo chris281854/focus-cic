@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react"
 import { useUser } from "../../../../context/UserContext"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faChevronUp, faChevronDown, faTruckPlane } from "@fortawesome/free-solid-svg-icons"
+import {
+  faChevronUp,
+  faChevronDown,
+  faTruckPlane,
+} from "@fortawesome/free-solid-svg-icons"
 import axios from "axios"
 import dayjs from "dayjs"
-import TimezoneSelector from "./TimezoneSelector"
-import ThemeSelector from "./ThemeSelector"
 
 export default function ProfileSection() {
-  const { user, userProfile, updateUserProfile, getUserProfile } = useUser()
+  const { user, logOut, userProfile, updateUserProfile, getUserProfile } =
+    useUser()
 
   const [onEdition, setOnEdition] = useState(false)
   const [nickName, setNickName] = useState("")
@@ -25,6 +28,8 @@ export default function ProfileSection() {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [isPasswordVerified, setIsPasswordVerified] = useState(false)
+  const [isValidPassword, setIsValidPassword] = useState(false)
+  const [passwordChanged, setPasswordChanged] = useState(false)
 
   useEffect(() => {
     getUserProfile()
@@ -68,7 +73,15 @@ export default function ProfileSection() {
     getUserProfile()
     setOnEdition(false)
   }
-  console.log(user.user_id)
+
+  const handleNewPasswordTyping = (thisPassword) => {
+    setNewPassword(thisPassword)
+    if (thisPassword.length > 7) {
+      setIsValidPassword(true)
+    } else if (thisPassword.length < 7) {
+      setIsValidPassword(false)
+    }
+  }
 
   const verifyCurrentPassword = async () => {
     try {
@@ -89,7 +102,7 @@ export default function ProfileSection() {
       setIsPasswordVerified(false)
     }
   }
-  console.log(isPasswordVerified)
+  // console.log(isPasswordVerified)
 
   const changePassword = async () => {
     try {
@@ -108,6 +121,10 @@ export default function ProfileSection() {
       setCurrentPassword("")
       setNewPassword("")
       setIsPasswordVerified(false)
+      setPasswordChanged(true)
+      setTimeout(() => {
+        logOut()
+      }, 2000)
     } catch (error) {
       console.error("Error al cambiar la contraseña:", error)
     }
@@ -236,18 +253,18 @@ export default function ProfileSection() {
               <label className="block text-gray-700 dark:text-white mb-2">
                 Contraseña Actual
               </label>
-              <div className="flex">
+              <div className="flex gap-2">
                 <input
                   type="password"
                   autocomplete="off"
                   value={currentPassword}
                   require
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="flex-grow p-2 rounded-l bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
+                  className="flex-grow p-2 rounded-md bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
                 />
                 <button
                   onClick={verifyCurrentPassword}
-                  className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white px-4 py-2 rounded-r transition duration-300">
+                  className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white">
                   Verificar
                 </button>
               </div>
@@ -260,10 +277,17 @@ export default function ProfileSection() {
                 </label>
                 <input
                   type="password"
+                  id="password"
+                  minLength={8}
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={(e) => handleNewPasswordTyping(e.target.value)}
+                  autoComplete="off"
+                  placeholder="Contraseña"
                   className="w-full p-2 rounded bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
                 />
+                {newPassword && !isValidPassword && (
+                  <p>La contraseña debe tener más de 8 caracteres</p>
+                )}
               </div>
             )}
 
@@ -280,9 +304,11 @@ export default function ProfileSection() {
               </button>
               <button
                 onClick={changePassword}
-                disabled={!isPasswordVerified || !newPassword}
+                disabled={
+                  !isPasswordVerified || !isValidPassword || !newPassword
+                }
                 className={`${
-                  isPasswordVerified && newPassword
+                  isPasswordVerified && newPassword && isValidPassword
                     ? "bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500"
                     : "bg-gray-400 dark:bg-gray-700 cursor-not-allowed"
                 } text-white px-4 py-2 rounded transition duration-300`}>

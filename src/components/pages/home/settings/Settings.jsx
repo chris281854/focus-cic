@@ -38,8 +38,6 @@ export default function Settings() {
     getUserProfile()
   }, [onEdition])
 
-  
-
   const handleEdition = async () => {
     axios
       .patch(
@@ -182,7 +180,7 @@ export default function Settings() {
           </div>
         </button>
       </nav>
-      <div className="w-full overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
+      <div className="w-full overflow-y-auto p-6 bg-gray-100 dark:bg-bg-main-color">
         {activeSection === "general" && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
