@@ -10,15 +10,13 @@ import axios from "axios"
 import dayjs from "dayjs"
 
 export default function ProfileSection() {
-  const { user, logOut, userProfile, updateUserProfile, getUserProfile } =
+  const { user, logout, userProfile, updateUserProfile, getUserProfile } =
     useUser()
 
   const [onEdition, setOnEdition] = useState(false)
   const [nickName, setNickName] = useState("")
   const [name, setName] = useState("")
-  const [lastName, setLastName] = useState("")
   const [birthDate, setBirthDate] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
   const [email, setEmail] = useState("")
   const [activeSection, setActiveSection] = useState("general")
   const [panelVisibility, setPanelVisibility] = useState(true)
@@ -30,6 +28,7 @@ export default function ProfileSection() {
   const [isPasswordVerified, setIsPasswordVerified] = useState(false)
   const [isValidPassword, setIsValidPassword] = useState(false)
   const [passwordChanged, setPasswordChanged] = useState(false)
+  const [wrongPassword, setWrongPassword] = useState(false)
 
   useEffect(() => {
     getUserProfile()
@@ -37,11 +36,9 @@ export default function ProfileSection() {
 
   useEffect(() => {
     setName(userProfile.name)
-    setLastName(userProfile.last_name)
     setNickName(userProfile.nickname)
     setBirthDate(dayjs(userProfile.birthdate).format("YYYY-MM-DD"))
     setEmail(userProfile.email)
-    setPhoneNumber(userProfile.phone_number)
   }, [userProfile])
 
   const handleEdition = async () => {
@@ -50,10 +47,7 @@ export default function ProfileSection() {
         `http://localhost:3001/api/updateProfile?userId=${user.user_id}`,
         {
           name,
-          lastName,
           birthDate,
-          phoneNumber,
-          email,
         },
         { withCredentials: true }
       )
@@ -97,23 +91,23 @@ export default function ProfileSection() {
         }
       )
       setIsPasswordVerified(response.data.verified)
+      setWrongPassword(!response.data.verified)
     } catch (error) {
       console.error("Error al verificar la contraseña:", error)
       setIsPasswordVerified(false)
     }
   }
-  // console.log(isPasswordVerified)
 
   const changePassword = async () => {
     try {
-      const response = await axios.put(
+      const response = await axios.patch(
         "http://localhost:3001/api/changePassword",
         {
-          userIdd: user.user_id,
+          userId: user.user_id,
           password: newPassword,
         },
         {
-          withCredentials: faTruckPlane,
+          withCredentials: true,
         }
       )
       console.log("Contraseña cambiada exitosamente", response.data)
@@ -123,7 +117,7 @@ export default function ProfileSection() {
       setIsPasswordVerified(false)
       setPasswordChanged(true)
       setTimeout(() => {
-        logOut()
+        logout()
       }, 2000)
     } catch (error) {
       console.error("Error al cambiar la contraseña:", error)
@@ -153,24 +147,9 @@ export default function ProfileSection() {
             </div>
             <div>
               <label className="block text-gray-700 dark:text-white">
-                Apellido
+                Tu nombre de usuario
               </label>
-              <input
-                required
-                disabled={!onEdition}
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 dark:text-white">
-                Nombre de Usuario
-              </label>
-              <div
-                title="No puede modificar su nombre de usuario"
-                className="bg-gray-200 dark:bg-gray-600 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
+              <div className="bg-gray-200 dark:bg-slate-700 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
                 @{nickName}
               </div>
             </div>
@@ -188,28 +167,11 @@ export default function ProfileSection() {
             </div>
             <div>
               <label className="block text-gray-700 dark:text-white">
-                Número de Teléfono
+                Tu correo electrónico
               </label>
-              <input
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                disabled={!onEdition}
-                type="text"
-                className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 dark:text-white">
-                Correo Electrónico
-              </label>
-              <input
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={!onEdition}
-                type="email"
-                className="w-full p-2 rounded mt-1 bg-secondary/40 dark:!bg-gray-600 text-gray-900 dark:text-white disabled:!text-gray-600 dark:disabled:!text-gray-300"
-              />
+              <div className="bg-gray-200 dark:bg-slate-700 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                {email}
+              </div>
             </div>
           </div>
           <div className="mt-6 flex space-x-4">
@@ -256,10 +218,13 @@ export default function ProfileSection() {
               <div className="flex gap-2">
                 <input
                   type="password"
-                  autocomplete="off"
+                  autoComplete="off"
                   value={currentPassword}
-                  require
-                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  onChange={(e) => {
+                    setWrongPassword(false)
+                    setCurrentPassword(e.target.value)
+                  }}
                   className="flex-grow p-2 rounded-md bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
                 />
                 <button
@@ -269,6 +234,9 @@ export default function ProfileSection() {
                 </button>
               </div>
             </div>
+            {wrongPassword && (
+              <p className="text-red-600">La contraseña es incorrecta.</p>
+            )}
 
             {isPasswordVerified && (
               <div>
@@ -286,38 +254,46 @@ export default function ProfileSection() {
                   className="w-full p-2 rounded bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
                 />
                 {newPassword && !isValidPassword && (
-                  <p>La contraseña debe tener más de 8 caracteres</p>
+                  <p className="text-red-600">
+                    La contraseña debe tener más de 8 caracteres
+                  </p>
                 )}
               </div>
             )}
-
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => {
-                  setShowPasswordSection(false)
-                  setCurrentPassword("")
-                  setNewPassword("")
-                  setIsPasswordVerified(false)
-                }}
-                className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-4 py-2 rounded transition duration-300">
-                Cancelar
-              </button>
-              <button
-                onClick={changePassword}
-                disabled={
-                  !isPasswordVerified || !isValidPassword || !newPassword
-                }
-                className={`${
-                  isPasswordVerified && newPassword && isValidPassword
-                    ? "bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500"
-                    : "bg-gray-400 dark:bg-gray-700 cursor-not-allowed"
-                } text-white px-4 py-2 rounded transition duration-300`}>
-                Confirmar Cambio
-              </button>
-            </div>
+            {isPasswordVerified && (
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => {
+                    setShowPasswordSection(false)
+                    setCurrentPassword("")
+                    setNewPassword("")
+                    setIsPasswordVerified(false)
+                  }}
+                  className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-4 py-2 rounded transition duration-300 w-full">
+                  Cancelar
+                </button>
+                <button
+                  onClick={changePassword}
+                  disabled={
+                    !isPasswordVerified || !isValidPassword || !newPassword
+                  }
+                  className={`${
+                    isPasswordVerified && newPassword && isValidPassword
+                      ? "bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500"
+                      : "bg-gray-400 dark:bg-gray-700 cursor-not-allowed"
+                  } text-white px-4 py-2 rounded transition duration-300`}>
+                  Confirmar Cambio
+                </button>
+              </div>
+            )}
           </div>
         )}
       </section>
+      {passwordChanged && (
+        <h5 className="text-red-600">
+          Su contraseña se ha actualizado. Inicie sesión de nuevo.
+        </h5>
+      )}
     </>
   )
 }

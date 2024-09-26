@@ -117,11 +117,17 @@ export default function Register() {
                 type="text"
                 id="email"
                 name="email"
+                required
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
                 value={email}
                 placeholder="Correo Electrónico"
                 onChange={handleEmailChange}
               />
+              {email && !isValidEmail && (
+                <p className="text-red-600">
+                  Este correo electrónico no es válido
+                </p>
+              )}
             </div>
             {/* <!-- Password Input --> */}
             <div className="mb-4">
@@ -139,10 +145,13 @@ export default function Register() {
                 minLength={8}
                 placeholder="Contraseña"
                 value={password}
+                required
                 onChange={handlePasswordChange}
               />
               {password && !isValidPassword && (
-                <p>La contraseña debe tener más de 8 caracteres</p>
+                <p className="text-red-600">
+                  La contraseña debe tener más de 8 caracteres
+                </p>
               )}
             </div>
             <div className="mb-4">
@@ -156,22 +165,8 @@ export default function Register() {
                 name="name"
                 placeholder="Nombre"
                 value={name}
+                required
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-gray-600 dark:text-white">
-                Apellido
-              </label>
-              <input
-                type="text"
-                name="apellido"
-                placeholder="Apellido"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
               />
             </div>
@@ -186,6 +181,7 @@ export default function Register() {
                 placeholder="Nombre de usuario"
                 value={nickName}
                 onChange={(e) => setNickName(e.target.value)}
+                required
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
               />
             </div>

@@ -294,7 +294,7 @@ app.get("/api/get/userData", authenticateToken, async (req, res) => {
   const userId = req.query.userId
   try {
     const result = await pool.query(
-      'SELECT name, last_name, nickname, email, birthDate FROM "Users" WHERE user_id = $1',
+      'SELECT name, nickname, email, birthDate FROM "Users" WHERE user_id = $1',
       [userId]
     )
 
@@ -377,78 +377,6 @@ app.post("/api/post/events", async (req, res) => {
       await client.query(lifeAreasQuery, lifeAreasValues)
     }
 
-    await client.query("COMMIT") // Confirmar la transacción
-
-    res.status(201).json({ message: "Evento creado correctamente" })
-  } catch (error) {
-    await client.query("ROLLBACK") // Revertir la transacción en caso de error
-
-    console.error("Error al crear el evento:", error)
-    res.status(500).json({ error: "Error al crear el evento" })
-  } finally {
-    client.release()
-  }
-})
-
-app.post("/api/post/tasks", async (req, res) => {
-  const client = await pool.connect() // Obtén un cliente de la pool de conexiones
-
-  try {
-    const {
-      taskReminderDate,
-      state,
-      endDate,
-      taskName,
-      taskCategory,
-      taskDate,
-      taskPriority,
-      taskDescription,
-      userId,
-      taskMail,
-      taskId,
-      taskReminderId,
-    } = req.body
-
-    await client.query("BEGIN") // Iniciar una transacción
-
-    const taskResult = await client.query(
-      'INSERT INTO "Tasks" (state, end_date, name, category, date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING task_id',
-      [
-        state,
-        endDate,
-        eventName,
-        eventCategory,
-        eventDate,
-        eventPriority,
-        eventDescription,
-        userId,
-      ]
-    )
-
-    console.log("Resultado de inserción del evento:", eventResult)
-
-    if (!eventResult.rows || eventResult.rows.length === 0) {
-      throw new Error("Error al insertar el evento")
-    }
-    const eventID = eventResult.rows[0].event_id // Obtener el ID del nuevo evento
-    // Insertar el recordatorio en la tabla Reminders
-    if (reminderDate) {
-      const reminderResult = await client.query(
-        'INSERT INTO "Reminders" (date, user_id, mail) VALUES ($1, $2, $3) RETURNING reminder_id',
-        [reminderDate, userId, mail]
-      )
-
-      if (!reminderResult.rows || reminderResult.rows.length === 0) {
-        throw new Error("Error al insertar el recordatorio")
-      }
-
-      const newReminderID = reminderResult.rows[0].reminder_id // Obtener el ID del nuevo recordatorio
-      // Insertar la relación en la tabla intermedia Event_Reminder
-      await client.query(
-        'INSERT INTO "Event_Reminder" (event_id, reminder_id) VALUES ($1, $2)',
-        [eventID, newReminderID]
-      )
-    }
     await client.query("COMMIT") // Confirmar la transacción
 
     res.status(201).json({ message: "Evento creado correctamente" })
@@ -966,16 +894,15 @@ app.post("/api/verifyToken", authenticateToken, (req, res) => {
 })
 
 app.post("/api/register", async (req, res) => {
-  const { name, lastName, birthDate, nickName, email, password } =
-    req.body
+  const { name, birthDate, nickName, email, password } = req.body
 
   try {
     // Genera un hash seguro de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10)
 
     const result = await pool.query(
-      'INSERT INTO "Users" (name, birthdate, last_name, password, nickname, email) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id',
-      [name, birthDate, lastName, hashedPassword, nickName, email]
+      'INSERT INTO "Users" (name, birthdate, password, nickname, email) VALUES ($1, $2, $3, $4, $5) RETURNING user_id',
+      [name, birthDate, hashedPassword, nickName, email]
     )
 
     const userId = result.rows[0].user_id
@@ -1008,7 +935,7 @@ app.get("/api/protected", (req, res) => {
 app.patch("/api/updateProfile", authenticateToken, async (req, res) => {
   const userId = req.query.userId
 
-  const { name, lastName, birthDate, email, password } = req.body
+  const { name, birthDate, password } = req.body
 
   if (!userId) {
     return res.status(400).json({ error: "User ID is required" })
@@ -1024,19 +951,9 @@ app.patch("/api/updateProfile", authenticateToken, async (req, res) => {
       values.push(name)
       valueIndex++
     }
-    if (lastName) {
-      updateFields.push(`last_name = $${valueIndex}`)
-      values.push(lastName)
-      valueIndex++
-    }
     if (birthDate) {
       updateFields.push(`birthdate = $${valueIndex}`)
       values.push(birthDate)
-      valueIndex++
-    }
-    if (email) {
-      updateFields.push(`email = $${valueIndex}`)
-      values.push(email)
       valueIndex++
     }
     if (password) {
@@ -1110,7 +1027,7 @@ app.patch("/api/changePassword", authenticateToken, async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    await pool.query(
+    const result = await pool.query(
       `UPDATE "Users" SET password = $1 WHERE user_id = $2 RETURNING *`,
       [hashedPassword, userId]
     )
