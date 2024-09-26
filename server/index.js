@@ -1046,6 +1046,57 @@ app.patch("/api/changePassword", authenticateToken, async (req, res) => {
   }
 })
 
+app.post("/api/userDisponibility", async (req, res) => {
+  const { nickName } = req.body
+
+  if (!nickName) {
+    return res.status(400).json({ error: "Nickname es requerido" })
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM "Users" WHERE nickname = $1',
+      [nickName]
+    )
+
+    if (result.rows.length > 0) {
+      return res.json(false) // El nickname ya está en uso
+    } else {
+      return res.json(true) // El nickname está disponible
+    }
+  } catch (error) {
+    console.error(error)
+    return res
+      .status(500)
+      .json({ error: "Error al verificar disponibilidad del nickname" })
+  }
+})
+
+app.post("/api/emailDisponibility", async (req, res) => {
+  const { email } = req.body
+
+  if (!email) {
+    return res.status(400).json({ error: "Nickname es requerido" })
+  }
+
+  try {
+    const result = await pool.query('SELECT * FROM "Users" WHERE email = $1', [
+      email,
+    ])
+
+    if (result.rows.length > 0) {
+      return res.json(false) // El nickname ya está en uso
+    } else {
+      return res.json(true) // El nickname está disponible
+    }
+  } catch (error) {
+    console.error(error)
+    return res
+      .status(500)
+      .json({ error: "Error al verificar disponibilidad del email" })
+  }
+})
+
 const port = process.env.PORT || 3001
 app.listen(port, () => {
   console.log(`Servidor ejecutándose en http://localhost:${port}`)

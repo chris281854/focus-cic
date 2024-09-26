@@ -1,31 +1,53 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useUser } from "../../context/UserContext"
 import { useNavigate, Link } from "react-router-dom"
 import Header from "../Header"
 import Footer from "../Footer"
 import sendEmail from "../EmailSender"
+import axios from "axios"
 
 export default function Register() {
   const { login } = useUser() // Usamos Zustand en lugar de useContext
   const [error, setError] = useState("")
 
   const [nickName, setNickName] = useState("")
+  const [isNickNameValid, setIsNickNameValid] = useState(true)
+  const [isNickNameAvailable, setIsNickNameAvailable] = useState(undefined)
   const [name, setName] = useState("")
-  const [lastName, setLastName] = useState("")
   const [birthDate, setBirthDate] = useState("")
   const [email, setEmail] = useState("")
-  const [isValidEmail, setIsValidEmail] = useState(true)
+  const [isValidEmail, setIsValidEmail] = useState(false)
+  const [isEmailAvailable, setIsEmailAvailable] = useState(null)
   const [password, setPassword] = useState("")
-  const [isValidPassword, setIsValidPassword] = useState(true)
+  const [isValidPassword, setIsValidPassword] = useState(false)
 
   const navigate = useNavigate()
 
-  const handleEmailChange = (e) => {
-    const mail = e.target.value
-    setEmail(mail)
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    setIsValidEmail(emailPattern.test(mail))
-  }
+  useEffect(() => {
+    if (email && isValidEmail) {
+      setIsEmailAvailable(null) // Reiniciar el estado mientras se analiza
+      axios
+        .post("http://localhost:3001/api/emailDisponibility", { email })
+        .then((response) => {
+          setIsEmailAvailable(response.data)
+          console.log("email disp", response.data)
+        })
+        .catch(() => setIsEmailAvailable(false))
+    }
+  }, [email, isValidEmail])
+
+  useEffect(() => {
+    setIsNickNameAvailable(null) // Reiniciar el estado mientras se analiza
+    if (nickName && isNickNameValid) {
+      axios
+        .post("http://localhost:3001/api/userDisponibility", { nickName })
+        .then((response) => {
+          setIsNickNameAvailable(response.data)
+          console.log("nickname disp", response.data)
+        })
+        .catch(() => setIsNickNameAvailable(false))
+    }
+  }, [nickName, isNickNameValid])
 
   const handlePasswordChange = (e) => {
     const pwd = e.target.value
@@ -36,34 +58,30 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("http://localhost:3001/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        "http://localhost:3001/api/register",
+        {
           name,
-          lastName,
           birthDate,
           nickName,
           email,
           password,
-        }),
-      })
-
-      if (response.ok) {
-        const userData = await response.json()
+        },
+        { withCredentials: true }
+      )
+      if (response.status === 200) {
+        const userData = response.data
         login(userData) // Llama a la función de login del store de Zustand
-        try {
-          await sendEmail({
-            to: email,
-            type: "welcome",
-            variables: { name, lastName, email },
-          })
-          console.log("Welcome email sent successfully")
-        } catch (error) {
-          console.error("Failed to send welcome email", error)
-        }
+        // try {
+        //   await sendEmail({
+        //     to: email,
+        //     type: "welcome",
+        //     variables: { name, email },
+        //   })
+        //   console.log("Welcome email sent successfully")
+        // } catch (error) {
+        //   console.error("Failed to send welcome email", error)
+        // }
         navigate("/home")
       } else {
         throw new Error("Registro fallido")
@@ -73,22 +91,42 @@ export default function Register() {
     }
   }
 
-  const emailSender = async () => {
-    try {
-      await sendEmail({
-        to: "josedgonzalez02@gmail.com",
-        type: "welcome",
-        variables: {
-          name: "David",
-          lastName: "G",
-          email: "josedgonzalez02@gmail.com",
-        },
-      })
-      return console.log("Welcome email sent successfully")
-    } catch (error) {
-      console.error("Failed to send welcome email", error)
-    }
+  const handleNickNameChange = (e) => {
+    const nick = e.target.value
+    setNickName(nick)
+    const pattern = /^[a-zA-Z0-9_]+$/
+    setIsNickNameValid(pattern.test(nick))
   }
+
+  const handleEmailChange = (e) => {
+    const mail = e.target.value
+    setEmail(mail)
+    const emailPattern =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
+    setIsValidEmail(emailPattern.test(mail))
+    console.log(emailPattern.test(mail))
+  }
+
+  // const checkNickNameAvailability = async (nick) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:3001/api/userDisponibility`
+  //     )
+  //     setIsNickNameAvailable(response.data)
+  //   } catch (error) {
+  //     console.error("Error checking nickname availability", error)
+  //   }
+  // }
+
+  const isFormValid =
+    isValidEmail &&
+    isEmailAvailable &&
+    isValidPassword &&
+    isNickNameValid &&
+    isNickNameAvailable &&
+    name &&
+    lastName &&
+    birthDate
 
   return (
     <>
@@ -180,10 +218,22 @@ export default function Register() {
                 type="text"
                 placeholder="Nombre de usuario"
                 value={nickName}
-                onChange={(e) => setNickName(e.target.value)}
+                pattern="[a-zA-Z0-9_]+"
+                onChange={handleNickNameChange}
                 required
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
               />
+              {nickName && !isNickNameValid && (
+                <p className="text-red-600">
+                  El nombre de usuario no es válido (sólo letras, números y
+                  guiones bajos)
+                </p>
+              )}
+              {nickName && isNickNameAvailable === false && (
+                <p className="text-red-600">
+                  El nombre de usuario ya está en uso
+                </p>
+              )}
             </div>
             <div className="mb-4">
               <label
@@ -204,7 +254,12 @@ export default function Register() {
             {/* <!-- Sign up Button --> */}
             <button
               type="submit"
-              disabled={!isValidPassword || !isValidEmail}
+              disabled={
+                !isValidPassword ||
+                !isValidEmail ||
+                !isNickNameValid ||
+                !isNickNameAvailable
+              }
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full">
               Registrarse
             </button>
