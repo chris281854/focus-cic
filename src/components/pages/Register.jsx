@@ -32,7 +32,9 @@ export default function Register() {
           setIsEmailAvailable(response.data)
           console.log("email disp", response.data)
         })
-        .catch(() => setIsEmailAvailable(false))
+        .catch(() => {
+          setIsEmailAvailable(false)
+        })
     }
   }, [email, isValidEmail])
 
@@ -52,7 +54,7 @@ export default function Register() {
   const handlePasswordChange = (e) => {
     const pwd = e.target.value
     setPassword(pwd)
-    setIsValidPassword(pwd.length > 8)
+    setIsValidPassword(pwd.length >= 8)
   }
 
   const handleSubmit = async (e) => {
@@ -101,10 +103,20 @@ export default function Register() {
   const handleEmailChange = (e) => {
     const mail = e.target.value
     setEmail(mail)
+    setIsEmailAvailable(null)
     const emailPattern =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
     setIsValidEmail(emailPattern.test(mail))
     console.log(emailPattern.test(mail))
+    if (nickName && isNickNameValid) {
+      axios
+        .post("http://localhost:3001/api/userDisponibility", { nickName })
+        .then((response) => {
+          setIsNickNameAvailable(response.data)
+          console.log("nickname disp", response.data)
+        })
+        .catch(() => setIsNickNameAvailable(false))
+    }
   }
 
   const isFormValid =
@@ -114,7 +126,6 @@ export default function Register() {
     isNickNameValid &&
     isNickNameAvailable &&
     name &&
-    lastName &&
     birthDate
 
   return (
@@ -153,6 +164,11 @@ export default function Register() {
               {email && !isValidEmail && (
                 <p className="text-red-600">
                   Este correo electrónico no es válido
+                </p>
+              )}
+              {email && isEmailAvailable === false && (
+                <p className="text-red-600">
+                  Este correo electrónico no está disponible
                 </p>
               )}
             </div>
@@ -235,6 +251,8 @@ export default function Register() {
                 name="birthDate"
                 placeholder="Fecha de Nacimiento"
                 value={birthDate}
+                min={"1910-01-01"}
+                max={"2015-01-01"}
                 required
                 onChange={(e) => setBirthDate(e.target.value)}
                 className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
@@ -246,10 +264,11 @@ export default function Register() {
               disabled={
                 !isValidPassword ||
                 !isValidEmail ||
+                !isEmailAvailable ||
                 !isNickNameValid ||
                 !isNickNameAvailable
               }
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full">
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full disabled:hover:bg-blue-500 disabled:cursor-not-allowed">
               Registrarse
             </button>
           </form>
