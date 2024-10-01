@@ -107,17 +107,6 @@ export default function Register() {
     console.log(emailPattern.test(mail))
   }
 
-  // const checkNickNameAvailability = async (nick) => {
-  //   try {
-  //     const response = await axios.get(
-  //       `http://localhost:3001/api/userDisponibility`
-  //     )
-  //     setIsNickNameAvailable(response.data)
-  //   } catch (error) {
-  //     console.error("Error checking nickname availability", error)
-  //   }
-  // }
-
   const isFormValid =
     isValidEmail &&
     isEmailAvailable &&
