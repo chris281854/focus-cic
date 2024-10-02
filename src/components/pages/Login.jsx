@@ -18,7 +18,7 @@ export default function Login() {
     if (user) {
       navigate("/home")
     }
-  }, [user, navigate]) // Ahora dependemos de "user" en lugar de "loading"
+  }, [user, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

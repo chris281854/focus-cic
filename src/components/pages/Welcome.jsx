@@ -35,44 +35,39 @@ export default function Welcome() {
           }}>
           <div className="bg-black bg-opacity-80 p-12 rounded-3xl">
             <h1 className="text-5xl font-bold text-white">
-              Esto, es <span className="text-accent">Focus</span>
+              <span className="text-accent">Focus</span>
             </h1>
           </div>
         </section>
 
-        <section className="container mx-auto mt-16 px-4">
+        <section className="mx-auto mt-16 px-4">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <h2 className="text-4xl font-bold text-accent">
               The Focus Project
             </h2>
             <hr className="border-slate-400 dark:border-slate-600" />
             <p className="text-xl">
-              Focus es tu aliado definitivo para dirigir todos los aspectos de
-              tu vida hacia la estabilidad y el éxito. Nuestra plataforma te
-              proporciona las herramientas esenciales para organizar tu estilo
-              de vida, desarrollar hábitos sólidos y embarcarte en un viaje de
-              superación personal.
+              Focus es una herramienta de organización de tareas y eventos.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mt-16">
             <article className="bg-slate-800 dark:bg-slate-800 p-8 rounded-2xl text-white">
-              <h3 className="text-2xl font-bold text-accent mb-4">Enfoque:</h3>
+              <h3 className="text-2xl font-bold text-accent mb-4">
+                Calendario:
+              </h3>
               <p>
-                En la vertiginosa era moderna, las distracciones interminables
-                nos impiden concentrarnos en lo que realmente importa. The Focus
-                Project te ayuda a dirigir tu atención hacia lo correcto: tu
-                futuro, tus relaciones, tu salud física, mental y espiritual, tu
-                bienestar general.
+                Organiza y gestiona tus tareas y eventos de manera eficiente con
+                un calendario intuitivo y fácil de usar, diseñado para
+                simplificar tu planificación diaria y mejorar tu productividad.
               </p>
             </article>
             <article className="bg-slate-800 dark:bg-slate-800 p-8 rounded-2xl text-white">
-              <h3 className="text-2xl font-bold text-accent mb-4">Control:</h3>
+              <h3 className="text-2xl font-bold text-accent mb-4">Hábitos</h3>
               <p>
-                Recupera el control de tu vida al rechazar la distracción del
-                entretenimiento instantáneo. Construye tu fuerza de voluntad,
-                elige tu propio camino y conviértete en la mejor versión de ti
-                mismo.
+                Crea y gestiona tus rutinas diarias organizando y categorizando
+                tus tareas en grupos, y realiza un seguimiento de tu progreso
+                para mantener tus objetivos en camino.{" "}
               </p>
             </article>
           </div>
@@ -105,11 +100,9 @@ export default function Welcome() {
                 Trabaja en las áreas realmente importantes de tu vida.
               </li>
               <li>
-                <span className="font-semibold">
-                  Recordatorios inteligentes:
-                </span>{" "}
-                Nuestra plataforma se encargará de planificar, organizar y
-                recordarte todo de la manera más eficiente posible.
+                <span className="font-semibold">Recordatorios:</span> Nuestra
+                plataforma se encargará de planificar, organizar y recordarte
+                todo de la manera más eficiente posible.
               </li>
             </ul>
           </div>
@@ -120,76 +113,62 @@ export default function Welcome() {
             <h2 className="text-3xl font-bold text-center mb-8">
               Descubre más sobre Focus
             </h2>
-            <div className="relative w-full max-w-5xl mx-auto overflow-hidden">
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden">
               <div
-                className="flex transition-transform duration-300 ease-in-out"
+                className="flex transition-all duration-300 ease-in-out"
                 style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-                <div className="w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
+                <div className="flex flex-col items-center w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
                   <img
-                    src="/placeholder.svg?height=200&width=400"
-                    alt="Organización eficiente"
-                    className="w-full h-48 object-cover rounded-lg mb-4"
+                    src="/calendar screenshot.png"
+                    alt="Vistas de calendario"
+                    className="w-9/12 object-contain rounded-lg mb-4"
                   />
                   <h3 className="text-xl font-semibold mb-2">
-                    Organización eficiente
+                    Vistas de calendario
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-300">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </p>
                 </div>
-                <div className="w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
+                <div className="flex flex-col items-center w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
                   <img
-                    src="/placeholder.svg?height=200&width=400"
+                    src="/habits screenshot.png"
                     alt="Desarrollo de hábitos"
-                    className="w-full h-48 object-cover rounded-lg mb-4"
+                    className="w-9/12 object-contain rounded-lg mb-4"
                   />
                   <h3 className="text-xl font-semibold mb-2">
                     Desarrollo de hábitos
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-300">
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                    laboris nisi ut aliquip ex ea commodo consequat.
-                  </p>
                 </div>
-                <div className="w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
+                <div className="flex flex-col items-center w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
                   <img
-                    src="/placeholder.svg?height=200&width=400"
-                    alt="Mejora continua"
-                    className="w-full h-48 object-cover rounded-lg mb-4"
+                    src="/general screenshot.png"
+                    alt="Gestión de tareas y eventos"
+                    className="w-9/12 object-contain rounded-lg mb-4"
                   />
                   <h3 className="text-xl font-semibold mb-2">
-                    Mejora continua
+                    Gestión de tareas y eventos
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-300">
-                    Duis aute irure dolor in reprehenderit in voluptate velit
-                    esse cillum dolore eu fugiat nulla pariatur.
-                  </p>
                 </div>
               </div>
               <button
                 onClick={prevSlide}
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-r-md"
+                className="absolute w-12 h-16 left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-r-md"
                 aria-label="Slide anterior">
                 &#10094;
               </button>
               <button
                 onClick={nextSlide}
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-l-md"
+                className="absolute w-12 h-16 right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-l-md"
                 aria-label="Siguiente slide">
                 &#10095;
               </button>
             </div>
           </div>
         </section>
-
-        <section className="container mx-auto mt-16 px-4 text-center">
+        <section className="mx-auto mt-16 px-4 text-center">
           <h2 className="text-4xl font-bold mb-8">
             Empieza a tomar el <span className="text-accent">Control</span>
           </h2>
           <Link to="/register">
-            <button className="bg-secondary hover:bg-primary text-white hover:text-accent text-2xl py-4 px-8 rounded-full transition duration-300 ease-in-out transform hover:scale-105">
+            <button className="bg-slate-500 hover:bg-primary text-white hover:text-accent text-2xl py-4 px-8 rounded-full transition duration-300 ease-in-out transform hover:scale-105">
               Registrarse
             </button>
           </Link>

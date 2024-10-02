@@ -7,7 +7,7 @@ import sendEmail from "../EmailSender"
 import axios from "axios"
 
 export default function Register() {
-  const { login } = useUser() // Usamos Zustand en lugar de useContext
+  const { login, user } = useUser() // Usamos Zustand en lugar de useContext
   const [error, setError] = useState("")
 
   const [nickName, setNickName] = useState("")
@@ -22,6 +22,13 @@ export default function Register() {
   const [isValidPassword, setIsValidPassword] = useState(false)
 
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // Si el usuario ya está autenticado, redirige a la página de inicio
+    if (user) {
+      navigate("/home")
+    }
+  }, [user, navigate])
 
   useEffect(() => {
     if (email && isValidEmail) {
