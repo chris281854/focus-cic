@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { useUser } from "../context/UserContext"
 import dayjs from "dayjs"
+import { CartesianGrid } from "recharts"
 
 export default function NewEvent({
   onEventCreated,
@@ -86,7 +87,7 @@ export default function NewEvent({
           eventName,
           category: category ? "task" : "event",
           lifeAreaIds: selectedAreas,
-          eventDate,
+          eventDate: eventDate || null,
           eventPriority,
           eventDescription,
           userId: user.user_id,
@@ -105,13 +106,13 @@ export default function NewEvent({
   //Close with scape key
   useEffect(() => {
     const close = (e) => {
-      if(e.keyCode === 27){
+      if (e.keyCode === 27) {
         toggleNewEvent()
       }
     }
-    window.addEventListener('keydown', close)
-  return () => window.removeEventListener('keydown', close)
-},[])
+    window.addEventListener("keydown", close)
+    return () => window.removeEventListener("keydown", close)
+  }, [])
 
   return (
     <>
@@ -197,7 +198,7 @@ export default function NewEvent({
                   name="EventDate"
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
-                  required
+                  required={!category}
                   className={`w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
                 />
               </div>

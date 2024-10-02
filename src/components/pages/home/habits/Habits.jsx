@@ -20,6 +20,7 @@ import {
   CardTitle,
 } from "../../../ui/card"
 import { ChartContainer } from "../../../ui/chart"
+import getRandomColor from "../../../../../server/RandomColor"
 
 export default function Habits() {
   // Manejar eventos base
@@ -82,18 +83,6 @@ export default function Habits() {
     }
   }
 
-  // // manejar eventos base:
-  // const handleSeleccion = (value) => {
-  //   setSelectedValues((prevSelectedValues) => {
-  //     if (prevSelectedValues.includes(value)) {
-  //       //Retirar valores seleccionados
-  //       return prevSelectedValues.filter((item) => item !== value)
-  //     } else {
-  //       return [...prevSelectedValues, value]
-  //     }
-  //   })
-  // }
-
   useEffect(() => {
     if (user) {
       fetchLifeAreas()
@@ -124,7 +113,7 @@ export default function Habits() {
           color: getRandomColor(),
         },
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
         }
       )
       fetchLifeAreas()

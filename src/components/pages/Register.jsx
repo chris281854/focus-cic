@@ -183,7 +183,7 @@ export default function Register() {
                 type="password"
                 id="password"
                 name="password"
-                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 !bg-slate-800 text-white"
                 autoComplete="off"
                 minLength={8}
                 placeholder="Contraseña"
@@ -255,7 +255,7 @@ export default function Register() {
                 max={"2015-01-01"}
                 required
                 onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 bg-slate-800 text-white"
+                className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500 !bg-slate-800 text-white"
               />
             </div>
             {/* <!-- Sign up Button --> */}
