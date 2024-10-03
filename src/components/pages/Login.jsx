@@ -4,21 +4,56 @@ import { useNavigate, Link } from "react-router-dom"
 import Header from "../Header"
 import Footer from "../Footer"
 import axios from "axios"
+import { GoogleLogin } from "@react-oauth/google"
+import clientId from "../../../server/clientId"
+import { jwtDecode } from "jwt-decode"
 
 export default function Login() {
-  const { user, login, loading } = useUser() // Usa Zustand en lugar de useContext
+  const { user, login, loading } = useUser()
   const navigate = useNavigate()
   const [error, setError] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const clientid = clientId()
 
-  useEffect(() => {
-    // Si el usuario ya está autenticado, redirige a la página de inicio
-    if (user) {
-      navigate("/home")
+  const googleResponseMessage = async (response) => {
+    console.log("OAuth valid", response)
+    const decoded = jwtDecode(response.credential)
+
+    try {
+      const token = response.credential
+      const google_id = decoded.sub
+      const email = decoded.email
+      const name = decoded.name
+      const nickname = decoded.given_name + Math.random().toString()
+      const birthdate = null
+
+      const res = await axios.post(
+        "http://localhost:3001/api/googleLogin",
+        { token, google_id, email, name, nickname, birthdate },
+        { withCredentials: true }
+      )
+
+      // Si es exitoso, redirigir al usuario
+      if (res.status === 200) {
+        const userData = res.data
+        await login(userData, rememberMe) // Llama a la función de login de Zustand
+        console.log("Iniciando sesión")
+        navigate("/home")
+        console.log("Exito al iniciar sesión")
+      }
+    } catch (error) {
+      console.error(
+        "Error durante el proceso de login:",
+        error.response?.data || error.message
+      )
     }
-  }, [user, navigate])
+  }
+  
+  const googleErrorMessage = (error) => {
+    console.log("Error OAuth", error)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -49,6 +84,7 @@ export default function Login() {
       }
     }
   }
+
   return (
     <>
       <Header />
@@ -56,7 +92,7 @@ export default function Login() {
         {/* <!-- Left: Image --> */}
         <div className="w-1/2 h-screen hidden lg:block">
           <img
-            src="public\Wallpaper.jpg"
+            src="\Wallpaper.jpg"
             alt="Placeholder Image"
             className="object-cover w-full h-full"
           />
@@ -64,6 +100,13 @@ export default function Login() {
         {/* <!-- Right: Login Form --> */}
         <div className="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
           <h1 className="text-2xl font-semibold mb-4">Inicio de Sesión</h1>
+          <div className="">
+            <h2>Iniciar sesión con Google</h2>
+            <GoogleLogin
+              onSuccess={googleResponseMessage}
+              onError={googleErrorMessage}
+            />
+          </div>
           <form onSubmit={handleSubmit}>
             {/* <!-- Username Input --> */}
             <div className="mb-4">

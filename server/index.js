@@ -49,6 +49,26 @@ function authenticateToken(req, res, next) {
   })
 }
 
+// Función para generar el token JWT, configurar la cookie y enviar la respuesta
+const sendAuthResponse = (res, user, rememberMe = false) => {
+  const token = jwt.sign(
+    { user_id: user.user_id, email: user.email },
+    SECRET_KEY,
+    { expiresIn: "1h" }
+  )
+
+  // Enviar el token como una cookie
+  res.cookie("token", token, {
+    httpOnly: true, // La cookie no puede ser leída por JavaScript
+    secure: false, // Cambiar a true si usas HTTPS
+    sameSite: "lax", // Permitir el envío en solicitudes dentro del mismo dominio
+    maxAge: rememberMe ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 60, // 7 días o 1 hora
+  })
+
+  // Devolver la misma estructura de respuesta
+  res.json({ user: { user_id: user.user_id, email: user.email } })
+}
+
 //ROUTES
 // Recibir datos
 app.get("/api/get/events", authenticateToken, async (req, res) => {
@@ -858,22 +878,7 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid password" })
     }
 
-    const token = jwt.sign(
-      { user_id: user.user_id, email: user.email },
-      SECRET_KEY,
-      { expiresIn: "1h" }
-    )
-
-    // Enviar el token como una cookie
-    res.cookie("token", token, {
-      httpOnly: true, // La cookie no puede ser leída por JavaScript
-      // secure: process.env.NODE_ENV === "production", // Solo se envía sobre HTTPS en producción
-      secure: false, //Mi servidor es http, no https
-      sameSite: "lax", // Permite el envío en solicitudes solo en el mismo dominio
-      maxAge: rememberMe ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 60,
-    })
-
-    res.json({ user: { user_id: user.user_id, email: user.email } })
+    sendAuthResponse(res, user, rememberMe)
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: "Internal server error" })
@@ -929,6 +934,50 @@ app.get("/api/protected", (req, res) => {
     const data = jwt.verify(token, SECRET_KEY)
     res.render("protected", data)
   } catch (error) {}
+})
+
+app.post("/api/googleLogin", async (req, res) => {
+  const { token, google_id, email, name, nickname, birthdate } = req.body
+
+  try {
+    // Verificar si el usuario ya existe en la tabla Users
+    const result = await pool.query('SELECT * FROM "Users" WHERE email = $1', [
+      email,
+    ])
+
+    let user
+    if (result.rows.length === 0) {
+      // Si no existe, crear un nuevo usuario
+      const newUser = await pool.query(
+        `INSERT INTO "Users" (name, nickname, birthdate, email) 
+         VALUES ($1, $2, $3, $4) 
+         RETURNING user_id, email`,
+        [name, nickname, birthdate, email]
+      )
+      user = newUser.rows[0] // usuario recién creado
+    } else {
+      // Si el usuario existe, asignarlo para el siguiente paso
+      user = result.rows[0]
+    }
+
+    // Ahora guardar en la tabla "Google_Auth"
+    const now = new Date()
+    const tokenUpdateTime = now.toISOString()
+
+    await pool.query(
+      `INSERT INTO "Google_Auth" (user_id, google_id, token, token_update) 
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (google_id) DO UPDATE 
+       SET token = $3, token_update = $4`,
+      [user.user_id, google_id, token, tokenUpdateTime]
+    )
+
+    const rememberMe = true
+    sendAuthResponse(res, user, rememberMe)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: "Internal server error" })
+  }
 })
 
 //Actualizar perfil

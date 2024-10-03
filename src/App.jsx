@@ -17,13 +17,14 @@ import dayjs from "dayjs"
 import es from "dayjs/locale/es"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
-import clientId from ""
+import clientId from "../server/clientId"
 
 import { useEffect } from "react"
 import { GoogleOAuthProvider } from "@react-oauth/google"
 
 function App() {
   const { themeColor, secondaryColor, tertiaryColor } = useUser()
+  const clientid = clientId()
 
   dayjs.locale("es")
   dayjs.locale({
@@ -47,7 +48,7 @@ function App() {
 
   return (
     <>
-      <GoogleOAuthProvider clientId={clientId}>
+      <GoogleOAuthProvider clientId={clientid}>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Welcome />} />
