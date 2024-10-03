@@ -17,8 +17,10 @@ import dayjs from "dayjs"
 import es from "dayjs/locale/es"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
+import clientId from ""
 
 import { useEffect } from "react"
+import { GoogleOAuthProvider } from "@react-oauth/google"
 
 function App() {
   const { themeColor, secondaryColor, tertiaryColor } = useUser()
@@ -45,29 +47,31 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/welcome" element={<Welcome />} />
-          <Route
-            path="/home/*"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }>
-            {/* Rutas secundarias dentro de /home */}
-            <Route index element={<GeneralView />} />
-            <Route path="calendar" element={<Calendar />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="habits" element={<Habits />} />
-          </Route>
-          <Route path="/about-us" element={<About />} />
-          <Route path="/contact-us" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Routes>
-      </BrowserRouter>
+      <GoogleOAuthProvider clientId={clientId}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Welcome />} />
+            <Route path="/welcome" element={<Welcome />} />
+            <Route
+              path="/home/*"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }>
+              {/* Rutas secundarias dentro de /home */}
+              <Route index element={<GeneralView />} />
+              <Route path="calendar" element={<Calendar />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="habits" element={<Habits />} />
+            </Route>
+            <Route path="/about-us" element={<About />} />
+            <Route path="/contact-us" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Routes>
+        </BrowserRouter>
+      </GoogleOAuthProvider>
     </>
   )
 }
