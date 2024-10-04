@@ -50,7 +50,7 @@ export default function Login() {
       )
     }
   }
-  
+
   const googleErrorMessage = (error) => {
     console.log("Error OAuth", error)
   }
@@ -88,7 +88,7 @@ export default function Login() {
   return (
     <>
       <Header />
-      <div className="bg-gray-100 dark:bg-bg-main-color flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center lg:h-screen h-fit overflow-hidden">
         {/* <!-- Left: Image --> */}
         <div className="w-1/2 h-screen hidden lg:block">
           <img
@@ -98,22 +98,24 @@ export default function Login() {
           />
         </div>
         {/* <!-- Right: Login Form --> */}
-        <div className="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
-          <h1 className="text-2xl font-semibold mb-4">Inicio de Sesión</h1>
-          <div className="">
-            <h2>Iniciar sesión con Google</h2>
+        <div className="lg:px-32 md:px-44 sm:px-10 p-10 w-full lg:w-1/2 items-center flex flex-col lg:h-screen h-fit overflow-scroll">
+          <h2 className="mb-4">Inicio de Sesión</h2>
+          <div className="border-b pb-8 w-full justify-center flex">
             <GoogleLogin
               onSuccess={googleResponseMessage}
               onError={googleErrorMessage}
+              style={{
+                backgroundColor: "blue",
+              }}
             />
           </div>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
             {/* <!-- Username Input --> */}
-            <div className="mb-4">
+            <div className="">
               <label
                 htmlFor="email"
-                className="block text-gray-600 dark:text-white">
-                Correo Electrónico
+                className="block text-gray-600 dark:text-white text-center mb-8">
+                O continuar con email
               </label>
               <input
                 type="text"
@@ -127,11 +129,6 @@ export default function Login() {
             </div>
             {/* <!-- Password Input --> */}
             <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-gray-600 dark:text-white">
-                Contraseña
-              </label>
               <input
                 type="password"
                 id="password"

@@ -5,6 +5,7 @@ import Header from "../Header"
 import Footer from "../Footer"
 import sendEmail from "../EmailSender"
 import axios from "axios"
+import { GoogleLogin } from "@react-oauth/google"
 
 export default function Register() {
   const { login, user } = useUser() // Usamos Zustand en lugar de useContext
@@ -126,6 +127,44 @@ export default function Register() {
     }
   }
 
+  const googleResponseMessage = async (response) => {
+    console.log("OAuth valid", response)
+    const decoded = jwtDecode(response.credential)
+
+    try {
+      const token = response.credential
+      const google_id = decoded.sub
+      const email = decoded.email
+      const name = decoded.name
+      const nickname = decoded.given_name + Math.random().toString()
+      const birthdate = null
+
+      const res = await axios.post(
+        "http://localhost:3001/api/googleLogin",
+        { token, google_id, email, name, nickname, birthdate },
+        { withCredentials: true }
+      )
+
+      // Si es exitoso, redirigir al usuario
+      if (res.status === 200) {
+        const userData = res.data
+        await login(userData, rememberMe) // Llama a la función de login de Zustand
+        console.log("Iniciando sesión")
+        navigate("/home")
+        console.log("Exito al iniciar sesión")
+      }
+    } catch (error) {
+      console.error(
+        "Error durante el proceso de login:",
+        error.response?.data || error.message
+      )
+    }
+  }
+
+  const googleErrorMessage = (error) => {
+    console.log("Error OAuth", error)
+  }
+
   const isFormValid =
     isValidEmail &&
     isEmailAvailable &&
@@ -138,7 +177,7 @@ export default function Register() {
   return (
     <>
       <Header />
-      <main className="bg-gray-100 dark:bg-bg-main-color flex justify-center items-center h-screen">
+      <main className="flex justify-center lg:h-screen h-fit overflow-hidden">
         {/* <!-- Left: Image --> */}
         <div className="w-1/2 h-screen hidden lg:block">
           <img
@@ -148,15 +187,24 @@ export default function Register() {
           />
         </div>
         {/* <!-- Right: Login Form --> */}
-        <section className="lg:px-36 md:px-52 sm:px-20 pb-32 w-full lg:w-1/2 mt-24 h-screen overflow-scroll scrollbar-none">
-          <h1 className="text-2xl font-semibold mb-4">Registro de Usuario</h1>
-          <form onSubmit={handleSubmit}>
+        <section className="lg:px-32 md:px-44 sm:px-10 p-10 w-full lg:w-1/2 items-center flex flex-col lg:h-screen h-fit overflow-scroll">
+          <h2 className="mb-4">Crear nueva cuenta</h2>
+          <div className="border-b pb-8 w-full justify-center flex">
+            <GoogleLogin
+              onSuccess={googleResponseMessage}
+              onError={googleErrorMessage}
+              style={{
+                backgroundColor: "blue",
+              }}
+            />
+          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
             {/* <!-- Email Input --> */}
             <div className="mb-4">
               <label
                 htmlFor="email"
-                className="block text-gray-600 dark:text-white">
-                Correo Electrónico
+                className="block text-gray-600 dark:text-white text-center mb-8">
+                O continuar con Email
               </label>
               <input
                 type="text"
