@@ -3,8 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import "./App.css"
 import Welcome from "./components/pages/Welcome"
 import Home from "./components/pages/home/Home"
-import About from "./components/pages/About"
-import Contact from "./components/pages/Contact"
 import GeneralView from "./components/pages/home/GeneralView"
 import Calendar from "./components/pages/home/calendar/Calendar"
 import Settings from "./components/pages/home/settings/Settings"
@@ -66,8 +64,6 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="habits" element={<Habits />} />
             </Route>
-            <Route path="/about-us" element={<About />} />
-            <Route path="/contact-us" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>
