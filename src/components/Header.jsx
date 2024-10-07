@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useContext } from "react"
 import { Link } from "react-router-dom"
 import { useUser } from "../context/UserContext"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons"
 
 const Header = () => {
   const { user, logout, darkMode, toggleDarkMode } = useUser()
@@ -30,21 +32,24 @@ const Header = () => {
   }, [])
 
   //links styles
-  const twLinks =
-    "text-white pl-3 pr-3 hover:text-blue transition-all duration-200"
+  const twLinks = "text-white lg:px-3 px-1 text-xs hover:text-blue"
 
   return (
     <header
-      className={`flex top-0 w-full h-20 items-center justify-between z-50 bg-slate-800 dark:bg-slate-900 transition-all duration-300 flex-row select-none`}>
+      className={`flex top-0 w-full lg:h-20 h-10 items-center z-50 bg-slate-800 dark:bg-slate-900 select-none overflow-hidden`}>
       <Link className="hover:text-accent transition-all bg-cover duration-500 w-fit h-full flex items-center p-3">
-        <img src="/Focus Logo Vector Large.png" alt="Logo" className="object-contain h-full w-full" />
-        <h2>Focus</h2>
+        <img
+          src="/Focus Logo Vector Large.png"
+          alt="Logo"
+          className="object-contain h-full w-full"
+        />
+        <h3>Focus</h3>
       </Link>
-      <div>
-        <button
-          className="border-2 border-white bg-transparent focus:outline-none w-16 transition-all"
+      <div className="flex ml-auto items-center">
+      <button
+          className={`w-fit bg-transparent text-white hover:text-blue-700 content-center`}
           onClick={toggleDarkMode}>
-          {darkMode === "dark" ? "💡" : "🌙"}
+          <FontAwesomeIcon icon={darkMode === "light" ? faMoon : faSun} />
         </button>
         <Link to="/about-us" className={twLinks}>
           Sobre nosotros
