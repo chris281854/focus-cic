@@ -121,9 +121,9 @@ export default function Welcome() {
                   <img
                     src="/calendar screenshot.png"
                     alt="Vistas de calendario"
-                    className="w-9/12 object-contain rounded-lg mb-4"
+                    className="w-9/12 max-sm:w-full object-contain rounded-lg mb-4"
                   />
-                  <h3 className="text-xl font-semibold mb-2">
+                  <h3 className="text-xl font-semibold text-center">
                     Vistas de calendario
                   </h3>
                 </div>
@@ -131,9 +131,9 @@ export default function Welcome() {
                   <img
                     src="/habits screenshot.png"
                     alt="Desarrollo de hábitos"
-                    className="w-9/12 object-contain rounded-lg mb-4"
+                    className="w-9/12 max-sm:w-full object-contain rounded-lg mb-4"
                   />
-                  <h3 className="text-xl font-semibold mb-2">
+                  <h3 className="text-xl font-semibold text-center">
                     Desarrollo de hábitos
                   </h3>
                 </div>
@@ -141,9 +141,9 @@ export default function Welcome() {
                   <img
                     src="/general screenshot.png"
                     alt="Gestión de tareas y eventos"
-                    className="w-9/12 object-contain rounded-lg mb-4"
+                    className="w-9/12 max-sm:w-full object-contain rounded-lg mb-4"
                   />
-                  <h3 className="text-xl font-semibold mb-2">
+                  <h3 className="text-xl font-semibold text-center">
                     Gestión de tareas y eventos
                   </h3>
                 </div>

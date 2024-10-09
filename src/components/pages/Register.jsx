@@ -187,8 +187,8 @@ export default function Register() {
           />
         </div>
         {/* <!-- Right: Login Form --> */}
-        <section className="lg:px-32 md:px-44 sm:px-10 p-10 w-full lg:w-1/2 items-center flex flex-col lg:h-screen h-fit overflow-scroll">
-          <h2 className="mb-4">Crear nueva cuenta</h2>
+        <section className="lg:px-32 md:px-44 sm:px-10 p-10 w-full lg:w-1/2 items-center flex flex-col lg:h-screen h-fit overflow-y-scroll">
+          <h2 className="mb-4 text-center">Registrarse con Google</h2>
           <div className="border-b pb-8 w-full justify-center flex">
             <GoogleLogin
               onSuccess={googleResponseMessage}
@@ -204,7 +204,7 @@ export default function Register() {
               <label
                 htmlFor="email"
                 className="block text-gray-600 dark:text-white text-center mb-8">
-                O continuar con Email
+                O crear cuenta con Email
               </label>
               <input
                 type="text"

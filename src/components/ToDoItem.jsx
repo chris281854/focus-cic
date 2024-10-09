@@ -27,7 +27,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
   let eventState = ""
 
   const stateColor = () => {
-    const state = event.state
+    const state = event?.state
     if (state === 0) {
       eventState = "Completado"
       return "bg-accent "
@@ -51,6 +51,7 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
       return "bg-green-400 "
     }
   }
+  stateColor()
 
   const toggleOpen = () => {
     setIsOpen(!isOpen)
@@ -110,15 +111,21 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
     <>
       {event && (
         <div
-          className="grid grid-cols-[0px_1fr_0.5fr_1fr_1fr_auto] bg-tertiary dark:bg-slate-800 rounded-lg shadow-lg p-1 m-3 ml-0 cursor-pointer dark:hover:bg-cyan-900 transition-all overflow-hidden"
+          className={`grid max-md:flex max-md:flex-wrap  ${
+            isOpen
+              ? "grid-cols-[1fr_1fr_1fr_1fr_auto] grid-rows-[auto_auto]"
+              : "grid-cols-[0px_1fr_1fr_1fr_1fr_auto] grid-rows-[auto]"
+          } gap-3 bg-tertiary dark:bg-slate-800 rounded-lg shadow-lg p-1 m-3 cursor-pointer dark:hover:bg-cyan-900 transition-all overflow-hidden items-center content-center min-w-64`}
           onClick={toggleOpen}>
-          <div
-            className={
-              `${stateColor()}` +
-              "grid rounded-sm self-center min-h-full w-4 h-14 -ml-3 -mt-3 -mb-3 left-0"
-            }></div>
-          <div className="col-span-2 flex items-center ml-2 gap-3 max-w-48">
-            <div className="col-span-1 h-full w-12">
+          {!isOpen && (
+            <div
+              className={
+                `${stateColor()}` +
+                "grid rounded-sm self-center min-h-full w-4 h-14 -ml-3 -mt-3 -mb-3 left-0 max-md:hidden"
+              }></div>
+          )}
+          <div className="grid grid-cols-[2.5rem_1fr] col-span-2 items-center gap-3 max-w-full h-min w-full">
+            <div className="col-span-1 h-full w-10">
               <button
                 className="flex text-center justify-center bg-emerald-400 text-white h-10 w-10 hover:bg-emerald-400 transition ease-in-out transform rounded-2xl hover:scale-110 duration-300"
                 onClick={(e) => {
@@ -128,27 +135,46 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
                 <FontAwesomeIcon icon={faCheck} />
               </button>
             </div>
-            <p className="font-light text-white col-span-2 min-w-max">{event.name}</p>
+            <p className="font-light text-white col-span-1 text-nowrap overflow-hidden text-ellipsis w-full">
+              {event.name}
+            </p>
           </div>
-          <div className="col-span-1 flex items-center justify-center">
+          <div className="col-span-1 flex justify-center overflow-hidden h-min w-full min-w-fit text-nowrap">
             <span className="text-base text-white">
-              {event.date ? dayjs(event.date).tz(timezone).format("D MMMM | h:m a") : ""}
+              {event.state === 1 &&
+                event.date &&
+                dayjs(event.date).tz(timezone).format("MMMM D, h:m a")}
+              {event.state === 2 &&
+                event.date &&
+                dayjs(event.date).tz(timezone).format("h:m a")}
+              {event.state === 6 &&
+                event.date &&
+                dayjs(event.date).tz(timezone).format("h:m a")}
+              {event.state === 3 &&
+                event.date &&
+                dayjs(event.date).tz(timezone).format("ddd h:m a")}
+              {event.state === 4 &&
+                event.date &&
+                dayjs(event.date).tz(timezone).format("D MMM. h:m a")}
             </span>
           </div>
-          <div className="col-span-1 flex items-center max-w-80 overflow-x-scroll rounded-xl scrollbar-none px-2">
+          <div
+            className={`flex items-center max-w-full overflow-x-auto rounded-xl scrollbar-none gap-1 h-full ${
+              isOpen && "row-span-2 flex-wrap content-start"
+            }`}>
             {event.life_areas.map(
               (area, index) =>
                 area && (
                   <div
                     key={index}
-                    className={`rounded-full p-1 pr-2 pl-2 mx-1`}
+                    className={`rounded-full p-0.5 px-2 h-7 text-center text-ellipsis overflow-hidden w-fit max-w-48 min-w-20 whitespace-nowrap`}
                     style={{ backgroundColor: `${area.color}` }}>
                     {area.name}
                   </div>
                 )
             )}
           </div>
-          <div className="col-span-1 flex justify-end items-center space-x-2 pr-1">
+          <div className="row-span-1 flex gap-2 h-min">
             <button
               className="text-white bg-primary dark:bg-slate-800 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
               onClick={(e) => {
@@ -167,14 +193,14 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
             </button>
           </div>
           {isOpen && (
-            <div className="grid col-span-6 row-start-2">
-              <div className="col-span-3 row-start-2">
-                <p className="text-white mt-2 p-2">{event.description}</p>
-              </div>
-              <div className="col-start-4 col-span-3 row-start-2">
-                <p className="text-white mt-2 p-2 place-self-end">
-                  {eventState}
+            <div className="col-span-3 grid grid-cols-3 grid-rows-1 max-md:hidden max-h-20">
+              <div className="col-span-2">
+                <p className="text-white text-clip overflow-hidden h-full">
+                  {event.description}
                 </p>
+              </div>
+              <div className="col-span-1 w-full text-center">
+                <p className="text-white">{eventState}</p>
               </div>
             </div>
           )}

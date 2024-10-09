@@ -88,7 +88,7 @@ export default function Login() {
   return (
     <>
       <Header />
-      <div className="flex justify-center items-center lg:h-screen h-fit overflow-hidden">
+      <div className="flex justify-center items-center lg:h-screen h-fit max-sm:h-full overflow-hidden">
         {/* <!-- Left: Image --> */}
         <div className="w-1/2 h-screen hidden lg:block">
           <img

@@ -103,8 +103,8 @@ export default function GeneralView() {
 
   return (
     <div className="flex relative flex-col w-full select-none">
-      <header className="border-b dark:border-white border-secondary dark:bg-transparent flex p-4 items-center gap-2 mx-5">
-        <h4 className="dark:text-white">Tareas y eventos pendientes</h4>
+      <header className="border-b dark:border-white border-secondary dark:bg-transparent flex p-4 max-sm:p-1 items-center gap-2 mx-5">
+        <h4 className="dark:text-white text-center">Tareas y eventos pendientes</h4>
         <button
           className="bg-primary text-white dark:bg-slate-800 ml-auto"
           onClick={() => setToggleNewEvent(true)}>

@@ -156,6 +156,7 @@ export default function EditItem({
                       type="text"
                       name="EventDescription"
                       value={eventDescription}
+                      maxLength={250}
                       onChange={(e) => setEventDescription(e.target.value)}
                       className="w-full min-h-16 p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     />

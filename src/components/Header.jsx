@@ -36,14 +36,14 @@ const Header = () => {
 
   return (
     <header
-      className={`flex top-0 w-full lg:h-20 h-10 items-center z-50 bg-slate-800 dark:bg-slate-900 select-none overflow-hidden`}>
-      <Link className="hover:text-accent transition-all bg-cover duration-500 w-fit h-full flex items-center p-3">
+      className={`flex top-0 w-full lg:h-20 h-10 items-center z-50 bg-slate-800 dark:bg-slate-900 select-none overflow-hidden text-center`}>
+      <Link className="bg-cover w-fit h-full flex items-center p-2">
         <img
           src="/Focus Logo Vector Large.png"
           alt="Logo"
           className="object-contain h-full w-full"
         />
-        <h3>Focus</h3>
+        <h3 className="max-sm:hidden hover:text-accent transition-all">Focus</h3>
       </Link>
       <div className="flex ml-auto items-center">
       <button
