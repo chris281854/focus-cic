@@ -51,8 +51,8 @@ const Header = () => {
           onClick={toggleDarkMode}>
           <FontAwesomeIcon icon={darkMode === "light" ? faMoon : faSun} />
         </button>
-        <Link to="/about-us" className={twLinks}>
-          Sobre nosotros
+        <Link to="/welcome" className={twLinks}>
+          ¿Comenzando en Focus?
         </Link>
         {user ? (
           <Link onClick={handleLogOut} to="/login" className={twLinks}>

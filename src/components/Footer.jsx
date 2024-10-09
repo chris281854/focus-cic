@@ -20,12 +20,6 @@ const Footer = () => {
         <Link to="/welcome" className={twLinks}>
           ¿Comenzando en Focus?
         </Link>
-        <Link to="/about-us" className={twLinks}>
-          Sobre nosotros
-        </Link>
-        <Link to="/contact-us" className={twLinks}>
-          Contáctanos
-        </Link>
       </div>
     </footer>
   )
