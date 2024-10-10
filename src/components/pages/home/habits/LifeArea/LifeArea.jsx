@@ -101,6 +101,37 @@ export default function LifeArea({
     ))
   }
 
+  const fetchAreaChanges = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3001/api/update/lifeAreas",
+        {
+          areaId: area.area_id,
+          areaName,
+          userId: user.user_id,
+          satisfaction,
+          longTermGoal,
+          weekGoal,
+        },
+        { withCredentials: true }
+      )
+
+      // Si es exitoso, redirigir al usuario
+      if (res.status === 200) {
+        const userData = res.data
+        await login(userData, rememberMe) // Llama a la función de login de Zustand
+        console.log("Iniciando sesión")
+        navigate("/home")
+        console.log("Exito al iniciar sesión")
+      }
+    } catch (error) {
+      console.error(
+        "Error durante el proceso de login:",
+        error.response?.data || error.message
+      )
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
@@ -111,7 +142,7 @@ export default function LifeArea({
         <div className="flex items-center justify-between p-4 mb-6 bg-primary/50 dark:bg-slate-900 rounded-lg shadow-md transition-all">
           <input
             type="text"
-            className="w-72 mr-3 text-3xl font-bold text-white bg-transparent border-b-2 border-transparent focus:border-white focus:outline-none transition-all"
+            className="w-72 mr-3 text-3xl font-bold text-white !bg-transparent border-b-2 border-neutral-500 focus:border-white focus:outline-none transition-all"
             value={areaName}
             onChange={(e) => setAreaName(e.target.value.toUpperCase())}
           />

@@ -222,7 +222,7 @@ export default function WeekView({ events, onEventCreated }) {
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500">No hay tareas para este día.</p>
+              <p className="text-gray-500">No hay tareas para esta semana.</p>
             )}
           </main>
         </aside>

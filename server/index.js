@@ -797,9 +797,8 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
   }
 })
 
-app.patch("/api/update/lifeAreas/:id", authenticateToken, async (req, res) => {
-  const { id } = req.params
-  const { userId, name } = req.body
+app.patch("/api/update/lifeAreas", authenticateToken, async (req, res) => {
+  const { userId, areaId, areaName } = req.body
 
   if (!name || !userId || score) {
     return res
@@ -810,7 +809,7 @@ app.patch("/api/update/lifeAreas/:id", authenticateToken, async (req, res) => {
   try {
     const lifeAreaResult = await pool.query(
       `UPDATE "Life_Areas" SET name = $1 WHERE life_area_id = $2 AND user_id = $3 RETURNING *`,
-      [name, id, userId]
+      [areaName, areaId, userId]
     )
 
     if (lifeAreaResult.rows.length === 0) {
