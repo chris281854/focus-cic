@@ -13,23 +13,21 @@ import { Calendar, CheckCircle } from "lucide-react"
 
 export default function LifeAreaCard({ area, allEvents, events }) {
   const title = area.name
-  const satisfaction = area.scores[0]?.score_value
-  const longTermGoal = area.long_goal
-  const relatedGoals = []
+  const [satisfaction, setSatisfaction] = useState(
+    area.scores[area.scores.length - 1]?.score_value
+  )
   const areaColor = area.color
 
   const [scoreBar, setScoreBar] = useState(satisfaction * 10)
   const [overView, setOverView] = useState(false)
 
-  function scoreBarHandler() {
-    if (satisfaction === null || satisfaction === NaN) {
-      setScoreBar(0)
-    }
-  }
-
   useEffect(() => {
-    scoreBarHandler()
-  }, [])
+    if (satisfaction === null || isNaN(satisfaction)) {
+      setScoreBar(0)
+    } else {
+      setScoreBar(satisfaction * 10)
+    }
+  }, [satisfaction])
 
   function handleOverview() {
     setOverView(true)
@@ -39,6 +37,13 @@ export default function LifeAreaCard({ area, allEvents, events }) {
     event.life_areas.some((lifeArea) => lifeArea.name === area.name)
   )
   const areaHasEvents = areaEvents.length > 0
+
+  const [parentState, setParentState] = useState(0)
+
+  const onAreaModified = () => {}
+  useEffect(() => {
+    setSatisfaction(area.scores[area.scores.length - 1]?.score_value)
+  }, [parentState, area])
 
   return (
     <>
@@ -103,6 +108,7 @@ export default function LifeAreaCard({ area, allEvents, events }) {
           setOverView={setOverView}
           areaEvents={areaEvents}
           areaHasEvents={areaHasEvents}
+          onAreaModified={onAreaModified}
         />
       )}
     </>

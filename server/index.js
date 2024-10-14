@@ -411,7 +411,7 @@ app.post("/api/post/events", async (req, res) => {
 })
 
 app.post("/api/post/lifeAreas", authenticateToken, async (req, res) => {
-  const { name, userId, score, longTermGoal, date, color } = req.body
+  const { name, userId, score, longTermGoal, color } = req.body
 
   if (!name || !userId) {
     return res.status(400).json({ error: "Nombre y userId requeridos" })
@@ -432,8 +432,8 @@ app.post("/api/post/lifeAreas", authenticateToken, async (req, res) => {
 
     if (score) {
       const lifeAreaScoreResult = await client.query(
-        `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2, $3, $4) RETURNING *`,
-        [lifeArea.life_area_id, userId, score, date]
+        `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2, $3, current_timestamp) RETURNING *`,
+        [lifeArea.life_area_id, userId, score]
       )
       lifeAreaScore = lifeAreaScoreResult.rows[0]
     }
@@ -797,32 +797,79 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
   }
 })
 
-app.patch("/api/update/lifeAreas", authenticateToken, async (req, res) => {
-  const { userId, areaId, areaName } = req.body
+app.patch("/api/update/lifeArea", authenticateToken, async (req, res) => {
+  const { userId, areaId, areaName, satisfaction, longTermGoal = "", weekGoal = "" } = req.body;
 
-  if (!name || !userId || score) {
-    return res
-      .status(400)
-      .json({ error: "Name, userId, score, date son requeridos" })
+  // Verificar si se pasaron los campos obligatorios
+  if (!userId || !areaId) {
+    return res.status(400).json({ error: "userId y areaId son requeridos" });
   }
+
+  const client = await pool.connect();
 
   try {
-    const lifeAreaResult = await pool.query(
-      `UPDATE "Life_Areas" SET name = $1 WHERE life_area_id = $2 AND user_id = $3 RETURNING *`,
-      [areaName, areaId, userId]
-    )
+    await client.query("BEGIN");
 
-    if (lifeAreaResult.rows.length === 0) {
-      return res.status(404).json({
-        error: "life area no ha sido encontrada o usuario no autorizado",
-      })
+    // Verificar si el área de vida existe
+    const lifeAreaCheck = await client.query(
+      `SELECT * FROM "Life_Areas" WHERE life_area_id = $1 AND user_id = $2`,
+      [areaId, userId]
+    );
+
+    if (lifeAreaCheck.rowCount === 0) {
+      return res.status(404).json({ error: "Life area no encontrada" });
     }
-    res.status(200).json(result.rows[0])
+
+    // Actualizar campos de Life_Areas, asignando "" si los valores vienen vacíos
+    const updateLifeAreaFields = [];
+    const updateLifeAreaValues = [];
+    let index = 1;
+
+    if (areaName) {
+      updateLifeAreaFields.push(`name = $${index}`);
+      updateLifeAreaValues.push(areaName);
+      index++;
+    }
+
+    // Insertar cadena vacía si no hay valores en longTermGoal o weekGoal
+    updateLifeAreaFields.push(`long_goal = $${index}`);
+    updateLifeAreaValues.push(longTermGoal);
+    index++;
+
+    updateLifeAreaFields.push(`week_goal = $${index}`);
+    updateLifeAreaValues.push(weekGoal);
+    index++;
+
+    // Ejecutar el UPDATE para actualizar Life_Areas
+    await client.query(
+      `UPDATE "Life_Areas" SET ${updateLifeAreaFields.join(", ")} WHERE life_area_id = $${index} AND user_id = $${index + 1}`,
+      [...updateLifeAreaValues, areaId, userId]
+    );
+
+    let lifeAreaScore;
+    if (satisfaction !== undefined) {
+      // Insertar siempre un nuevo score
+      const lifeAreaScoreResult = await client.query(
+        `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2, $3, current_timestamp) RETURNING *`,
+        [areaId, userId, satisfaction]
+      );
+      lifeAreaScore = lifeAreaScoreResult.rows[0];
+    }
+
+    await client.query("COMMIT");
+
+    res.status(200).json({ message: "Life area y nuevo score insertados", areaId, lifeAreaScore });
   } catch (error) {
-    console.error("Error al actualizar life area: ", error)
-    res.status(500).json({ error: "Error al actualizar life area" })
+    await client.query("ROLLBACK");
+    console.error("Error al actualizar life area y score", error);
+    res.status(500).json({ error: "Error al actualizar life area y score" });
+  } finally {
+    client.release();
   }
-})
+});
+
+
+
 
 app.patch("/api/update/userConfig", authenticateToken, async (req, res) => {
   const { userId, timezone, theme } = req.body

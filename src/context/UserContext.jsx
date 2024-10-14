@@ -9,6 +9,7 @@ const useUserStore = create((set) => ({
   lifeAreas: [],
   events: [],
   allEvents: [],
+  lifeAreas: [],
   darkMode: (() => {
     const savedMode = localStorage.getItem("darkMode")
     if (savedMode) {
@@ -191,6 +192,18 @@ const useUserStore = create((set) => ({
       set({ allEvents: response.data })
     } catch (error) {
       console.error("Error al obtener los eventos: ", error)
+    }
+  },
+
+  fetchLifeAreas: async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/api/get/lifeAreas",
+        { withCredentials: true }
+      )
+      set({ lifeAreas: response.data })
+    } catch (error) {
+      console.error("Error al obtener las áreas de vida: ", error)
     }
   },
 

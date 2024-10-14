@@ -52,7 +52,7 @@ export default function Habits() {
   const {
     user,
     lifeAreas,
-    updateLifeAreas,
+    fetchLifeAreas,
     allEvents,
     fetchAllEvents,
     events,
@@ -68,20 +68,6 @@ export default function Habits() {
   const [longTermGoal, setLongTermGoal] = useState("")
 
   const [randomColor, setRandomColor] = useState() //Utilizar o eliminar
-
-  const fetchLifeAreas = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/api/get/lifeAreas`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      )
-      updateLifeAreas(response.data)
-    } catch (error) {
-      console.error("Error fetching life areas:", error)
-    }
-  }
 
   useEffect(() => {
     if (user) {
@@ -202,7 +188,6 @@ export default function Habits() {
       }
     })
   }
-  // console.log(latestScores)
 
   const ChartTooltipContent = ({ payload }) => {
     if (!payload || !payload.length) return null
@@ -223,7 +208,7 @@ export default function Habits() {
   }))
 
   return (
-    <div className="w-full max-w-full min-h-screen text-primary-foreground flex flex-col p-4 select-none gap-4">
+    <div className="relative w-full max-w-full min-h-screen text-primary-foreground flex flex-col p-4 select-none gap-4">
       <div className="flex gap-4 flex-wrap w-full justify-center">
         <Card className="lg:w-5/12 min-w-[300px] max-h-[400px] flex-grow bg-primary/10 dark:bg-slate-900 border-primary/20">
           <CardHeader>
