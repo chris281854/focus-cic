@@ -25,7 +25,10 @@ export default function NewEvent({
   const [mail, setMail] = useState(false)
   const [selectedAreas, setSelectedAreas] = useState([])
   const [category, setCategory] = useState(true) //task: true - event: false
-  const [recurrence, setRecurrence] = useState([])
+  const [recurrence, setRecurrence] = useState("") // Tipo de recurrencia: "semanal", "mensual", "anual"
+  const [diasSemanales, setDiasSemanales] = useState([]) // Para la recurrencia semanal
+  const [diaMes, setDiaMes] = useState(null) // Para la recurrencia mensual
+  const [mesAnual, setMesAnual] = useState(null) // Para la recurrencia anual
 
   //Abrir panel
   const toggleNewEvent = (event) => {
@@ -43,11 +46,27 @@ export default function NewEvent({
     setEventDescription("")
     setAddReminder(false)
     setMail(false)
+    setRecurrence("")
+    setDiasSemanales([])
+    setDiaMes(null)
+    setMesAnual(null)
   }
 
   //Manejar selección de categoría:
   const handleCategory = () => {
     setCategory(!category)
+  }
+
+  // Manejar selección de recurrencia:
+  const handleRecurrence = (e) => {
+    setRecurrence(e.target.value)
+  }
+
+  // Manejar selección de días de la semana (solo si la recurrencia es semanal):
+  const handleDaySelection = (day) => {
+    setDiasSemanales((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    )
   }
 
   //Manejar selección de areas:
@@ -62,37 +81,38 @@ export default function NewEvent({
     })
   }
 
-  //Manejar selecicón de recurrencia:
-  const handleRecurrence = (e, value) => {
-    e.preventDefault()
-    setRecurrence((prevRecurrence) => {
-      if (prevRecurrence.includes(value)) {
-        //Retirar valores seleccionados
-        return prevRecurrence.filter((item) => item !== value)
-      } else {
-        return [...prevRecurrence, value]
-      }
-    })
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // Preparar los datos a enviar de acuerdo a la recurrencia
+    let requestData = {
+      reminderDate: addReminder ? reminderDate : null,
+      endDate: endDate || null,
+      eventName,
+      category: category ? "task" : "event",
+      lifeAreaIds: selectedAreas,
+      eventDate: eventDate || null,
+      eventPriority,
+      eventDescription,
+      userId: user.user_id,
+      mail,
+    }
+
+    // Lógica para manejar la recurrencia
+    if (recurrence === "week") {
+      // Convertimos el array diasSemanales en una cadena de texto separada por comas
+      requestData.recurrencyType =
+        diasSemanales.length > 0 ? diasSemanales : null
+    } else if (recurrence === "month" || recurrence === "year") {
+      requestData.recurrencyType = recurrence // Para mensual o anual, solo enviar el tipo de recurrencia
+    } else {
+      requestData.recurrencyType = null // Si no hay recurrencia, no enviamos datos de recurrencia
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:3001/api/post/events",
-        {
-          reminderDate: addReminder ? reminderDate : null,
-          // state,
-          endDate: endDate || null,
-          eventName,
-          category: category ? "task" : "event",
-          lifeAreaIds: selectedAreas,
-          eventDate: eventDate || null,
-          eventPriority,
-          eventDescription,
-          userId: user.user_id,
-          mail,
-        }
+        requestData
       )
       console.log("Evento creado: ", response.data)
       reset()
@@ -162,7 +182,7 @@ export default function NewEvent({
               type="text"
               name="EventName"
               id="EventName"
-              placeholder="Nombre"
+              placeholder="Título"
               autoFocus
               value={eventName ?? ""}
               onChange={(e) => setEventName(e.target.value)}
@@ -170,14 +190,10 @@ export default function NewEvent({
               className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
             <div>
-              <label
-                htmlFor="eventDescription"
-                className="block text-white text-left mb-1">
-                Notas
-              </label>
               <textarea
                 type="text"
                 name="EventDescription"
+                placeholder="Descripción"
                 value={eventDescription}
                 onChange={(e) => setEventDescription(e.target.value)}
                 className="w-full min-h-16 p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -238,34 +254,69 @@ export default function NewEvent({
                 </select>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <label className="text-white text-left mb-1">Repetir:</label>
-              <section className="max-h-full flex grow">
-                {["D", "L", "M", "M", "J", "V", "S"].map((day, index) => {
-                  const daysOfWeek = [
-                    "Domingo",
-                    "Lunes",
-                    "Martes",
-                    "Miércoles",
-                    "Jueves",
-                    "Viernes",
-                    "Sábado",
-                  ]
-                  const dayName = daysOfWeek[index]
-                  return (
-                    <button
-                      key={dayName}
-                      className={`w-14 h-14 mx-1 text-center rounded-full transition duration-300 ${
-                        recurrence.includes(dayName)
-                          ? "bg-cyan-500 opacity-100 text-opacity-100"
-                          : "bg-gray-500"
-                      }`}
-                      onClick={(e) => handleRecurrence(e, dayName)}>
-                      {day}
-                    </button>
-                  )
-                })}
-              </section>
+            <div>
+              <label className="block text-white text-left mb-1">
+                Frecuencia:
+              </label>
+
+              <select
+                className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                value={recurrence}
+                onChange={handleRecurrence}>
+                <option value="">Ninguna</option>
+                <option value="week">Semanal</option>
+                <option value="month">Mensual</option>
+                <option value="year">Anual</option>
+              </select>
+            </div>
+            <div>
+              {recurrence === "week" && (
+                <div>
+                  <div className="max-h-full flex grow justify-center">
+                    {["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"].map(
+                      (day, code) => (
+                        <button
+                          className={`w-16 h-14 mx-1 text-center rounded-full transition duration-300 ${
+                            diasSemanales.includes(code)
+                              ? "bg-cyan-500"
+                              : "bg-gray-500"
+                          }`}
+                          type="button"
+                          key={day}
+                          onClick={() => handleDaySelection(code)}>
+                          {day}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {recurrence === "month" && (
+                <div>
+                  <label>Day of the Month</label>
+                  <input
+                    type="number"
+                    value={diaMes || ""}
+                    onChange={(e) => setDiaMes(parseInt(e.target.value))}
+                    min="1"
+                    max="31"
+                  />
+                </div>
+              )}
+
+              {recurrence === "year" && (
+                <div>
+                  <label>Month of the Year</label>
+                  <input
+                    type="number"
+                    value={mesAnual || ""}
+                    onChange={(e) => setMesAnual(parseInt(e.target.value))}
+                    min="1"
+                    max="12"
+                  />
+                </div>
+              )}
             </div>
             <div className="flex items-center space-x-2">
               <input

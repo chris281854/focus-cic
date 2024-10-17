@@ -1,12 +1,16 @@
+const dayjs = require("dayjs")
 const express = require("express")
 const cors = require("cors")
 const { Pool } = require("pg")
 const bcrypt = require("bcrypt")
 const bodyParser = require("body-parser")
 const jwt = require("jsonwebtoken")
+const nodemailer = require("nodemailer")
+
+require("dotenv").config()
 
 const app = express()
-const SECRET_KEY = "1234"
+const SECRET_KEY = process.env.SECRET_KEY
 const cookieParser = require("cookie-parser")
 app.use(cookieParser())
 
@@ -23,11 +27,11 @@ app.use(bodyParser.json())
 
 // Configura PostgreSQL
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "focus",
-  password: "1234",
-  port: 5432,
+  user: process.env.POSTGRES_USER,
+  host: process.env.POSTGRES_HOST,
+  database: process.env.POSTGRES_DATABASE,
+  password: process.env.POSTGRES_PASSWORD,
+  port: process.env.POSTGRES_PORT,
 })
 
 // Función para autenticar el token
@@ -69,7 +73,83 @@ const sendAuthResponse = (res, user, rememberMe = false) => {
   res.json({ user: { user_id: user.user_id, email: user.email } })
 }
 
+//Configuración de nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail", // O usa otro servicio, como Outlook
+  auth: {
+    user: process.env.NODEMAILER_GMAIL,
+    pass: process.env.NODEMAILER_PASSWORD,
+  },
+})
+
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log("Error en la configuración del transporter:", error)
+  } else {
+    console.log("Servidor de correo listo para enviar mensajes.")
+  }
+})
+
+// Mapeo de días de la semana a números para comparación
+const daysOfWeek = {
+  Lun: 1,
+  Mar: 2,
+  Mie: 3,
+  Jue: 4,
+  Vie: 5,
+  Sab: 6,
+  Dom: 0,
+}
+
+// Función para obtener la próxima fecha para un día específico de la semana
+function getNextWeekdayDate(startDate, dayOfWeek, weeksForward = 0) {
+  const start = dayjs(startDate)
+  const targetDay = daysOfWeek[dayOfWeek]
+
+  if (targetDay === undefined) {
+    throw new Error(`Invalid day of the week: ${dayOfWeek}`)
+  }
+
+  // Encontrar el día actual de la semana (0 = Domingo, 1 = Lunes, etc.)
+  const currentDay = start.day()
+
+  // Calcular la diferencia en días hacia el próximo día objetivo
+  let daysUntilNext = targetDay - currentDay
+
+  // Si el día objetivo ya pasó en esta semana, sumamos 7 días
+  if (daysUntilNext < 0) {
+    daysUntilNext += 7
+  }
+
+  // Añadir semanas adicionales si se especifica
+  daysUntilNext += weeksForward * 7
+
+  // Devolver la próxima fecha del día objetivo
+  return start.add(daysUntilNext, "day").format("YYYY-MM-DD")
+}
+
 //ROUTES
+
+//Enviar email
+app.post("/send-email", authenticateToken, (req, res) => {
+  const { name, email, message } = req.body
+
+  const mailOptions = {
+    from: "jgonzalezr@cincinnatus.edu.do",
+    to: email,
+    subject: `New message from ${name}`,
+    text: message,
+  }
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error in sendMail:", error) // Agrega más información sobre el error
+      return res.status(500).send(error.toString()) // Asegúrate de devolver el error
+    }
+    res.send("Email sent successfully!")
+  })
+})
+
 // Recibir datos
 app.get("/api/get/events", authenticateToken, async (req, res) => {
   const userId = req.query.userId
@@ -83,15 +163,16 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
   try {
     await client.query("BEGIN")
 
-    const result = await client.query(
+    // Actualizar el estado de los eventos según las fechas
+    await client.query(
       `
       UPDATE "Events" 
       SET "state" = CASE
         WHEN "date" < NOW() THEN 1  -- Atrasado
         WHEN "date" >= NOW() AND "date" < date_trunc('day', NOW() + INTERVAL '1 day') THEN 2  -- Para hoy
         WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 day') AND "date" < date_trunc('day', NOW() + INTERVAL '2 days') THEN 6  -- Para mañana
-        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '2 days') AND "date" < date_trunc('day', NOW() + INTERVAL '1 week') THEN 3  -- Para esta semana
-        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 week') AND "date" < date_trunc('day', NOW() + INTERVAL '1 month') THEN 4  -- Para este mes
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '2 days') AND "date" < date_trunc('day', NOW() + INTERVAL '1 week') THEN 3  -- Dentro de una semana
+        WHEN "date" >= date_trunc('day', NOW() + INTERVAL '1 week') AND "date" < date_trunc('day', NOW() + INTERVAL '1 month') THEN 4  -- Dentro de un mes
         ELSE 5  -- Después
       END
       WHERE "user_id" = $1
@@ -101,10 +182,18 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
 
     await client.query("COMMIT")
 
-    // Obtener los eventos actualizados
+    // Obtener los eventos actualizados con los detalles necesarios
     const updatedResult = await client.query(
       `SELECT 
-        e.*, 
+        e.event_id,
+        e.name,
+        e.category,
+        e.description,
+        e.priority_level,
+        e.iteration_id,
+        e.recurrency_type,
+        e.date,
+        e.state,
         er.reminder_id, 
         r.date AS reminder_date, 
         r.mail AS reminder_mail,
@@ -122,11 +211,14 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
       LEFT JOIN "Life_Areas" la ON ela.life_area_id = la.life_area_id
       WHERE e.user_id = $1
       AND e.state != 0
-      GROUP BY e.event_id, er.reminder_id, r.date, r.mail`,
+      GROUP BY e.event_id, e.iteration_id, e.recurrency_type, e.date, er.reminder_id, r.date, r.mail
+      ORDER BY e.date ASC`, // Ordenamos los eventos por fecha
       [userId]
     )
 
-    res.status(200).json(updatedResult.rows)
+    const events = updatedResult.rows
+
+    res.status(200).json(events)
   } catch (err) {
     await client.query("ROLLBACK")
     console.error(
@@ -151,7 +243,8 @@ app.get("/api/get/allEvents", authenticateToken, async (req, res) => {
   try {
     await client.query("BEGIN")
 
-    const result = await client.query(
+    // Actualizar el estado de los eventos según las fechas
+    await client.query(
       `
       UPDATE "Events" 
       SET "state" = CASE
@@ -169,21 +262,26 @@ app.get("/api/get/allEvents", authenticateToken, async (req, res) => {
 
     await client.query("COMMIT")
 
-    // Obtener los eventos actualizados
+    // Obtener todos los eventos actualizados
     const updatedResult = await client.query(
       `SELECT 
-        e.*, 
+        e.event_id,
+        e.iteration_id,
+        e.recurrency_type,
+        e.date,
+        e.state,
         er.reminder_id, 
         r.date AS reminder_date, 
         r.mail AS reminder_mail,
-        ARRAY_AGG(la.name) AS life_areas
+        ARRAY_AGG(DISTINCT la.name) AS life_areas
       FROM "Events" e
       LEFT JOIN "Event_Reminder" er ON e.event_id = er.event_id
       LEFT JOIN "Reminders" r ON er.reminder_id = r.reminder_id
       LEFT JOIN "Event_Life_Areas" ela ON e.event_id = ela.event_id
       LEFT JOIN "Life_Areas" la ON ela.life_area_id = la.life_area_id
       WHERE e.user_id = $1
-      GROUP BY e.event_id, er.reminder_id, r.date, r.mail`,
+      GROUP BY e.event_id, e.iteration_id, e.recurrency_type, e.date, er.reminder_id, r.date, r.mail
+      ORDER BY e.date ASC`,
       [userId]
     )
 
@@ -331,7 +429,7 @@ app.get("/api/get/userData", authenticateToken, async (req, res) => {
 
 //Insertar
 app.post("/api/post/events", async (req, res) => {
-  const client = await pool.connect() // Obtén un cliente de la pool de conexiones
+  const client = await pool.connect() // Obtener un cliente de la pool de conexiones
 
   try {
     const {
@@ -345,12 +443,14 @@ app.post("/api/post/events", async (req, res) => {
       userId,
       mail,
       lifeAreaIds,
+      recurrencyType, // Puede ser "year", "month", o un array de días de la semana [1,2,3,4,5,6,7]
     } = req.body
 
-    await client.query("BEGIN") // Iniciar una transacción
+    await client.query("BEGIN")
 
+    // Insertar el evento principal
     const eventResult = await client.query(
-      'INSERT INTO "Events" (end_date, name, category, date, priority_level, description, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING event_id',
+      'INSERT INTO "Events" (end_date, name, category, date, priority_level, description, user_id, recurrency_type, iteration_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING event_id, iteration_id',
       [
         endDate,
         eventName,
@@ -359,16 +459,24 @@ app.post("/api/post/events", async (req, res) => {
         eventPriority,
         eventDescription,
         userId,
+        recurrencyType, // Asignar el tipo de recurrencia
+        null, // iteration_id será null inicialmente para el primer evento (se generarán iteraciones)
       ]
     )
-
-    console.log("Resultado de inserción del evento:", eventResult)
 
     if (!eventResult.rows || eventResult.rows.length === 0) {
       throw new Error("Error al insertar el evento")
     }
     const eventID = eventResult.rows[0].event_id // Obtener el ID del nuevo evento
-    // Insertar el recordatorio en la tabla Reminders
+    const iterationID = eventID // El primer evento es su propia "base" para las iteraciones
+
+    // Actualizar el iteration_id del evento recién creado
+    await client.query(
+      `UPDATE "Events" SET iteration_id = $1 WHERE event_id = $2`,
+      [iterationID, eventID]
+    )
+
+    // Insertar el recordatorio si existe
     if (reminderDate) {
       const reminderResult = await client.query(
         'INSERT INTO "Reminders" (date, user_id, mail) VALUES ($1, $2, $3) RETURNING reminder_id',
@@ -387,6 +495,7 @@ app.post("/api/post/events", async (req, res) => {
       )
     }
 
+    // Insertar las áreas de vida asociadas al evento
     if (lifeAreaIds && lifeAreaIds.length > 0) {
       const lifeAreasQuery = `
       INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
@@ -397,9 +506,80 @@ app.post("/api/post/events", async (req, res) => {
       await client.query(lifeAreasQuery, lifeAreasValues)
     }
 
+    // Crear eventos recurrentes basados en recurrencyType
+    console.log(recurrencyType)
+    if (recurrencyType) {
+      const today = new Date(eventDate)
+      let iterationEvents = []
+
+      // Manejo de recurrencias por tipo
+      switch (recurrencyType) {
+        case "month":
+          // Repetir cada mes durante los próximos 12 meses
+          for (let i = 1; i <= 12; i++) {
+            const nextDate = new Date(today)
+            nextDate.setMonth(today.getMonth() + i)
+            if (!endDate || nextDate <= new Date(endDate)) {
+              iterationEvents.push(nextDate)
+            }
+          }
+          break
+
+        case "year":
+          // Repetir cada año durante los próximos 5 años
+          for (let i = 1; i <= 5; i++) {
+            const nextDate = new Date(today)
+            nextDate.setFullYear(today.getFullYear() + i)
+            if (!endDate || nextDate <= new Date(endDate)) {
+              iterationEvents.push(nextDate)
+            }
+          }
+          break
+
+        default:
+          // Si recurrencyType es un array de días de la semana, tratamos como repetición semanal personalizada
+          if (Array.isArray(recurrencyType)) {
+            const daysOfWeek = recurrencyType // Ejemplo: [1, 3, 5] -> Lunes, Miércoles, Viernes
+            const weeksAhead = 12 // Generar iteraciones para las próximas 12 semanas
+            for (let i = 0; i < weeksAhead; i++) {
+              daysOfWeek.forEach((day) => {
+                const nextDate = new Date(today)
+                const currentDay = today.getDay() // Obtener el día actual
+                const diffDays = (day - currentDay + 7) % 7 // Calcular la diferencia para el próximo día de la semana
+                nextDate.setDate(today.getDate() + i * 7 + diffDays)
+                if (!endDate || nextDate <= new Date(endDate)) {
+                  iterationEvents.push(nextDate)
+                }
+              })
+            }
+          }
+          break
+      }
+
+      // Insertar los eventos recurrentes en la tabla Events
+      for (const iterationDate of iterationEvents) {
+        await client.query(
+          'INSERT INTO "Events" (end_date, name, category, date, priority_level, description, user_id, recurrency_type, iteration_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+          [
+            endDate,
+            eventName,
+            category,
+            iterationDate,
+            eventPriority,
+            eventDescription,
+            userId,
+            recurrencyType.join(","), // Mismo tipo de recurrencia
+            iterationID, // Iteration ID que referencia al evento original
+          ]
+        )
+      }
+    }
+
     await client.query("COMMIT") // Confirmar la transacción
 
-    res.status(201).json({ message: "Evento creado correctamente" })
+    res
+      .status(201)
+      .json({ message: "Evento e iteraciones creadas correctamente" })
   } catch (error) {
     await client.query("ROLLBACK") // Revertir la transacción en caso de error
 
@@ -475,18 +655,19 @@ app.post("/api/post/lifeAreaScore", authenticateToken, async (req, res) => {
 })
 
 app.post("/api/post/reminders", authenticateToken, async (req, res) => {
-  const { userId, date } = req.body
+  const { reminderDate, userId, reminderMail } = req.body
 
-  if (!date || !userId) {
+  if (!reminderDate || !userId) {
     return res.status(400).json({ error: "data requerida" })
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO "Reminders" (user_id, date) VALUES ($1, $2
-      RETURNING *`[(userId, date)]
+      `INSERT INTO "Reminders" (user_id, date, mail) VALUES ($1, $2, $3) RETURNING *`,
+      [userId, reminderDate, reminderMail]
     )
-  } catch {
+    res.status(201).json(result.rows[0]) // Retorna el recordatorio creado
+  } catch (error) {
     console.error("Error al crear reminder", error)
     res.status(500).json({ error: "Error al crear reminder" })
   }
@@ -798,78 +979,88 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
 })
 
 app.patch("/api/update/lifeArea", authenticateToken, async (req, res) => {
-  const { userId, areaId, areaName, satisfaction, longTermGoal = "", weekGoal = "" } = req.body;
+  const {
+    userId,
+    areaId,
+    areaName,
+    satisfaction,
+    longTermGoal = "",
+    weekGoal = "",
+  } = req.body
 
   // Verificar si se pasaron los campos obligatorios
   if (!userId || !areaId) {
-    return res.status(400).json({ error: "userId y areaId son requeridos" });
+    return res.status(400).json({ error: "userId y areaId son requeridos" })
   }
 
-  const client = await pool.connect();
+  const client = await pool.connect()
 
   try {
-    await client.query("BEGIN");
+    await client.query("BEGIN")
 
     // Verificar si el área de vida existe
     const lifeAreaCheck = await client.query(
       `SELECT * FROM "Life_Areas" WHERE life_area_id = $1 AND user_id = $2`,
       [areaId, userId]
-    );
+    )
 
     if (lifeAreaCheck.rowCount === 0) {
-      return res.status(404).json({ error: "Life area no encontrada" });
+      return res.status(404).json({ error: "Life area no encontrada" })
     }
 
     // Actualizar campos de Life_Areas, asignando "" si los valores vienen vacíos
-    const updateLifeAreaFields = [];
-    const updateLifeAreaValues = [];
-    let index = 1;
+    const updateLifeAreaFields = []
+    const updateLifeAreaValues = []
+    let index = 1
 
     if (areaName) {
-      updateLifeAreaFields.push(`name = $${index}`);
-      updateLifeAreaValues.push(areaName);
-      index++;
+      updateLifeAreaFields.push(`name = $${index}`)
+      updateLifeAreaValues.push(areaName)
+      index++
     }
 
     // Insertar cadena vacía si no hay valores en longTermGoal o weekGoal
-    updateLifeAreaFields.push(`long_goal = $${index}`);
-    updateLifeAreaValues.push(longTermGoal);
-    index++;
+    updateLifeAreaFields.push(`long_goal = $${index}`)
+    updateLifeAreaValues.push(longTermGoal)
+    index++
 
-    updateLifeAreaFields.push(`week_goal = $${index}`);
-    updateLifeAreaValues.push(weekGoal);
-    index++;
+    updateLifeAreaFields.push(`week_goal = $${index}`)
+    updateLifeAreaValues.push(weekGoal)
+    index++
 
     // Ejecutar el UPDATE para actualizar Life_Areas
     await client.query(
-      `UPDATE "Life_Areas" SET ${updateLifeAreaFields.join(", ")} WHERE life_area_id = $${index} AND user_id = $${index + 1}`,
+      `UPDATE "Life_Areas" SET ${updateLifeAreaFields.join(
+        ", "
+      )} WHERE life_area_id = $${index} AND user_id = $${index + 1}`,
       [...updateLifeAreaValues, areaId, userId]
-    );
+    )
 
-    let lifeAreaScore;
+    let lifeAreaScore
     if (satisfaction !== undefined) {
       // Insertar siempre un nuevo score
       const lifeAreaScoreResult = await client.query(
         `INSERT INTO "Life_Area_Scores" (life_area_id, user_id, score, date) VALUES ($1, $2, $3, current_timestamp) RETURNING *`,
         [areaId, userId, satisfaction]
-      );
-      lifeAreaScore = lifeAreaScoreResult.rows[0];
+      )
+      lifeAreaScore = lifeAreaScoreResult.rows[0]
     }
 
-    await client.query("COMMIT");
+    await client.query("COMMIT")
 
-    res.status(200).json({ message: "Life area y nuevo score insertados", areaId, lifeAreaScore });
+    res.status(200).json({
+      message: "Life area y nuevo score insertados",
+      areaId,
+      lifeAreaScore,
+    })
   } catch (error) {
-    await client.query("ROLLBACK");
-    console.error("Error al actualizar life area y score", error);
-    res.status(500).json({ error: "Error al actualizar life area y score" });
+    await client.query("ROLLBACK")
+    console.error("Error al actualizar life area y score", error)
+    res.status(500).json({ error: "Error al actualizar life area y score" })
   } finally {
-    client.release();
+    client.release()
   }
-});
-
-
-
+})
 
 app.patch("/api/update/userConfig", authenticateToken, async (req, res) => {
   const { userId, timezone, theme } = req.body

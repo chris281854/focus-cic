@@ -27,5 +27,6 @@ env/*
 # Database
 db/
 
-#server info and google api
+#server info and google api and dotenv
 clientId.js
+.env

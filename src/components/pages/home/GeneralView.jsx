@@ -25,17 +25,37 @@ export default function GeneralView() {
   })
 
   function generateEvents(eventList) {
-    if (!eventList | (eventList.length === 0)) {
+    if (!eventList || eventList.length === 0) {
       return <p>Sin tareas pendientes</p>
     }
 
-    return eventList.map((event) => (
-      <ToDoItem
-        key={event.event_id}
-        event={event}
-        onEventModified={handleTableModified}
-      />
-    ))
+    return eventList.flatMap((event) => {
+      // Verificar si el evento tiene iteraciones
+      if (event.instances && event.instances.length > 0) {
+        // Si hay iteraciones, devolver un ToDoItem por cada iteración
+        return event.instances.map((instance) => (
+          <ToDoItem
+            key={instance.instance_id} // Usamos el ID de la instancia como clave
+            event={{
+              ...event, // Copiamos los datos del evento
+              instance_date: instance.instance_date, // Pasamos la fecha de la iteración
+              completed: instance.completed, // Estado completado de la iteración
+              instance_id: instance.instance_id, // Pasamos el ID de la instancia
+            }}
+            onEventModified={handleTableModified}
+          />
+        ))
+      } else {
+        // Si el evento no tiene iteraciones, devolvemos un solo ToDoItem
+        return (
+          <ToDoItem
+            key={event.event_id}
+            event={event}
+            onEventModified={handleTableModified}
+          />
+        )
+      }
+    })
   }
 
   function generateAlarms() {
@@ -72,6 +92,7 @@ export default function GeneralView() {
     fetchReminders(user.user_id)
 
     setTableModified(false)
+    console.log(events)
   }, [tableModified])
 
   const handleTableModified = () => {
@@ -104,7 +125,9 @@ export default function GeneralView() {
   return (
     <div className="flex relative flex-col w-full select-none">
       <header className="border-b dark:border-white border-secondary dark:bg-transparent flex p-4 max-sm:p-1 items-center gap-2 mx-5">
-        <h4 className="dark:text-white text-center">Tareas y eventos pendientes</h4>
+        <h4 className="dark:text-white text-center">
+          Tareas y eventos pendientes
+        </h4>
         <button
           className="bg-primary text-white dark:bg-slate-800 ml-auto"
           onClick={() => setToggleNewEvent(true)}>
@@ -152,7 +175,7 @@ export default function GeneralView() {
             <h5
               onClick={() => toggleSection("thisWeek")}
               className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
-              Esta Semana {expandedSections.thisWeek ? "▲" : "▼"}
+              Próximos 7 días {expandedSections.thisWeek ? "▲" : "▼"}
             </h5>
             {expandedSections.thisWeek &&
               generateEvents(categorizedEvents.thisWeek)}
@@ -163,7 +186,7 @@ export default function GeneralView() {
             <h5
               onClick={() => toggleSection("thisMonth")}
               className="bg-secondary text-neutral-900 dark:bg-gray-900 dark:text-white p-2 rounded-md">
-              Este Mes {expandedSections.thisMonth ? "▲" : "▼"}
+              Próximos 30 días {expandedSections.thisMonth ? "▲" : "▼"}
             </h5>
             {expandedSections.thisMonth &&
               generateEvents(categorizedEvents.thisMonth)}
@@ -185,7 +208,7 @@ export default function GeneralView() {
         <button
           className="bg-primary text-white dark:bg-slate-800 ml-auto"
           // onClick={() => setToggleNewEvent(true)}
-          >
+        >
           <FontAwesomeIcon icon={faPlus} /> <span>Recordatorio</span>
         </button>
         <NewReminder onReminderCreated={handleTableModified}></NewReminder>
