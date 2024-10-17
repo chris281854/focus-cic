@@ -15,7 +15,7 @@ export default function GeneralView() {
   // const [events, setEvents] = useState([])
   const [alarms, setAlarms] = useState([])
   const [tasks, setTasks] = useState([])
-  const [tableModified, setTableModified] = useState(false)
+  const [tableModified, setTableModified] = useState(0)
   const [expandedSections, setExpandedSections] = useState({
     overdue: true,
     today: true,
@@ -78,11 +78,7 @@ export default function GeneralView() {
       try {
         const response = await axios.get(
           `http://localhost:3001/api/get/reminders?userId=${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
+          { withCredentials: true }
         )
         setAlarms(response.data)
       } catch (error) {
@@ -90,13 +86,11 @@ export default function GeneralView() {
       }
     }
     fetchReminders(user.user_id)
-
-    setTableModified(false)
     console.log(events)
   }, [tableModified])
 
   const handleTableModified = () => {
-    setTableModified(true)
+    setTableModified((prevCount) => prevCount + 1) // Incrementamos el contador
   }
 
   const categorizedEvents = {
@@ -121,6 +115,7 @@ export default function GeneralView() {
     }))
   }
   const [toggleNewEvent, setToggleNewEvent] = useState(false)
+  const [toggleNewReminder, setToggleNewReminder] = useState(false)
 
   return (
     <div className="flex relative flex-col w-full select-none">
@@ -207,13 +202,17 @@ export default function GeneralView() {
         <h4 className="dark:text-white">Recordatorios activos</h4>
         <button
           className="bg-primary text-white dark:bg-slate-800 ml-auto"
-          // onClick={() => setToggleNewEvent(true)}
-        >
+          onClick={() => setToggleNewReminder(true)}>
           <FontAwesomeIcon icon={faPlus} /> <span>Recordatorio</span>
         </button>
-        <NewReminder onReminderCreated={handleTableModified}></NewReminder>
+        {toggleNewReminder && (
+          <NewReminder
+            onReminderCreated={handleTableModified}
+            setToggleNewReminder={setToggleNewReminder}
+          />
+        )}
       </header>
-      <div className="">{generateAlarms()}</div>
+      <div className="w-full gap-2 p-4 flex flex-col">{generateAlarms()}</div>
     </div>
   )
 }

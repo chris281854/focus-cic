@@ -149,7 +149,7 @@ export default function ProfileSection() {
               <label className="block text-gray-700 dark:text-white">
                 Nombre de usuario
               </label>
-              <div className="bg-gray-200 dark:bg-slate-700 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
+              <div className="bg-gray-200 dark:bg-slate-700 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300 overflow-hidden">
                 @{nickName}
               </div>
             </div>
@@ -169,7 +169,7 @@ export default function ProfileSection() {
               <label className="block text-gray-700 dark:text-white">
                 Correo electrónico
               </label>
-              <div className="bg-gray-200 dark:bg-slate-700 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300">
+              <div className="bg-gray-200 dark:bg-slate-700 w-full h-10 rounded mt-1 flex items-center px-2 text-gray-700 dark:text-gray-300 overflow-hidden">
                 {email}
               </div>
             </div>

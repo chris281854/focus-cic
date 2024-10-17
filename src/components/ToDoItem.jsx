@@ -21,7 +21,6 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
   // 1: Urgente
   // 2: Importante
   // 3: Normal
-
   const { user, timezone } = useUser()
   const [isOpen, setIsOpen] = useState(false)
   let eventState = ""
@@ -88,23 +87,16 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
 
   const handleDelete = async (id, type) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/items/delete/`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ id, type }),
-      })
-      if (response.ok) {
-        console.log("Item eliminado satisfactoriamente")
-        onEventModified()
-      } else {
-        const errorData = await response.json()
-        console.error("Fallo al eliminar el evento", errorData.error)
-      }
+      const response = await axios.delete(
+        `http://localhost:3001/api/items/delete?id=${id}&type=${type}`,
+        {
+          withCredentials: true,
+        }
+      )
+      console.log("Item eliminado satisfactoriamente")
+      onEventModified()
     } catch (error) {
-      console.error("Error al eliminar el evento", error)
+      console.error("Error al eliminar el item", error)
     }
   }
   return (
@@ -209,22 +201,21 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
 
       {reminder && (
         <>
-          <div className="max-w-sm w-full bg-black rounded-lg shadow-lg p-6 m-3">
-            <div className="flex relative items-center justify-between">
-              <h2 className="text-xl font-light text-white">
-                Para: {dayjs(reminder.date).format("D MMM | H:m")}
-              </h2>
-              <button
-                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 absolute right-10"
-                onClick={toggleEditVisibility}>
-                <i className="fas fa-edit"></i>
-              </button>
-              <button
-                className="text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8 relative right-0"
-                onClick={() => handleDelete(reminder.reminder_id, "reminder")}>
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
+          <div className="grid grid-cols-[1fr_1fr_auto] w-full bg-tertiary dark:bg-slate-900 dark:hover:bg-cyan-900 transition-all rounded-lg p-2">
+            <p className="font-light text-white col-span-1 text-nowrap overflow-hidden text-ellipsis w-full content-center">
+              {reminder.name}
+            </p>
+            <p className="font-light text-white">
+              {dayjs(reminder.date).format("MMM D, YYYY | H:m")}
+            </p>
+            <button
+              className="text-white bg-primary dark:bg-slate-800 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleDelete(reminder.reminder_id, "reminder")
+              }}>
+              <FontAwesomeIcon icon={faXmark} />
+            </button>
           </div>
         </>
       )}

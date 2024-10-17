@@ -332,7 +332,7 @@ app.get("/api/get/reminders", async (req, res) => {
     res.json(result.rows)
   } catch (err) {
     console.error(err)
-    res.status(500).send("Error al obtener las tareas")
+    res.status(500).send("Error al obtener los recordatorios")
   }
 })
 
@@ -655,7 +655,7 @@ app.post("/api/post/lifeAreaScore", authenticateToken, async (req, res) => {
 })
 
 app.post("/api/post/reminders", authenticateToken, async (req, res) => {
-  const { reminderDate, userId, reminderMail } = req.body
+  const { name, reminderDate, userId, reminderMail } = req.body
 
   if (!reminderDate || !userId) {
     return res.status(400).json({ error: "data requerida" })
@@ -663,8 +663,8 @@ app.post("/api/post/reminders", authenticateToken, async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO "Reminders" (user_id, date, mail) VALUES ($1, $2, $3) RETURNING *`,
-      [userId, reminderDate, reminderMail]
+      `INSERT INTO "Reminders" (name, user_id, date, mail) VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, userId, reminderDate, reminderMail]
     )
     res.status(201).json(result.rows[0]) // Retorna el recordatorio creado
   } catch (error) {
@@ -675,7 +675,7 @@ app.post("/api/post/reminders", authenticateToken, async (req, res) => {
 
 //Eliminar Items
 app.delete("/api/items/delete", async (req, res) => {
-  const { id, type } = req.body
+  const { id, type } = req.query
   console.log(id, type)
 
   if (!id || !type) {
@@ -684,10 +684,7 @@ app.delete("/api/items/delete", async (req, res) => {
   try {
     let tableName
     let idName
-    if (type === "task") {
-      tableName = "Tasks"
-      idName = "task_id"
-    } else if (type === "event") {
+    if (type === "event") {
       tableName = "Events"
       idName = "event_id"
     } else if (type === "reminder") {
@@ -709,7 +706,7 @@ app.delete("/api/items/delete", async (req, res) => {
     res.status(200).json({ message: "Item eliminado exitosamente" })
   } catch (error) {
     console.error(error)
-    res.status.apply(500).json({ error: "¿ interno del servidor" })
+    res.status(500).json({ error: "error interno del servidor" })
   }
 })
 
