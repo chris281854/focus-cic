@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt")
 const bodyParser = require("body-parser")
 const jwt = require("jsonwebtoken")
 const nodemailer = require("nodemailer")
+const cron = require("node-cron")
 
 require("dotenv").config()
 
@@ -90,6 +91,77 @@ transporter.verify(function (error, success) {
   }
 })
 
+async function checkAndSendReminders() {
+  try {
+    // Obtenemos la fecha y hora actuales usando dayjs en el formato 'YYYY-MM-DD HH:mm:ss'
+    const now = dayjs().format("YYYY-MM-DD HH:mm:ss")
+
+    // Consulta a la base de datos para buscar recordatorios con la fecha actual
+    // Y UN J<zxADSQWOIN para obtener el email del usuario relacionado con el recordatorio
+    const query = `
+      SELECT r.name, u.email
+      FROM "Reminders" r
+      JOIN "Users" u ON r.user_id = u.user_id
+      WHERE r.date = $1 AND r.mail = true
+    `
+
+    const result = await pool.query(query, [now])
+
+    // Si hay recordatorios para la fecha actual, enviamos correos
+    for (const reminder of result.rows) {
+      const { name, email } = reminder
+      // Envía el correo a través del endpoint de nodemailer
+      await sendEmail(name, email)
+    }
+    await deleteOldReminders(now);
+
+    console.log(
+      `Se enviaron ${result.rows.length} recordatorios para la fecha ${now}.`
+    )
+  } catch (error) {
+    console.error("Error al verificar los recordatorios:", error)
+  }
+}
+
+async function deleteOldReminders(now) {
+  try {
+    const deleteQuery = `
+      DELETE FROM "Reminders"
+      WHERE date < $1
+    `;
+    const result = await pool.query(deleteQuery, [now]);
+    console.log(`Se eliminaron ${result.rowCount} recordatorios antiguos.`);
+  } catch (error) {
+    console.error("Error al eliminar recordatorios antiguos:", error);
+  }
+}
+
+// Función para enviar el correo usando nodemailer
+function sendEmail(name, email) {
+  const mailOptions = {
+    from: process.env.NODEMAILER_GMAIL,
+    to: email,
+    subject: `Recordatorio: ${name}`,
+    text: `Este es un recordatorio enviado desde Focus. 
+    Accede a la aplicación con este link:
+    http://localhost:5173/home`,
+  }
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error al enviar el correo:", error)
+    } else {
+      console.log("Correo enviado:", info.response)
+    }
+  })
+}
+
+// Programar la tarea para que se ejecute cada minuto
+cron.schedule("* * * * *", () => {
+  console.log("Verificando recordatorios...")
+  checkAndSendReminders()
+})
+
 // Mapeo de días de la semana a números para comparación
 const daysOfWeek = {
   Lun: 1,
@@ -102,6 +174,7 @@ const daysOfWeek = {
 }
 
 // Función para obtener la próxima fecha para un día específico de la semana
+//BORRAR SI NO SE UTILIZA
 function getNextWeekdayDate(startDate, dayOfWeek, weeksForward = 0) {
   const start = dayjs(startDate)
   const targetDay = daysOfWeek[dayOfWeek]
@@ -129,26 +202,6 @@ function getNextWeekdayDate(startDate, dayOfWeek, weeksForward = 0) {
 }
 
 //ROUTES
-
-//Enviar email
-app.post("/send-email", authenticateToken, (req, res) => {
-  const { name, email, message } = req.body
-
-  const mailOptions = {
-    from: "jgonzalezr@cincinnatus.edu.do",
-    to: email,
-    subject: `New message from ${name}`,
-    text: message,
-  }
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error in sendMail:", error) // Agrega más información sobre el error
-      return res.status(500).send(error.toString()) // Asegúrate de devolver el error
-    }
-    res.send("Email sent successfully!")
-  })
-})
 
 // Recibir datos
 app.get("/api/get/events", authenticateToken, async (req, res) => {

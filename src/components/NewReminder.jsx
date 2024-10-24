@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { useUser } from "./../context/UserContext"
 import { Plus } from "lucide-react"
+import dayjs from "dayjs"
 
 export default function NewReminder({
   onReminderCreated,
@@ -13,6 +14,7 @@ export default function NewReminder({
 
   const [reminderName, setReminderName] = useState("")
   const [reminderDate, setReminderDate] = useState("")
+  const today = dayjs().format("YYYY-MM-DD HH:MM")
 
   const toggleNewReminder = () => {
     setToggleNewReminder(false)
@@ -34,20 +36,20 @@ export default function NewReminder({
     setReminderDate("")
   }
 
-  const sendEmail = async (formData) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/send-email",
-        formData,
-        {
-          withCredentials: true,
-        }
-      )
-      console.log("Email sent:", response.data)
-    } catch (error) {
-      console.error("Error sending email:", error)
-    }
-  }
+  // const sendEmail = async (formData) => {
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:3001/send-email",
+  //       formData,
+  //       {
+  //         withCredentials: true,
+  //       }
+  //     )
+  //     console.log("Email sent:", response.data)
+  //   } catch (error) {
+  //     console.error("Error sending email:", error)
+  //   }
+  // } //REMOVER ANTES DEL PRÓXIMO PULL REQUEST
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -67,19 +69,20 @@ export default function NewReminder({
         formData,
         { withCredentials: true }
       )
-      if (response.status === 201) {
-        // Llama a sendEmail para enviar el correo
-        await sendEmail({
-          name: "Focus", // O el nombre del usuario que envía
-          email: user.email, // Dirección del remitente (usuario que está creando el recordatorio)
-          message: `Tienes un nuevo recordatorio: 
-          ${reminderName} para el ${reminderDate}.`,
-        })
-      }
+      // if (response.status === 201) {
+      //   // Llama a sendEmail para enviar el correo
+      //   await sendEmail({
+      //     name: "Focus", // O el nombre del usuario que envía
+      //     email: user.email, // Dirección del remitente (usuario que está creando el recordatorio)
+      //     message: `Tienes un nuevo recordatorio:
+      //     ${reminderName} para el ${reminderDate}.`,
+      //   })
+      // } //REMOVER ANTES DEL PRÓXIMO PULL REQUEST
 
       reset()
       toggleNewReminder()
       onReminderCreated()
+      console.log("Recordatorio creado")
     } catch (error) {
       console.error("Error al crear recordatorio: ", error)
     }
@@ -120,6 +123,7 @@ export default function NewReminder({
               type="datetime-local"
               className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               name="reminderDate"
+              min={today}
               value={reminderDate}
               onChange={(e) => setReminderDate(e.target.value)}
             />
