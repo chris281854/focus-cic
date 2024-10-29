@@ -212,7 +212,7 @@ export default function GeneralView() {
           />
         )}
       </header>
-      <div className="w-full gap-2 p-4 flex flex-col">{generateAlarms()}</div>
+      <div className="w-full gap-2 p-4 flex flex-row flex-wrap">{generateAlarms()}</div>
     </div>
   )
 }

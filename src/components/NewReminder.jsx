@@ -126,6 +126,7 @@ export default function NewReminder({
               min={today}
               value={reminderDate}
               onChange={(e) => setReminderDate(e.target.value)}
+              required
             />
             <div className="flex justify-around mt-4">
               <button

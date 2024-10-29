@@ -162,23 +162,6 @@ export default function EditItem({
                     />
                   </div>
                   <div>
-                    {/* <label
-                      htmlFor="EventLifeAreas"
-                      className="block text-white text-left mb-1">
-                      Categoría
-                    </label>
-                    <select
-                      name="EventLifeAreas"
-                      id="EventLifeAreas"
-                      value={eventLifeArea}
-                      onChange={(e) => setEventLifeArea(e.target.value)}
-                      className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                      {lifeAreas.map((area) => (
-                        <option key={area.life_area_id} value={area.life_area_id}>
-                          {area.name}
-                        </option>
-                      ))}
-                    </select> */}
                   </div>
                   <div className="space-x-4 flex justify-evenly">
                     <div className="w-full">

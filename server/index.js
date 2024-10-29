@@ -97,7 +97,6 @@ async function checkAndSendReminders() {
     const now = dayjs().format("YYYY-MM-DD HH:mm:ss")
 
     // Consulta a la base de datos para buscar recordatorios con la fecha actual
-    // Y UN J<zxADSQWOIN para obtener el email del usuario relacionado con el recordatorio
     const query = `
       SELECT r.name, u.email
       FROM "Reminders" r

@@ -198,26 +198,32 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
           )}
         </div>
       )}
-
       {reminder && (
-        <>
-          <div className="grid grid-cols-[1fr_1fr_auto] w-full bg-tertiary dark:bg-slate-900 dark:hover:bg-cyan-900 transition-all rounded-lg p-2">
-            <p className="font-light text-white col-span-1 text-nowrap overflow-hidden text-ellipsis w-full content-center">
-              {reminder.name}
-            </p>
-            <p className="font-light text-white">
-              {dayjs(reminder.date).format("MMM D, YYYY | H:m")}
-            </p>
-            <button
-              className="text-white bg-primary dark:bg-slate-800 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDelete(reminder.reminder_id, "reminder")
-              }}>
-              <FontAwesomeIcon icon={faXmark} />
-            </button>
+        <div className="relative min-w-full lg:min-w-[40vw] max-w-[48vw] grow bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+          <div className="p-5 flex flex-col h-full">
+            <div className="flex justify-between items-start">
+              <h6 className="dark:text-white truncate max-w-[80%]">
+                {reminder.name ||
+                  `Recordatorio para ${dayjs(reminder.date).format(
+                    "MMMM DD, YYYY"
+                  )}`}
+              </h6>
+              <button
+                className="absolute right-2 top-2 justify-self-end text-white bg-primary dark:bg-slate-800 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50 rounded-full p-1 h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDelete(reminder.reminder_id, "reminder")
+                }}>
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+            <div className="mt-auto">
+              <p className="text-gray-600 dark:text-gray-200">
+                {dayjs(reminder.date).format("MMM D, YYYY | HH:mm")}
+              </p>
+            </div>
           </div>
-        </>
+        </div>
       )}
       {onEdit && (
         <EditItem
