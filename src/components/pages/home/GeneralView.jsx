@@ -20,8 +20,8 @@ export default function GeneralView() {
     overdue: true,
     today: true,
     thisWeek: true,
-    thisMonth: true,
-    later: true,
+    thisMonth: false,
+    later: false,
   })
 
   function generateEvents(eventList) {
@@ -212,7 +212,9 @@ export default function GeneralView() {
           />
         )}
       </header>
-      <div className="w-full gap-2 p-4 flex flex-row flex-wrap">{generateAlarms()}</div>
+      <div className="w-full gap-2 p-4 flex flex-row flex-wrap">
+        {generateAlarms()}
+      </div>
     </div>
   )
 }

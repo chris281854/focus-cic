@@ -34,7 +34,24 @@ export default function EditItem({
       .map((area) => area.life_area_id)
       .filter((id) => id !== null)
   )
+  const [diasSemanales, setDiasSemanales] = useState([]) // Para la recurrencia semanal
+  const [recurrence, setRecurrence] = useState() // Tipo de recurrencia: "semanal", "mensual", "anual"
 
+  useEffect(() => {
+    if (event.recurrency_type === "month") {
+      setRecurrence("month")
+    } else if (event.recurrency_type === "year") {
+      setRecurrence("year")
+    } else if (!event.recurrency_type || event.recurrency_type === "") {
+      setRecurrence("")
+    } else {
+      setDiasSemanales(event.recurrency_type.split(",").map(Number))
+      setRecurrence("week")
+    }
+  }, [])
+  console.log("diasSemanales", diasSemanales)
+
+  console.log(event)
   const [eventReminderDate, setEventReminderDate] = useState(
     event?.reminder_date || undefined
   )
@@ -55,6 +72,21 @@ export default function EditItem({
     setAddEventReminder(false)
     setEventMail(false)
     setEventLifeArea(null)
+    setRecurrence("")
+    setDiasSemanales([])
+  }
+
+  // Manejar selección de recurrencia:
+  const handleRecurrence = (e) => {
+    setRecurrence(e.target.value)
+  }
+
+  // Manejar selección de días de la semana (solo si la recurrencia es semanal):
+  const handleDaySelection = (day) => {
+    setDiasSemanales((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    )
+    console.log(diasSemanales)
   }
 
   //Manejar selección de areas:
@@ -71,7 +103,6 @@ export default function EditItem({
 
   const handleEventUpdate = async (e) => {
     e.preventDefault()
-
     const updateData = {
       eventReminderDate,
       state,
@@ -86,6 +117,18 @@ export default function EditItem({
       eventId,
       userId: user.user_id,
       eventReminderId,
+      iterationId: event.iteration_id || null,
+    }
+
+    // Lógica para manejar la recurrencia
+    if (recurrence === "week") {
+      // Convertimos el array diasSemanales en una cadena de texto separada por comas
+      updateData.recurrencyType =
+        diasSemanales.length > 0 ? diasSemanales : null
+    } else if (recurrence === "month" || recurrence === "year") {
+      updateData.recurrencyType = recurrence // Para mensual o anual, solo enviar el tipo de recurrencia
+    } else {
+      updateData.recurrencyType = null // Si no hay recurrencia, no enviamos datos de recurrencia
     }
 
     axios
@@ -101,6 +144,40 @@ export default function EditItem({
       .catch((error) => {
         console.error("Error al actualizar el item: ", error)
       })
+  }
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:3001/api/items/delete?id=${id}&type=${"event"}`,
+        {
+          withCredentials: true,
+        }
+      )
+      console.log("Item eliminado satisfactoriamente")
+      onEventModified()
+    } catch (error) {
+      console.error("Error al eliminar el item", error)
+    }
+  }
+
+  const deleteAllRecurrences = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await axios.post(
+        `http://localhost:3001/api/items/deleteAllRecurrences`,
+        {
+          iterationId: event.iteration_id,
+        },
+        {
+          withCredentials: true,
+        }
+      )
+      console.log("Items eliminados satisfactoriamente")
+      onEventModified()
+    } catch (error) {
+      console.error("Error al eliminar los items", error)
+    }
   }
 
   //Close with esc key
@@ -158,10 +235,8 @@ export default function EditItem({
                       value={eventDescription}
                       maxLength={250}
                       onChange={(e) => setEventDescription(e.target.value)}
-                      className="w-full min-h-16 p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full min-h-16 max-h-40 p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
-                  </div>
-                  <div>
                   </div>
                   <div className="space-x-4 flex justify-evenly">
                     <div className="w-full">
@@ -198,20 +273,49 @@ export default function EditItem({
                       </select>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div>
                     <label className="block text-white text-left mb-1">
-                      Repetir:
+                      Frecuencia:
                     </label>
+
                     <select
-                      name="repetition"
-                      id="repetition"
-                      className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                      <option value="0"> Nunca </option>
-                      <option value="1">Diario</option>
-                      <option value="2">Semanal</option>
-                      <option value="3">Mensual</option>
-                      <option value="4">Anual</option>
+                      className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      value={recurrence}
+                      onChange={handleRecurrence}>
+                      <option value="">Ninguna</option>
+                      <option value="week">Semanal</option>
+                      <option value="month">Mensual</option>
+                      <option value="year">Anual</option>
                     </select>
+                  </div>
+                  <div>
+                    {recurrence === "week" && (
+                      <div>
+                        <div className="max-h-full flex grow justify-center">
+                          {[
+                            "Lun",
+                            "Mar",
+                            "Mie",
+                            "Jue",
+                            "Vie",
+                            "Sab",
+                            "Dom",
+                          ].map((day, code) => (
+                            <button
+                              className={`w-16 h-14 mx-1 text-center rounded-full transition duration-300 ${
+                                diasSemanales.includes(code)
+                                  ? "bg-cyan-500"
+                                  : "bg-gray-500"
+                              }`}
+                              type="button"
+                              key={day}
+                              onClick={() => handleDaySelection(code)}>
+                              {day}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <input
@@ -239,6 +343,16 @@ export default function EditItem({
                     </div>
                   )}
                   <div className="flex justify-around mt-4">
+                    <button
+                      onClick={handleDelete}
+                      className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                      Eliminar
+                    </button>
+                    <button
+                      onClick={(e) => deleteAllRecurrences(e)}
+                      className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                      Eliminar todas las recurrencias
+                    </button>
                     <button
                       type="reset"
                       onClick={toggleEditVisibility}

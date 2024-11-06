@@ -7,6 +7,7 @@ const bodyParser = require("body-parser")
 const jwt = require("jsonwebtoken")
 const nodemailer = require("nodemailer")
 const cron = require("node-cron")
+const axios = require("axios")
 
 require("dotenv").config()
 
@@ -112,7 +113,7 @@ async function checkAndSendReminders() {
       // Envía el correo a través del endpoint de nodemailer
       await sendEmail(name, email)
     }
-    await deleteOldReminders(now);
+    await deleteOldReminders(now)
 
     console.log(
       `Se enviaron ${result.rows.length} recordatorios para la fecha ${now}.`
@@ -127,11 +128,11 @@ async function deleteOldReminders(now) {
     const deleteQuery = `
       DELETE FROM "Reminders"
       WHERE date < $1
-    `;
-    const result = await pool.query(deleteQuery, [now]);
-    console.log(`Se eliminaron ${result.rowCount} recordatorios antiguos.`);
+    `
+    const result = await pool.query(deleteQuery, [now])
+    console.log(`Se eliminaron ${result.rowCount} recordatorios antiguos.`)
   } catch (error) {
-    console.error("Error al eliminar recordatorios antiguos:", error);
+    console.error("Error al eliminar recordatorios antiguos:", error)
   }
 }
 
@@ -481,23 +482,27 @@ app.get("/api/get/userData", authenticateToken, async (req, res) => {
 
 //Insertar
 app.post("/api/post/events", async (req, res) => {
+  const {
+    reminderDate,
+    endDate,
+    eventName,
+    eventDate,
+    category,
+    eventPriority,
+    eventDescription,
+    userId,
+    mail,
+    lifeAreaIds,
+    recurrencyType, // Puede ser "year", "month", o un array de días de la semana [1,2,3,4,5,6,7]
+  } = req.body
+
+  const formattedRecurrencyType = Array.isArray(recurrencyType)
+    ? recurrencyType.join(",")
+    : recurrencyType
+
   const client = await pool.connect() // Obtener un cliente de la pool de conexiones
 
   try {
-    const {
-      reminderDate,
-      endDate,
-      eventName,
-      eventDate,
-      category,
-      eventPriority,
-      eventDescription,
-      userId,
-      mail,
-      lifeAreaIds,
-      recurrencyType, // Puede ser "year", "month", o un array de días de la semana [1,2,3,4,5,6,7]
-    } = req.body
-
     await client.query("BEGIN")
 
     // Insertar el evento principal
@@ -511,7 +516,7 @@ app.post("/api/post/events", async (req, res) => {
         eventPriority,
         eventDescription,
         userId,
-        recurrencyType, // Asignar el tipo de recurrencia
+        formattedRecurrencyType,
         null, // iteration_id será null inicialmente para el primer evento (se generarán iteraciones)
       ]
     )
@@ -563,7 +568,6 @@ app.post("/api/post/events", async (req, res) => {
     if (recurrencyType) {
       const today = new Date(eventDate)
       let iterationEvents = []
-
       // Manejo de recurrencias por tipo
       switch (recurrencyType) {
         case "month":
@@ -571,9 +575,8 @@ app.post("/api/post/events", async (req, res) => {
           for (let i = 1; i <= 12; i++) {
             const nextDate = new Date(today)
             nextDate.setMonth(today.getMonth() + i)
-            if (!endDate || nextDate <= new Date(endDate)) {
-              iterationEvents.push(nextDate)
-            }
+
+            iterationEvents.push(nextDate)
           }
           break
 
@@ -582,33 +585,36 @@ app.post("/api/post/events", async (req, res) => {
           for (let i = 1; i <= 5; i++) {
             const nextDate = new Date(today)
             nextDate.setFullYear(today.getFullYear() + i)
-            if (!endDate || nextDate <= new Date(endDate)) {
-              iterationEvents.push(nextDate)
-            }
+
+            iterationEvents.push(nextDate)
           }
           break
 
         default:
           // Si recurrencyType es un array de días de la semana, tratamos como repetición semanal personalizada
           if (Array.isArray(recurrencyType)) {
+            console.log(
+              "Manejando recurrencyType como Array de días de semana",
+              recurrencyType
+            )
             const daysOfWeek = recurrencyType // Ejemplo: [1, 3, 5] -> Lunes, Miércoles, Viernes
             const weeksAhead = 12 // Generar iteraciones para las próximas 12 semanas
             for (let i = 0; i < weeksAhead; i++) {
               daysOfWeek.forEach((day) => {
                 const nextDate = new Date(today)
-                const currentDay = today.getDay() // Obtener el día actual
-                const diffDays = (day - currentDay + 7) % 7 // Calcular la diferencia para el próximo día de la semana
+                const currentDay = today.getDay()
+                const diffDays = (day - currentDay + 7) % 7
                 nextDate.setDate(today.getDate() + i * 7 + diffDays)
-                if (!endDate || nextDate <= new Date(endDate)) {
-                  iterationEvents.push(nextDate)
-                }
+                console.log("nextDate calculated:", nextDate) // Verificar aquí
+
+                iterationEvents.push(nextDate)
               })
             }
           }
           break
       }
-
       // Insertar los eventos recurrentes en la tabla Events
+      console.log("iterationEvents", iterationEvents)
       for (const iterationDate of iterationEvents) {
         await client.query(
           'INSERT INTO "Events" (end_date, name, category, date, priority_level, description, user_id, recurrency_type, iteration_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
@@ -620,7 +626,7 @@ app.post("/api/post/events", async (req, res) => {
             eventPriority,
             eventDescription,
             userId,
-            recurrencyType.join(","), // Mismo tipo de recurrencia
+            formattedRecurrencyType, // Mismo tipo de recurrencia
             iterationID, // Iteration ID que referencia al evento original
           ]
         )
@@ -726,7 +732,7 @@ app.post("/api/post/reminders", authenticateToken, async (req, res) => {
 })
 
 //Eliminar Items
-app.delete("/api/items/delete", async (req, res) => {
+app.delete("/api/items/delete", authenticateToken, async (req, res) => {
   const { id, type } = req.query
   console.log(id, type)
 
@@ -761,6 +767,35 @@ app.delete("/api/items/delete", async (req, res) => {
     res.status(500).json({ error: "error interno del servidor" })
   }
 })
+
+app.post(
+  "/api/items/deleteAllRecurrences",
+  authenticateToken,
+  async (req, res) => {
+    const { iterationId } = req.body
+
+    if (!iterationId) {
+      return res.status(400).json({ error: "recurrencia requerida" })
+    }
+    try {
+      const result = await pool.query(
+        `DELETE FROM "Events" WHERE iteration_id = $1`,
+        [iterationId]
+      )
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Items no encontrados" })
+      }
+
+      res
+        .status(200)
+        .json({ message: "se han eliminado todas las iteraciones" })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: "error interno del servidor" })
+    }
+  }
+)
 
 app.delete("/api/lifeAreas/:id", authenticateToken, async (req, res) => {
   const { id } = req.params
@@ -803,6 +838,30 @@ app.delete("/api/lifeAreas/:id", authenticateToken, async (req, res) => {
       .json({ error: "Error al eliminar life area y score relacionado" })
   } finally {
     client.release()
+  }
+})
+
+app.delete("/api/items/deleteAllRecurrences", async (req, res) => {
+  const { recurrenceId } = req.query
+  console.log(recurrenceId)
+
+  if (!recurrenceId) {
+    return res.status(400).json({ error: "Id de recuurrencia es requerida" })
+  }
+  try {
+    const result = await pool.query(
+      `DELETE FROM "Events" WHERE ${recurrenceId} = $1 RETURNING *`,
+      [id]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Items no encontrados" })
+    }
+
+    res.status(200).json({ message: "Items eliminados exitosamente" })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: "error interno del servidor" })
   }
 })
 
@@ -892,6 +951,8 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
     eventId,
     userId,
     eventReminderId,
+    iterationId,
+    recurrencyType,
   } = req.body
 
   const client = await pool.connect()
@@ -906,10 +967,42 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
       .json({ error: "User not authorized to update this event" })
   }
 
-  try {
-    await client.query("BEGIN")
+  if (iterationId) {
+    const killIterationsQuery = `
+      DELETE FROM "Events"
+      WHERE iteration_id = $1;
+    `
+    const killIterationsValue = [iterationId]
+    try {
+      await client.query(killIterationsQuery, killIterationsValue)
+      console.log("recurrencyType", recurrencyType)
+      const response = await axios.post(
+        "http://localhost:3001/api/post/events",
+        {
+          reminderDate: eventReminderDate,
+          endDate,
+          eventName,
+          eventDate,
+          category,
+          eventPriority,
+          eventDescription,
+          userId,
+          mail: eventMail,
+          lifeAreaIds,
+          recurrencyType,
+        }
+      )
 
-    const updateEventQuery = `
+      res.status(response.status).json(response.data)
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ message: "Error al actualizar el evento" })
+    }
+  } else {
+    try {
+      await client.query("BEGIN")
+
+      const updateEventQuery = `
       UPDATE "Events" 
       SET 
         "state" = $1,
@@ -919,111 +1012,115 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
         "date" = $5,
         "priority_level" = $6,
         "description" = $7,
-        "user_id" = $8
+        "user_id" = $8,
+        "recurrency_type" = $9
       WHERE "event_id" = $9 AND "user_id" = $8
       RETURNING *;
     `
-    const eventValues = [
-      state,
-      endDate,
-      eventName,
-      category,
-      eventDate,
-      eventPriority,
-      eventDescription,
-      userId,
-      eventId,
-    ]
 
-    const eventResult = await client.query(updateEventQuery, eventValues)
+      const eventValues = [
+        state,
+        endDate,
+        eventName,
+        category,
+        eventDate,
+        eventPriority,
+        eventDescription,
+        userId,
+        eventId,
+        recurrencyType,
+      ]
 
-    if (eventResult.rows.length === 0) {
-      await client.query("ROLLBACK")
-      return res
-        .status(404)
-        .json({ error: "Event not found or user not authorized" })
-    }
+      const eventResult = await client.query(updateEventQuery, eventValues)
 
-    if (!eventReminderId && eventReminderDate) {
-      const insertReminderQuery = `
+      if (eventResult.rows.length === 0) {
+        await client.query("ROLLBACK")
+        return res
+          .status(404)
+          .json({ error: "Event not found or user not authorized" })
+      }
+
+      if (!eventReminderId && eventReminderDate) {
+        const insertReminderQuery = `
         INSERT INTO "Reminders" ("date", "mail", "user_id")
         VALUES ($1, $2, $3)
         RETURNING "reminder_id";
       `
-      const insertReminderValues = [eventReminderDate, eventMail, userId]
-      const reminderResult = await client.query(
-        insertReminderQuery,
-        insertReminderValues
-      )
-      const newReminderId = reminderResult.rows[0].reminder_id
+        const insertReminderValues = [eventReminderDate, eventMail, userId]
+        const reminderResult = await client.query(
+          insertReminderQuery,
+          insertReminderValues
+        )
+        const newReminderId = reminderResult.rows[0].reminder_id
 
-      const insertEventReminderQuery = `
+        const insertEventReminderQuery = `
         INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
         VALUES ($1, $2);
       `
-      await client.query(insertEventReminderQuery, [eventId, newReminderId])
-    } else if (eventReminderId) {
-      const deleteReminderQuery = `
+        await client.query(insertEventReminderQuery, [eventId, newReminderId])
+      } else if (eventReminderId) {
+        const deleteReminderQuery = `
         DELETE FROM "Reminders"
         WHERE "reminder_id" = $1;
       `
-      await client.query(deleteReminderQuery, [eventReminderId])
+        await client.query(deleteReminderQuery, [eventReminderId])
 
-      const insertReminderQuery = `
+        const insertReminderQuery = `
         INSERT INTO "Reminders" ("date", "mail", "user_id")
         VALUES ($1, $2, $3)
         RETURNING "reminder_id";
       `
-      const insertReminderValues = [eventReminderDate, eventMail, userId]
+        const insertReminderValues = [eventReminderDate, eventMail, userId]
 
-      const reminderResult = await client.query(
-        insertReminderQuery,
-        insertReminderValues
-      )
-      const newReminderId = reminderResult.rows[0].reminder_id
+        const reminderResult = await client.query(
+          insertReminderQuery,
+          insertReminderValues
+        )
+        const newReminderId = reminderResult.rows[0].reminder_id
 
-      const insertEventReminderQuery = `
+        const insertEventReminderQuery = `
         INSERT INTO "Event_Reminder" ("event_id", "reminder_id")
         VALUES ($1, $2);
       `
 
-      await client.query(insertEventReminderQuery, [eventId, newReminderId])
-    }
+        await client.query(insertEventReminderQuery, [eventId, newReminderId])
+      }
 
-    //Manejar áreas de vida
+      //Manejar áreas de vida
 
-    const deleteLifeAreasQuery = `
+      const deleteLifeAreasQuery = `
       DELETE FROM "Event_Life_Areas" WHERE "event_id" = $1;
     `
-    await client.query(deleteLifeAreasQuery, [eventId])
+      await client.query(deleteLifeAreasQuery, [eventId])
 
-    console.log("lifeAreaIds:", lifeAreaIds)
-
-    if (lifeAreaIds && lifeAreaIds.length > 0) {
       console.log("lifeAreaIds:", lifeAreaIds)
-      const lifeAreasQuery = `
+
+      if (lifeAreaIds && lifeAreaIds.length > 0) {
+        console.log("lifeAreaIds:", lifeAreaIds)
+        const lifeAreasQuery = `
       INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
       VALUES ${lifeAreaIds.map((_, i) => `($1, $${i + 2})`).join(", ")}
       `
-      const lifeAreasValues = [eventId, ...lifeAreaIds]
+        const lifeAreasValues = [eventId, ...lifeAreaIds]
 
-      await client.query(lifeAreasQuery, lifeAreasValues)
+        await client.query(lifeAreasQuery, lifeAreasValues)
+      }
+
+      await client.query("COMMIT")
+
+      res.status(200).json({
+        message: "Event, related Reminder and life area updated successfully",
+        event: eventResult.rows[0],
+      })
+    } catch (error) {
+      await client.query("ROLLBACK")
+      console.error("Error updating event and reminder", error)
+      res.status(500).json({
+        error: "An error occurred while updating the event and reminder",
+      })
+    } finally {
+      client.release()
     }
-
-    await client.query("COMMIT")
-
-    res.status(200).json({
-      message: "Event, related Reminder and life area updated successfully",
-      event: eventResult.rows[0],
-    })
-  } catch (error) {
-    await client.query("ROLLBACK")
-    console.error("Error updating event and reminder", error)
-    res.status(500).json({
-      error: "An error occurred while updating the event and reminder",
-    })
-  } finally {
-    client.release()
   }
 })
 

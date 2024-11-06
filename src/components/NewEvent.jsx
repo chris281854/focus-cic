@@ -27,8 +27,6 @@ export default function NewEvent({
   const [category, setCategory] = useState(true) //task: true - event: false
   const [recurrence, setRecurrence] = useState("") // Tipo de recurrencia: "semanal", "mensual", "anual"
   const [diasSemanales, setDiasSemanales] = useState([]) // Para la recurrencia semanal
-  const [diaMes, setDiaMes] = useState(null) // Para la recurrencia mensual
-  const [mesAnual, setMesAnual] = useState(null) // Para la recurrencia anual
 
   //Abrir panel
   const toggleNewEvent = (event) => {
@@ -48,8 +46,7 @@ export default function NewEvent({
     setMail(false)
     setRecurrence("")
     setDiasSemanales([])
-    setDiaMes(null)
-    setMesAnual(null)
+
   }
 
   //Manejar selección de categoría:
@@ -289,32 +286,6 @@ export default function NewEvent({
                       )
                     )}
                   </div>
-                </div>
-              )}
-
-              {recurrence === "month" && (
-                <div>
-                  <label>Day of the Month</label>
-                  <input
-                    type="number"
-                    value={diaMes || ""}
-                    onChange={(e) => setDiaMes(parseInt(e.target.value))}
-                    min="1"
-                    max="31"
-                  />
-                </div>
-              )}
-
-              {recurrence === "year" && (
-                <div>
-                  <label>Month of the Year</label>
-                  <input
-                    type="number"
-                    value={mesAnual || ""}
-                    onChange={(e) => setMesAnual(parseInt(e.target.value))}
-                    min="1"
-                    max="12"
-                  />
                 </div>
               )}
             </div>
