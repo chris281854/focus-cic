@@ -779,13 +779,15 @@ app.post(
     }
     try {
       const result = await pool.query(
-        `DELETE FROM "Events" WHERE iteration_id = $1`,
+        `DELETE FROM "Events" WHERE "iteration_id" = $1`,
         [iterationId]
       )
+      console.log("done")
 
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: "Items no encontrados" })
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Items no encontrados" });
       }
+      
 
       res
         .status(200)
@@ -797,7 +799,7 @@ app.post(
   }
 )
 
-app.delete("/api/lifeAreas/:id", authenticateToken, async (req, res) => {
+app.delete("dr                                          d", authenticateToken, async (req, res) => {
   const { id } = req.params
   const { userId } = req.body
   if (!userId) {

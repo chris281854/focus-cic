@@ -133,21 +133,22 @@ export default function ToDoItem({ event, reminder, onEventModified }) {
           </div>
           <div className="col-span-1 flex justify-center overflow-hidden h-min w-full min-w-fit text-nowrap">
             <span className="text-base text-white">
-              {event.state === 1 &&
+              {(event.state === 1 &&
                 event.date &&
-                dayjs(event.date).tz(timezone).format("MMMM D, h:m a")}
-              {event.state === 2 &&
-                event.date &&
-                dayjs(event.date).tz(timezone).format("h:m a")}
-              {event.state === 6 &&
-                event.date &&
-                dayjs(event.date).tz(timezone).format("h:m a")}
-              {event.state === 3 &&
-                event.date &&
-                dayjs(event.date).tz(timezone).format("ddd h:m a")}
-              {event.state === 4 &&
-                event.date &&
-                dayjs(event.date).tz(timezone).format("D MMM. h:m a")}
+                dayjs(event.date).tz(timezone).format("MMMM D, h:m a")) ||
+                (event.state === 2 &&
+                  event.date &&
+                  dayjs(event.date).tz(timezone).format("h:m a")) ||
+                (event.state === 6 &&
+                  event.date &&
+                  dayjs(event.date).tz(timezone).format("h:m a")) ||
+                (event.state === 3 &&
+                  event.date &&
+                  dayjs(event.date).tz(timezone).format("ddd h:m a")) ||
+                (event.state === 4 &&
+                  event.date &&
+                  dayjs(event.date).tz(timezone).format("D MMM. h:m a")) ||
+                dayjs(event.date).tz(timezone).format("D MMM. h:m a, YYYY")}
             </span>
           </div>
           <div
