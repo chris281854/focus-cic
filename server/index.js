@@ -734,7 +734,6 @@ app.post("/api/post/reminders", authenticateToken, async (req, res) => {
 //Eliminar Items
 app.delete("/api/items/delete", authenticateToken, async (req, res) => {
   const { id, type } = req.query
-  console.log(id, type)
 
   if (!id || !type) {
     return res.status(400).json({ error: "ID y tipo requeridos" })
@@ -785,9 +784,8 @@ app.post(
       console.log("done")
 
       if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Items no encontrados" });
+        return res.status(404).json({ error: "Items no encontrados" })
       }
-      
 
       res
         .status(200)
@@ -799,49 +797,53 @@ app.post(
   }
 )
 
-app.delete("dr                                          d", authenticateToken, async (req, res) => {
-  const { id } = req.params
-  const { userId } = req.body
-  if (!userId) {
-    return res.status(400).json({ error: "userId is required" })
-  }
-
-  const client = await pool.connect()
-
-  try {
-    await client.query("BEGIN")
-
-    await client.query(
-      `DELETE FROM "Life_Area_Score" WHERE life_area_id = $1`,
-      [id]
-    )
-
-    const result = await client.query(
-      `DELETE FROM "Life_Areas" Where life_area_id = $1 AND user_id = $2 RETURNING *`,
-      [id, userId]
-    )
-
-    if (result.rows.length === 0) {
-      await client.query("ROLLBACK")
-      return res
-        .status(404)
-        .json({ error: "Life area no encontrada o usuario no autorizado" })
+app.delete(
+  "dr                                          d",
+  authenticateToken,
+  async (req, res) => {
+    const { id } = req.params
+    const { userId } = req.body
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" })
     }
 
-    await client.query("COMMIT")
+    const client = await pool.connect()
 
-    res
-      .status(200)
-      .json({ message: "Life area y scores relacionados elimidados" })
-  } catch (error) {
-    await client.query("ROLLBACK")
-    return res
-      .status(500)
-      .json({ error: "Error al eliminar life area y score relacionado" })
-  } finally {
-    client.release()
+    try {
+      await client.query("BEGIN")
+
+      await client.query(
+        `DELETE FROM "Life_Area_Score" WHERE life_area_id = $1`,
+        [id]
+      )
+
+      const result = await client.query(
+        `DELETE FROM "Life_Areas" Where life_area_id = $1 AND user_id = $2 RETURNING *`,
+        [id, userId]
+      )
+
+      if (result.rows.length === 0) {
+        await client.query("ROLLBACK")
+        return res
+          .status(404)
+          .json({ error: "Life area no encontrada o usuario no autorizado" })
+      }
+
+      await client.query("COMMIT")
+
+      res
+        .status(200)
+        .json({ message: "Life area y scores relacionados elimidados" })
+    } catch (error) {
+      await client.query("ROLLBACK")
+      return res
+        .status(500)
+        .json({ error: "Error al eliminar life area y score relacionado" })
+    } finally {
+      client.release()
+    }
   }
-})
+)
 
 app.delete("/api/items/deleteAllRecurrences", async (req, res) => {
   const { recurrenceId } = req.query

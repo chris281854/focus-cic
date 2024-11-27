@@ -146,7 +146,13 @@ export default function EditItem({
       })
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (e, id) => {
+    e.preventDefault()
+    console.log("ID enviado:", id)
+    console.log(
+      "URL enviada:",
+      `http://localhost:3001/api/items/delete?id=${id}&type=event`
+    )
     try {
       const response = await axios.delete(
         `http://localhost:3001/api/items/delete?id=${id}&type=${"event"}`,
@@ -217,6 +223,7 @@ export default function EditItem({
                       type="text"
                       name="EventName"
                       id="EventName"
+                      placeholder="Título *"
                       value={eventName ?? ""}
                       onChange={(e) => setEventName(e.target.value)}
                       required
@@ -224,14 +231,10 @@ export default function EditItem({
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="eventDescription"
-                      className="block text-white text-left mb-1">
-                      Notas
-                    </label>
                     <textarea
                       type="text"
                       name="EventDescription"
+                      placeholder="Descripción"
                       value={eventDescription}
                       maxLength={250}
                       onChange={(e) => setEventDescription(e.target.value)}
@@ -243,7 +246,7 @@ export default function EditItem({
                       <label
                         htmlFor="EventDate"
                         className="block text-white text-left mb-1">
-                        Hora y fecha
+                        Hora y fecha *
                       </label>
                       <input
                         type="datetime-local"
@@ -342,26 +345,28 @@ export default function EditItem({
                       />
                     </div>
                   )}
-                  <div className="flex justify-around mt-4">
+                  <div className="flex mt-4 gap-2 h-13">
                     <button
-                      onClick={handleDelete}
-                      className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                      onClick={(e) => handleDelete(e, event.event_id)}
+                      className="py-2 px-4 w-28 bg-slate-400 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
                       Eliminar
                     </button>
-                    <button
-                      onClick={(e) => deleteAllRecurrences(e)}
-                      className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
-                      Eliminar todas las recurrencias
-                    </button>
+                    {event.iteration_id && (
+                      <button
+                        onClick={(e) => deleteAllRecurrences(e)}
+                        className="p-2 w-40 bg-slate-400 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                        Eliminar todas las repeticiones
+                      </button>
+                    )}
                     <button
                       type="reset"
                       onClick={toggleEditVisibility}
-                      className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                      className="p-2 ml-auto bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                      className="p-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
                       Guardar
                     </button>
                   </div>

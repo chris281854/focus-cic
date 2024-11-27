@@ -46,7 +46,6 @@ export default function NewEvent({
     setMail(false)
     setRecurrence("")
     setDiasSemanales([])
-
   }
 
   //Manejar selección de categoría:
@@ -179,7 +178,7 @@ export default function NewEvent({
               type="text"
               name="EventName"
               id="EventName"
-              placeholder="Título"
+              placeholder="Título *"
               autoFocus
               value={eventName ?? ""}
               onChange={(e) => setEventName(e.target.value)}
@@ -204,7 +203,7 @@ export default function NewEvent({
                 <label
                   htmlFor="EventDate"
                   className="block text-white text-left mb-1">
-                  Comienza
+                  Comienza {!category && "*"}
                 </label>
                 <input
                   type="datetime-local"
@@ -220,7 +219,7 @@ export default function NewEvent({
                   <label
                     htmlFor="endDate"
                     className="block text-white text-left mb-1">
-                    Termina
+                    Termina {!category && "*"}
                   </label>
                   <input
                     type="datetime-local"
