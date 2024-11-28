@@ -9,7 +9,8 @@ import clientId from "../../../server/clientId"
 import { jwtDecode } from "jwt-decode"
 
 export default function Login() {
-  const { user, login, loading } = useUser()
+  const { user, login, loading, setLoggedWithGoogle, loggedWithGoogle } =
+    useUser()
   const navigate = useNavigate()
   const [error, setError] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
@@ -42,6 +43,7 @@ export default function Login() {
         console.log("Iniciando sesión")
         navigate("/home")
         console.log("Exito al iniciar sesión")
+        setLoggedWithGoogle(true)
       }
     } catch (error) {
       console.error(
@@ -69,6 +71,7 @@ export default function Login() {
         await login(userData, rememberMe) // Llama a la función de login de Zustand
         console.log("Iniciando sesión")
         navigate("/home")
+        setLoggedWithGoogle(false)
       } else {
         const errorData = await response.json()
         setError(errorData.error)

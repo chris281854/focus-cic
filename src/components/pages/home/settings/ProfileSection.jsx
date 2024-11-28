@@ -10,8 +10,14 @@ import axios from "axios"
 import dayjs from "dayjs"
 
 export default function ProfileSection() {
-  const { user, logout, userProfile, updateUserProfile, getUserProfile } =
-    useUser()
+  const {
+    user,
+    logout,
+    userProfile,
+    updateUserProfile,
+    getUserProfile,
+    loggedWithGoogle,
+  } = useUser()
 
   const [onEdition, setOnEdition] = useState(false)
   const [nickName, setNickName] = useState("")
@@ -199,96 +205,98 @@ export default function ProfileSection() {
         </div>
       </section>
       {/* New Password Change Section */}
-      <section className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <button
-          onClick={() => setShowPasswordSection(!showPasswordSection)}
-          className="flex items-center justify-between w-full text-left text-gray-700 dark:text-white hover:text-primary dark:hover:text-primary-light transition duration-300 bg-transparent">
-          <span className="text-xl font-semibold">Cambiar Contraseña</span>
-          <FontAwesomeIcon
-            icon={showPasswordSection ? faChevronUp : faChevronDown}
-          />
-        </button>
+      {!loggedWithGoogle && (
+        <section className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <button
+            onClick={() => setShowPasswordSection(!showPasswordSection)}
+            className="flex items-center justify-between w-full text-left text-gray-700 dark:text-white hover:text-primary dark:hover:text-primary-light transition duration-300 bg-transparent">
+            <span className="text-xl font-semibold">Cambiar Contraseña</span>
+            <FontAwesomeIcon
+              icon={showPasswordSection ? faChevronUp : faChevronDown}
+            />
+          </button>
 
-        {showPasswordSection && (
-          <div className="mt-4 space-y-4">
-            <div>
-              <label className="block text-gray-700 dark:text-white mb-2">
-                Contraseña Actual
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  autoComplete="off"
-                  value={currentPassword}
-                  required
-                  onChange={(e) => {
-                    setWrongPassword(false)
-                    setCurrentPassword(e.target.value)
-                  }}
-                  className="flex-grow p-2 rounded-md bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
-                />
-                <button
-                  onClick={verifyCurrentPassword}
-                  className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white">
-                  Verificar
-                </button>
-              </div>
-            </div>
-            {wrongPassword && (
-              <p className="text-red-600">La contraseña es incorrecta.</p>
-            )}
-
-            {isPasswordVerified && (
+          {showPasswordSection && (
+            <div className="mt-4 space-y-4">
               <div>
                 <label className="block text-gray-700 dark:text-white mb-2">
-                  Nueva Contraseña
+                  Contraseña Actual
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  minLength={8}
-                  value={newPassword}
-                  onChange={(e) => handleNewPasswordTyping(e.target.value)}
-                  autoComplete="off"
-                  placeholder="Contraseña"
-                  className="w-full p-2 rounded bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
-                />
-                {newPassword && !isValidPassword && (
-                  <p className="text-red-600">
-                    La contraseña debe tener más de 8 caracteres
-                  </p>
-                )}
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    autoComplete="off"
+                    value={currentPassword}
+                    required
+                    onChange={(e) => {
+                      setWrongPassword(false)
+                      setCurrentPassword(e.target.value)
+                    }}
+                    className="flex-grow p-2 rounded-md bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
+                  />
+                  <button
+                    onClick={verifyCurrentPassword}
+                    className="bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500 text-white">
+                    Verificar
+                  </button>
+                </div>
               </div>
-            )}
-            {isPasswordVerified && (
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={() => {
-                    setShowPasswordSection(false)
-                    setCurrentPassword("")
-                    setNewPassword("")
-                    setIsPasswordVerified(false)
-                  }}
-                  className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-4 py-2 rounded transition duration-300 w-full">
-                  Cancelar
-                </button>
-                <button
-                  onClick={changePassword}
-                  disabled={
-                    !isPasswordVerified || !isValidPassword || !newPassword
-                  }
-                  className={`${
-                    isPasswordVerified && newPassword && isValidPassword
-                      ? "bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500"
-                      : "bg-gray-400 dark:bg-gray-700 cursor-not-allowed"
-                  } text-white px-4 py-2 rounded transition duration-300`}>
-                  Confirmar Cambio
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
+              {wrongPassword && (
+                <p className="text-red-600">La contraseña es incorrecta.</p>
+              )}
+
+              {isPasswordVerified && (
+                <div>
+                  <label className="block text-gray-700 dark:text-white mb-2">
+                    Nueva Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    minLength={8}
+                    value={newPassword}
+                    onChange={(e) => handleNewPasswordTyping(e.target.value)}
+                    autoComplete="off"
+                    placeholder="Contraseña"
+                    className="w-full p-2 rounded bg-secondary/40 dark:bg-gray-600 text-gray-900 dark:text-white"
+                  />
+                  {newPassword && !isValidPassword && (
+                    <p className="text-red-600">
+                      La contraseña debe tener más de 8 caracteres
+                    </p>
+                  )}
+                </div>
+              )}
+              {isPasswordVerified && (
+                <div className="flex justify-end space-x-4">
+                  <button
+                    onClick={() => {
+                      setShowPasswordSection(false)
+                      setCurrentPassword("")
+                      setNewPassword("")
+                      setIsPasswordVerified(false)
+                    }}
+                    className="bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white px-4 py-2 rounded transition duration-300 w-full">
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={changePassword}
+                    disabled={
+                      !isPasswordVerified || !isValidPassword || !newPassword
+                    }
+                    className={`${
+                      isPasswordVerified && newPassword && isValidPassword
+                        ? "bg-primary hover:bg-tertiary dark:bg-slate-600 dark:hover:bg-slate-500"
+                        : "bg-gray-400 dark:bg-gray-700 cursor-not-allowed"
+                    } text-white px-4 py-2 rounded transition duration-300`}>
+                    Confirmar Cambio
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
       {passwordChanged && (
         <h5 className="text-red-600">
           Su contraseña se ha actualizado. Inicie sesión de nuevo.

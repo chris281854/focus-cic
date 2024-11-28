@@ -23,6 +23,9 @@ const useUserStore = create((set) => ({
   themeColor: localStorage.getItem("themeColor") || "54, 55, 58",
   secondaryColor: localStorage.getItem("secondaryColor") || "193, 184, 179",
   tertiaryColor: localStorage.getItem("tertiaryColor") || "151, 136, 122",
+  loggedWithGoogle: false,
+
+  setLoggedWithGoogle: (value) => set(() => ({ loggedWithGoogle: value })),
 
   setThemeColor: async (theme, secondary, tertiary) => {
     localStorage.setItem("themeColor", theme)
