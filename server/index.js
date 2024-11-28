@@ -516,7 +516,7 @@ app.post("/api/post/events", async (req, res) => {
         eventPriority,
         eventDescription,
         userId,
-        6,
+        recurrencyType,
         null, // iteration_id será null inicialmente para el primer evento (se generarán iteraciones)
       ]
     )

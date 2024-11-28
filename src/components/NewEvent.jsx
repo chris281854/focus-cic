@@ -25,7 +25,7 @@ export default function NewEvent({
   const [mail, setMail] = useState(false)
   const [selectedAreas, setSelectedAreas] = useState([])
   const [category, setCategory] = useState(true) //task: true - event: false
-  const [recurrence, setRecurrence] = useState("") // Tipo de recurrencia: "semanal", "mensual", "anual"
+  const [recurrence, setRecurrence] = useState(null) // Tipo de recurrencia: "semanal", "mensual", "anual"
   const [diasSemanales, setDiasSemanales] = useState([]) // Para la recurrencia semanal
 
   //Abrir panel
@@ -259,7 +259,7 @@ export default function NewEvent({
                 className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={recurrence}
                 onChange={handleRecurrence}>
-                <option value="">Ninguna</option>
+                <option value={null}>Ninguna</option>
                 <option value="week">Semanal</option>
                 <option value="month">Mensual</option>
                 <option value="year">Anual</option>
