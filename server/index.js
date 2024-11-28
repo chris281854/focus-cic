@@ -516,7 +516,7 @@ app.post("/api/post/events", async (req, res) => {
         eventPriority,
         eventDescription,
         userId,
-        formattedRecurrencyType,
+        6,
         null, // iteration_id será null inicialmente para el primer evento (se generarán iteraciones)
       ]
     )
@@ -616,8 +616,8 @@ app.post("/api/post/events", async (req, res) => {
       // Insertar los eventos recurrentes en la tabla Events
       console.log("iterationEvents", iterationEvents)
       for (const iterationDate of iterationEvents) {
-        await client.query(
-          'INSERT INTO "Events" (end_date, name, category, date, priority_level, description, user_id, recurrency_type, iteration_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        const iterationResult = await client.query(
+          'INSERT INTO "Events" (end_date, name, category, date, priority_level, description, user_id, recurrency_type, iteration_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING event_id',
           [
             endDate,
             eventName,
@@ -630,6 +630,19 @@ app.post("/api/post/events", async (req, res) => {
             iterationID, // Iteration ID que referencia al evento original
           ]
         )
+
+        const newIterationEventID = iterationResult.rows[0].event_id
+
+        // Asociar las áreas de vida a esta iteración
+        if (lifeAreaIds && lifeAreaIds.length > 0) {
+          const lifeAreasQuery = `
+    INSERT INTO "Event_Life_Areas" ("event_id", life_area_id)
+    VALUES ${lifeAreaIds.map((_, i) => `($1, $${i + 2})`).join(", ")}
+    `
+          const lifeAreasValues = [newIterationEventID, ...lifeAreaIds]
+
+          await client.query(lifeAreasQuery, lifeAreasValues)
+        }
       }
     }
 
