@@ -516,7 +516,7 @@ app.post("/api/post/events", async (req, res) => {
         eventPriority,
         eventDescription,
         userId,
-        recurrencyType,
+        formattedRecurrencyType,
         null, // iteration_id será null inicialmente para el primer evento (se generarán iteraciones)
       ]
     )
@@ -524,15 +524,16 @@ app.post("/api/post/events", async (req, res) => {
     if (!eventResult.rows || eventResult.rows.length === 0) {
       throw new Error("Error al insertar el evento")
     }
+
     const eventID = eventResult.rows[0].event_id // Obtener el ID del nuevo evento
     const iterationID = eventID // El primer evento es su propia "base" para las iteraciones
-
-    // Actualizar el iteration_id del evento recién creado
-    await client.query(
-      `UPDATE "Events" SET iteration_id = $1 WHERE event_id = $2`,
-      [iterationID, eventID]
-    )
-
+    if (recurrencyType) {
+      // Actualizar el iteration_id del evento recién creado
+      await client.query(
+        `UPDATE "Events" SET iteration_id = $1 WHERE event_id = $2`,
+        [iterationID, eventID]
+      )
+    }
     // Insertar el recordatorio si existe
     if (reminderDate) {
       const reminderResult = await client.query(
@@ -971,7 +972,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
     iterationId,
     recurrencyType,
   } = req.body
-
+  console.log("recurrencyType", recurrencyType)
   const client = await pool.connect()
 
   if (!eventId) {
@@ -1030,7 +1031,7 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
         "priority_level" = $6,
         "description" = $7,
         "user_id" = $8,
-        "recurrency_type" = $9
+        "recurrency_type" = $10
       WHERE "event_id" = $9 AND "user_id" = $8
       RETURNING *;
     `

@@ -51,7 +51,6 @@ export default function EditItem({
   }, [])
   console.log("diasSemanales", diasSemanales)
 
-  console.log(event)
   const [eventReminderDate, setEventReminderDate] = useState(
     event?.reminder_date || undefined
   )
@@ -122,13 +121,14 @@ export default function EditItem({
 
     // Lógica para manejar la recurrencia
     if (recurrence === "week") {
-      // Convertimos el array diasSemanales en una cadena de texto separada por comas
+      // Se convierte el array diasSemanales en una cadena de texto separada por comas
       updateData.recurrencyType =
         diasSemanales.length > 0 ? diasSemanales : null
-    } else if (recurrence === "month" || recurrence === "year") {
+      console.log("recurrencyType", updateData.recurrencyType)
+    } else if (recurrence === "m¿onth" || recurrence === "year") {
       updateData.recurrencyType = recurrence // Para mensual o anual, solo enviar el tipo de recurrencia
     } else {
-      updateData.recurrencyType = null // Si no hay recurrencia, no enviamos datos de recurrencia
+      updateData.recurrencyType = null // Si no hay recurrencia, no enviar datos de recurrencia
     }
 
     axios
@@ -366,7 +366,10 @@ export default function EditItem({
                     </button>
                     <button
                       type="submit"
-                      className="p-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                      className="p-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 disabled:cursor-not-allowed"
+                      disabled={
+                        recurrence === "week" && diasSemanales.length === 0
+                      }>
                       Guardar
                     </button>
                   </div>

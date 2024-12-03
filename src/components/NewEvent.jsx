@@ -64,7 +64,8 @@ export default function NewEvent({
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
     )
   }
-
+  console.log("diasSemanales", diasSemanales.length === 0)
+  console.log("recurrence", recurrence)
   //Manejar selección de areas:
   const handleSeleccion = async (value) => {
     setSelectedAreas((prevSelectedAreas) => {
@@ -96,7 +97,8 @@ export default function NewEvent({
 
     // Lógica para manejar la recurrencia
     if (recurrence === "week") {
-      // Convertimos el array diasSemanales en una cadena de texto separada por comas
+      if (diasSemanales.length === 0) return
+
       requestData.recurrencyType =
         diasSemanales.length > 0 ? diasSemanales : null
     } else if (recurrence === "month" || recurrence === "year") {
@@ -322,7 +324,8 @@ export default function NewEvent({
               </button>
               <button
                 type="submit"
-                className="py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                className="py-2 px-4 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 disabled:cursor-not-allowed"
+                disabled={recurrence === "week" && diasSemanales.length === 0}>
                 Guardar
               </button>
             </div>
