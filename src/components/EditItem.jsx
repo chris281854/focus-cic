@@ -162,6 +162,7 @@ export default function EditItem({
       )
       console.log("Item eliminado satisfactoriamente")
       onEventModified()
+      toggleEditVisibility()
     } catch (error) {
       console.error("Error al eliminar el item", error)
     }
@@ -181,6 +182,7 @@ export default function EditItem({
       )
       console.log("Items eliminados satisfactoriamente")
       onEventModified()
+      toggleEditVisibility()
     } catch (error) {
       console.error("Error al eliminar los items", error)
     }
