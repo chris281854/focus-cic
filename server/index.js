@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken")
 const nodemailer = require("nodemailer")
 const cron = require("node-cron")
 const axios = require("axios")
+const webpush = require("web-push")
 
 require("dotenv").config()
 
@@ -123,6 +124,62 @@ async function checkAndSendReminders() {
   }
 }
 
+async function checkAndSendRemindersWebPush() {
+  try {
+    // Obtener la fecha y hora actuales en formato 'YYYY-MM-DD HH:mm:ss'
+    const now = dayjs().format("YYYY-MM-DD HH:mm:ss")
+
+    // Consulta para obtener recordatorios y suscripciones
+    const query = `
+      SELECT r.name AS reminder_name, u.user_id, s.subscription
+      FROM "Reminders" r
+      JOIN "Users" u ON r.user_id = u.user_id
+      JOIN "User_Web_Push_Subscriptions" s ON u.user_id = s.user_id
+      WHERE r.date = $1 AND r.mail = true
+    `
+
+    // Ejecutar la consulta
+    const result = await pool.query(query, [now])
+
+    // Enviar notificaciones para cada recordatorio
+    for (const { reminder_name, user_id, subscription } of result.rows) {
+      // Crear el payload de la notificación
+      const payload = JSON.stringify({
+        title: `${reminder_name}`,
+        message: `Tienes un recordatorio: ${reminder_name}`,
+      })
+
+      try {
+        // Enviar notificación push al usuario
+        await webpush.sendNotification(JSON.parse(subscription), payload)
+        console.log(`Notificación enviada a usuario ${user_id}.`)
+      } catch (error) {
+        // Manejar errores de envío
+        if (error.statusCode === 410) {
+          console.log(
+            `Suscripción inválida para usuario ${user_id}. Eliminando...`
+          )
+          await pool.query(
+            `DELETE FROM "User_Web_Push_Subscriptions" WHERE user_id = $1`,
+            [user_id]
+          )
+        } else {
+          console.error(
+            `Error al enviar notificación a usuario ${user_id}:`,
+            error
+          )
+        }
+      }
+    }
+
+    console.log(
+      `Se enviaron ${result.rows.length} notificaciones para la fecha ${now}.`
+    )
+  } catch (error) {
+    console.error("Error al verificar los recordatorios:", error)
+  }
+}
+
 async function deleteOldReminders(now) {
   try {
     const deleteQuery = `
@@ -156,10 +213,42 @@ function sendEmail(name, email) {
   })
 }
 
+console.log(process.env.PUBLIC_VAPID_KEY, process.env.PRIVATE_VAPID_KEY)
+
+let pushSubscription
+
+webpush.setVapidDetails(
+  "mailto:josedgonzalez02@gmail.com",
+  process.env.PUBLIC_VAPID_KEY,
+  process.env.PRIVATE_VAPID_KEY
+)
+
+app.post("/api/subscription", async (req, res) => {
+  if (!process.env.PUBLIC_VAPID_KEY || !process.env.PRIVATE_VAPID_KEY) {
+    throw new Error("VAPID keys are missing! Set them in your .env file")
+  }
+
+  pushSubscription = req.body.subscription
+  console.log(pushSubscription)
+
+  const payload = JSON.stringify({
+    title: "custom notification",
+    message: "Hello world",
+  })
+  try {
+    await webpush.sendNotification(pushSubscription, payload)
+    res.status(200).json({ success: true })
+  } catch (error) {
+    console.error("Error sending notification:", error)
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
 // Programar la tarea para que se ejecute cada minuto
 cron.schedule("* * * * *", () => {
   console.log("Verificando recordatorios...")
   checkAndSendReminders()
+  checkAndSendRemindersWebPush()
 })
 
 // Mapeo de días de la semana a números para comparación
@@ -727,21 +816,39 @@ app.post("/api/post/lifeAreaScore", authenticateToken, async (req, res) => {
 })
 
 app.post("/api/post/reminders", authenticateToken, async (req, res) => {
-  const { name, reminderDate, userId, reminderMail } = req.body
+  const { name, reminderDate, userId, reminderMail, subscription } = req.body
 
   if (!reminderDate || !userId) {
-    return res.status(400).json({ error: "data requerida" })
+    return res
+      .status(400)
+      .json({ error: "Datos requeridos: reminderDate y userId." })
   }
 
   try {
-    const result = await pool.query(
-      `INSERT INTO "Reminders" (name, user_id, date, mail) VALUES ($1, $2, $3, $4) RETURNING *`,
+    // Inserta el recordatorio en la tabla "Reminders"
+    const reminderResult = await pool.query(
+      `INSERT INTO "Reminders" (name, user_id, date, mail) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING *`,
       [name, userId, reminderDate, reminderMail]
     )
-    res.status(201).json(result.rows[0]) // Retorna el recordatorio creado
+
+    // Manejo de la suscripción del usuario
+    if (subscription) {
+      await pool.query(
+        `INSERT INTO "User_Web_Push_Subscriptions" (user_id, subscription) 
+         VALUES ($1, $2) 
+         ON CONFLICT (user_id) DO UPDATE SET subscription = $2`,
+        [userId, JSON.stringify(subscription)]
+      )
+      console.log(`Suscripción actualizada para el usuario ${userId}.`)
+    }
+
+    // Retorna el recordatorio creado
+    res.status(201).json(reminderResult.rows[0])
   } catch (error) {
-    console.error("Error al crear reminder", error)
-    res.status(500).json({ error: "Error al crear reminder" })
+    console.error("Error al crear recordatorio o guardar suscripción:", error)
+    res.status(500).json({ error: "Error al procesar la solicitud." })
   }
 })
 

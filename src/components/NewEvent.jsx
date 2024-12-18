@@ -205,7 +205,7 @@ export default function NewEvent({
                 <label
                   htmlFor="EventDate"
                   className="block text-white text-left mb-1">
-                  Comienza {!category && "*"}
+                  Comienza *
                 </label>
                 <input
                   type="datetime-local"
