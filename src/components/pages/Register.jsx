@@ -6,6 +6,7 @@ import Footer from "../Footer"
 import sendEmail from "../EmailSender"
 import axios from "axios"
 import { GoogleLogin } from "@react-oauth/google"
+import { jwtDecode } from "jwt-decode"
 
 export default function Register() {
   const { login, user } = useUser() // Usamos Zustand en lugar de useContext

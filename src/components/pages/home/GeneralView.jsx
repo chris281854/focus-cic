@@ -11,7 +11,7 @@ import { faP, faPlus } from "@fortawesome/free-solid-svg-icons"
 export default function GeneralView() {
   const { user, lifeAreas, fetchEvents, fetchReminders, events, reminders } =
     useUser()
-
+  console.log("eventos:", events) 
   // const [events, setEvents] = useState([])
   const [alarms, setAlarms] = useState([])
   const [tasks, setTasks] = useState([])

@@ -359,7 +359,8 @@ app.get("/api/get/events", authenticateToken, async (req, res) => {
     )
 
     const events = updatedResult.rows
-
+    console.log('events :>> ', events);
+    console.log('userId :>> ', userId);
     res.status(200).json(events)
   } catch (err) {
     await client.query("ROLLBACK")
