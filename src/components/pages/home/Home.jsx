@@ -4,12 +4,14 @@ import Header from "../../Header"
 import Footer from "../../Footer"
 import Panel from "./Panel"
 import axios from "axios"
+import { useUser } from "../../../context/UserContext"
 // import requestNotificationPermission from "../../../../server/RequestNotification"
 
 export default function Home() {
+  const { user } = useUser()
   const [panelVisibility, setPanelVisibility] = useState(true)
   const PUBLIC_VAPID_KEY =
-    "BEiybRMQEqnja71SML1ISBb99aNQz_vxWBhwXS6Xucbh_-s7xTwqKq4f9gYn8ShmGuYs3x2tAR0lavFFVEub4uI"
+    "BLKrykdHlaoAPXXV2iU8jRnKpaJxP8sM-SVt6IKXKeWJ1HzeMQcvoB_0pjTW7LGAR8cO5KlbRTNsWP57VEZp9ZU"
 
   const subscription = async () => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
@@ -34,6 +36,7 @@ export default function Home() {
       const response = await axios.post(
         "http://localhost:3001/api/subscription",
         {
+          userId: user.user_id,
           subscription,
         },
         {
