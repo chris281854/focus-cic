@@ -1,123 +1,180 @@
-import React from "react"
-import "./Welcome.css"
-import Header from "../Header.jsx"
+import React, { useState, useEffect } from "react"
+import Header from "../Header"
 import Footer from "../Footer"
-// import SplitLine from "../SplitLine.jsx"
+import { Link } from "react-router-dom"
 
 export default function Welcome() {
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const totalSlides = 3
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  const nextSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide - 1 + totalSlides) % totalSlides)
+  }
+
   return (
-    <>
-      <div className="welcome-container flex items-center content-center flex-col bg-white text-primary dark:bg-bg-main-color dark:text-white pb-8">
-        <Header></Header>
-        <div className="start-div flex top-0 static w-full content-center items-center">
-          <div className="box">
-            <h1 className="text-white">
-              Esto, es <mark>Focus</mark>
+    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+      <Header />
+      <main className="flex flex-col items-center pb-16">
+        <section
+          className="w-full h-[90vh] bg-cover bg-center bg-no-repeat flex items-center justify-center"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('Wallpaper.jpg')",
+          }}>
+          <div className="bg-black bg-opacity-80 p-12 rounded-3xl">
+            <h1 className="text-5xl font-bold text-white">
+              <span className="text-accent">Focus</span>
             </h1>
           </div>
-        </div>
-        <div className="container static flex content-center items-center flex-col border-solid border-2 p-8 pb-12 w-11/12 mt-8 rounded-xl dark:border-0">
-          <div className="text-block text-center text-2xl">
-            <h1>The Focus Project</h1>
-            <br />
-            {/* <SplitLine color="white" height="2px" /> */}
-            <hr className="border-primary border-2 rounded-full dark:border-white" />
-            <br />
-            <p>
-              Focus es tu aliado definitivo para dirigir todos los aspectos de
-              tu vida hacia la estabilidad y el éxito. Nuestra plataforma te
-              proporciona las herramientas esenciales para organizar tu estilo
-              de vida, desarrollar hábitos sólidos y embarcarte en un viaje de
-              superación personal.
-            </p>
-            <br />
-            <br />
-            <h2>Enfoque:</h2>
-            <br />
-            <p>
-              En la vertiginosa era moderna, las distracciones interminables nos
-              impiden concentrarnos en lo que realmente importa. The Focus
-              Project te ayuda a dirigir tu atención hacia lo correcto: tu
-              futuro, tus relaciones, tu salud física, mental y espiritual, tu
-              bienestar general.
-            </p>
-            <br />
-            <br />
-            <h2>Control:</h2>
-            <br />
-            <p>
-              Recupera el control de tu vida al rechazar la distracción del
-              entretenimiento instantáneo. Construye tu fuerza de voluntad,
-              elige tu propio camino y conviértete en la mejor versión de ti
-              mismo.
+        </section>
+
+        <section className="mx-auto mt-16 px-4">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h2 className="text-4xl font-bold text-accent">
+              The Focus Project
+            </h2>
+            <hr className="border-slate-400 dark:border-slate-600" />
+            <p className="text-xl">
+              Focus es una herramienta de organización de tareas y eventos.
             </p>
           </div>
-          <div className="text-block text-left text-2xl mt-10">
-            <p>
-              <mark>Agenda:</mark> Con herramientas de organización,
-              planificación, seguimiento y desarrollo de hábitos que necesitas
-              para tomar el control de tu vida.
-            </p>
-            <br />
-            <p>
-              <mark>Organiza tus tareas diarias:</mark> A través de listas de
-              tareas y recordatorios, mantente en la cima de tus
-              responsabilidades diarias.
-            </p>
-            <br />
-            <p>
-              <mark>Planifica tu agenda:</mark> Crea y organiza tu futuro con
-              una planificación efectiva.
-            </p>
-            <br />
-            <p>
-              <mark>Enfócate en lo que importa:</mark>
-              Trabaja en las áreas realmente importantes de tu vida.
-            </p>
-            <br />
-            <p>
-              <mark>Recordatorios</mark>: Nuestra plataforma se encargará de
-              planificar, organizar y recordarte todo de la manera más eficiente
-              posible.
-            </p>
-          </div>
-          <div className="cards flex">
-            <div className="card bg-primary text-white dark:text-white">
+
+          <div className="grid md:grid-cols-2 gap-8 mt-16">
+            <article className="bg-slate-800 dark:bg-slate-800 p-8 rounded-2xl text-white">
+              <h3 className="text-2xl font-bold text-accent mb-4">
+                Calendario:
+              </h3>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
-                nisi laborum, nobis alias assumenda in ullam quis iste veritatis
-                recusandae aliquid delectus cupiditate, quo tenetur pariatur
-                omnis soluta quidem temporibus!
+                Organiza y gestiona tus tareas y eventos de manera eficiente con
+                un calendario intuitivo y fácil de usar, diseñado para
+                simplificar tu planificación diaria y mejorar tu productividad.
               </p>
-            </div>
-            <div className="img-div">
-              <img src="https://placebear.com/g/300/300" alt="Test img" />
-            </div>
-            <div className="img-div">
-              <img src="https://placebear.com/g/300/300" alt="Test img" />
-            </div>
-            <div className="card bg-primary text-white dark:text-white">
+            </article>
+            <article className="bg-slate-800 dark:bg-slate-800 p-8 rounded-2xl text-white">
+              <h3 className="text-2xl font-bold text-accent mb-4">Hábitos</h3>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. A
-                distinctio placeat quae voluptatibus nobis odit impedit enim
-                neque sint tempore, eligendi hic non molestias perspiciatis aut
-                nesciunt, recusandae et necessitatibus?
+                Crea y gestiona tus rutinas diarias organizando y categorizando
+                tus tareas en grupos, y realiza un seguimiento de tu progreso
+                para mantener tus objetivos en camino.{" "}
               </p>
+            </article>
+          </div>
+
+          <div className="bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl mt-16 text-slate-900 dark:text-white">
+            <h3 className="text-2xl font-bold text-accent mb-4">
+              Características principales:
+            </h3>
+            <ul className="list-disc list-inside space-y-2">
+              <li>
+                <span className="font-semibold">Agenda:</span> Herramientas de
+                organización, planificación, seguimiento y desarrollo de
+                hábitos.
+              </li>
+              <li>
+                <span className="font-semibold">
+                  Organiza tus tareas diarias:
+                </span>{" "}
+                Listas de tareas y recordatorios para mantener el control de tus
+                responsabilidades.
+              </li>
+              <li>
+                <span className="font-semibold">Planifica tu agenda:</span> Crea
+                y organiza tu futuro con una planificación efectiva.
+              </li>
+              <li>
+                <span className="font-semibold">
+                  Enfócate en lo que importa:
+                </span>{" "}
+                Trabaja en las áreas realmente importantes de tu vida.
+              </li>
+              <li>
+                <span className="font-semibold">Recordatorios:</span> Nuestra
+                plataforma se encargará de planificar, organizar y recordarte
+                todo de la manera más eficiente posible.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section className="w-full mt-16 bg-slate-100 dark:bg-slate-800 py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-8">
+              Descubre más sobre Focus
+            </h2>
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden">
+              <div
+                className="flex transition-all duration-300 ease-in-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+                <div className="flex flex-col items-center w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
+                  <img
+                    src="/calendar screenshot.png"
+                    alt="Vistas de calendario"
+                    className="w-9/12 max-sm:w-full object-contain rounded-lg mb-4"
+                  />
+                  <h3 className="text-xl font-semibold text-center">
+                    Vistas de calendario
+                  </h3>
+                </div>
+                <div className="flex flex-col items-center w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
+                  <img
+                    src="/habits screenshot.png"
+                    alt="Desarrollo de hábitos"
+                    className="w-9/12 max-sm:w-full object-contain rounded-lg mb-4"
+                  />
+                  <h3 className="text-xl font-semibold text-center">
+                    Desarrollo de hábitos
+                  </h3>
+                </div>
+                <div className="flex flex-col items-center w-full flex-shrink-0 bg-white dark:bg-slate-700 p-6 rounded-xl shadow-lg">
+                  <img
+                    src="/general screenshot.png"
+                    alt="Gestión de tareas y eventos"
+                    className="w-9/12 max-sm:w-full object-contain rounded-lg mb-4"
+                  />
+                  <h3 className="text-xl font-semibold text-center">
+                    Gestión de tareas y eventos
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={prevSlide}
+                className="absolute w-12 h-16 left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-r-md"
+                aria-label="Slide anterior">
+                &#10094;
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute w-12 h-16 right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-l-md"
+                aria-label="Siguiente slide">
+                &#10095;
+              </button>
             </div>
           </div>
-          <div className="text-box flex items-center flex-col mt-4">
-            <h1>
-              Empieza a tomar el <mark>Control</mark>
-            </h1>
-            <br />
-            <br />
-            <button className="subscribe-button">
-              <h2>¡Regístrate ahora!</h2>
+        </section>
+        <section className="mx-auto mt-16 px-4 text-center">
+          <h2 className="text-4xl font-bold mb-8">
+            Empieza a tomar el <span className="text-accent">Control</span>
+          </h2>
+          <Link to="/register">
+            <button className="bg-slate-500 hover:bg-primary text-white hover:text-accent text-2xl py-4 px-8 rounded-full transition duration-300 ease-in-out transform hover:scale-105">
+              Registrarse
             </button>
-          </div>
-        </div>
-      </div>
-      <Footer></Footer>
-    </>
+          </Link>
+        </section>
+      </main>
+      <Footer />
+    </div>
   )
 }

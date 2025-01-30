@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useContext } from "react"
 import { Link } from "react-router-dom"
 import { useUser } from "../context/UserContext"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons"
 
 const Header = () => {
-  const { user, logout } = useUser()
+  const { user, logout, darkMode, toggleDarkMode } = useUser()
 
   const handleLogOut = () => {
     logout()
@@ -21,48 +23,36 @@ const Header = () => {
     }
   }, [])
 
-  //dark mode
-  const [theme, setTheme] = useState(() => {
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark"
-    }
-    return "light"
-  })
-
   useEffect(() => {
-    if (theme === "dark") {
+    if (darkMode === "dark") {
       document.querySelector("html").classList.add("dark")
     } else {
       document.querySelector("html").classList.remove("dark")
     }
-  }, [theme])
-
-  const handleChangeTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"))
-  }
+  }, [])
 
   //links styles
-  const twLinks =
-    "text-white pl-3 pr-3 hover:text-blue transition-all duration-200"
+  const twLinks = "text-white lg:px-3 px-1 text-xs hover:text-blue"
 
   return (
     <header
-      className={`flex top-0 w-full pt-4 pb-4 items-center justify-between z-50 bg-primary transition-all duration-1000 flex-row 
-        `}>
-
-        {/* Change color scroll => ${scrollY > 0 ? "bg-opacity-30 bg-black backdrop-blur" : ""} */}
-      <Link className="tittle-header hover:text-accent transition-all duration-500">
-        <img src="/Focus Logo Vector Large.png" alt="Logo" />
-        <h2>Focus</h2>
+      className={`flex top-0 w-full lg:h-20 h-10 items-center z-50 bg-slate-800 dark:bg-slate-900 select-none overflow-hidden text-center`}>
+      <Link className="bg-cover w-fit h-full flex items-center p-2">
+        <img
+          src="/Focus Logo Vector Large.png"
+          alt="Logo"
+          className="object-contain h-full w-full"
+        />
+        <h3 className="max-sm:hidden hover:text-accent transition-all">Focus</h3>
       </Link>
-      <div>
-        <button
-          className="border-2 border-white bg-transparent focus:outline-none w-16 transition-all"
-          onClick={handleChangeTheme}>
-          {theme === "dark" ? "💡" : "🌙"}
+      <div className="flex ml-auto items-center">
+      <button
+          className={`w-fit bg-transparent text-white hover:text-blue-700 content-center`}
+          onClick={toggleDarkMode}>
+          <FontAwesomeIcon icon={darkMode === "light" ? faMoon : faSun} />
         </button>
-        <Link to="/about-us" className={twLinks}>
-          Sobre nosotros
+        <Link to="/welcome" className={twLinks}>
+          ¿Comenzando en Focus?
         </Link>
         {user ? (
           <Link onClick={handleLogOut} to="/login" className={twLinks}>
