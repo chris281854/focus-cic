@@ -3,14 +3,13 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { useUser } from "../context/UserContext"
 import dayjs from "dayjs"
-import { CartesianGrid } from "recharts"
 
 export default function NewEvent({
   onEventCreated,
   setToggleNewEvent,
   timedEvent,
 }) {
-  const { user, lifeAreas } = useUser()
+  const { user, lifeAreas, timezone } = useUser()
   const [state, setState] = useState(0)
   const [eventDate, setEventDate] = useState(
     timedEvent || dayjs().format("YYYY-MM-DD HH:mm")
@@ -18,7 +17,7 @@ export default function NewEvent({
   const [endDate, setEndDate] = useState(null)
   const [eventName, setEventName] = useState("")
   const [eventLifeArea, setEventLifeArea] = useState("")
-  const [reminderDate, setReminderDate] = useState(null)
+  const [preReminderDate, setPreReminderDate] = useState(0)
   const [eventPriority, setEventPriority] = useState(3)
   const [eventDescription, setEventDescription] = useState("")
   const [addReminder, setAddReminder] = useState(false)
@@ -39,7 +38,6 @@ export default function NewEvent({
     setEndDate(null)
     setEventName("")
     setEventLifeArea("")
-    setReminderDate(null)
     setEventPriority(3)
     setEventDescription("")
     setAddReminder(false)
@@ -78,22 +76,43 @@ export default function NewEvent({
     })
   }
 
+  console.log(
+    "EventDate with dayjs:",
+    dayjs(eventDate)
+      .subtract(preReminderDate, "minutes")
+      .format("YYYY-MM-DD HH:mm")
+  )
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    //CONVERTIR A TIMEZONE DEL USUARIO
+    const eventDateInUserTimezone = dayjs.tz(eventDate, timezone).utc().format()
+    let reminderDateCalc = null
+
+    if (addReminder) {
+      reminderDateCalc = dayjs(eventDate)
+        .tz(timezone) // Convierte la fecha al timezone del usuario
+        .subtract(preReminderDate, "minutes") // Resta los minutos del recordatorio
+        .utc() // Convierte a UTC
+        .format() // Formatea correctamente
+    }
+
     // Preparar los datos a enviar de acuerdo a la recurrencia
     let requestData = {
-      reminderDate: addReminder ? reminderDate : null,
-      endDate: endDate || null,
+      reminderDate: addReminder ? reminderDateCalc : null,
+      endDate: endDate ? dayjs.tz(endDate, timezone).utc().format() : null,
       eventName,
       category: category ? "task" : "event",
       lifeAreaIds: selectedAreas,
-      eventDate: eventDate || null,
+      eventDate: dayjs.tz(eventDate, timezone).utc().format() || null,
       eventPriority,
       eventDescription,
       userId: user.user_id,
       mail,
+      timezone,
     }
+    console.log("Datos enviados :>> ", requestData)
 
     // Lógica para manejar la recurrencia
     if (recurrence === "week") {
@@ -305,14 +324,19 @@ export default function NewEvent({
             </div>
             {addReminder && (
               <div>
-                <input
-                  type="datetime-local"
-                  name="reminderDate"
-                  value={reminderDate}
-                  onChange={(e) => setReminderDate(e.target.value)}
-                  required
+                <select
                   className="w-full p-2 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
+                  value={preReminderDate}
+                  onChange={(e) => setPreReminderDate(e.target.value)}>
+                  <option value="0">A la hora del evento</option>
+                  <option value="5">5 minutos antes</option>
+                  <option value="10">10 minutos antes</option>
+                  <option value="15">15 minutos antes</option>
+                  <option value="20">20 minutos antes</option>
+                  <option value="30">30 minutos antes</option>
+                  <option value="60">1 hora antes</option>
+                  <option value="1440">un día antes</option>
+                </select>
               </div>
             )}
             <div className="flex justify-around mt-4">

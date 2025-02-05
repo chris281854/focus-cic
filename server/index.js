@@ -1,4 +1,6 @@
 const dayjs = require("dayjs")
+const utc = require("dayjs/plugin/utc")
+const timezone = require("dayjs/plugin/timezone")
 const express = require("express")
 const cors = require("cors")
 const { Pool } = require("pg")
@@ -11,6 +13,29 @@ const axios = require("axios")
 const webpush = require("web-push")
 
 require("dotenv").config()
+
+// Day.js plugins necesarios
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+// Definir la zona horaria deseada
+const FIXED_TIMEZONE = "America/New_York"
+
+// Obtener la fecha y hora en la zona horaria específica
+const now = dayjs().tz(FIXED_TIMEZONE)
+const formatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: FIXED_TIMEZONE,
+  timeZoneName: "short",
+})
+const timeZoneAbbreviation = formatter
+  .formatToParts(now.toDate())
+  .find((part) => part.type === "timeZoneName").value
+
+console.log(
+  `Fecha y hora en zona fija: ${now.format(
+    "YYYY-MM-DD HH:mm:ss"
+  )} (${timeZoneAbbreviation})`
+)
 
 const app = express()
 const SECRET_KEY = process.env.SECRET_KEY
@@ -94,20 +119,24 @@ transporter.verify(function (error, success) {
 })
 
 async function checkAndSendReminders() {
-  try {
-    // Obtenemos la fecha y hora actuales usando dayjs en el formato 'YYYY-MM-DD HH:mm:ss'
-    const now = dayjs().format("YYYY-MM-DD HH:mm:ss")
+  console.log("dayjs date: ", dayjs())
 
+  try {
+    const now = dayjs().utc()
+    const oneMinuteAgo = now.subtract(1, "minute")
     // Consulta a la base de datos para buscar recordatorios con la fecha actual
     const query = `
       SELECT r.name AS reminder_name, u.email, uwps.subscription
       FROM "Reminders" r
       JOIN "Users" u ON r.user_id = u.user_id
       LEFT JOIN "User_Web_Push_Subscriptions" uwps ON u.user_id = uwps.user_id
-      WHERE r.date = $1 AND r.mail = true
-    `
+      WHERE r.date >= $1 AND r.date <= $2
+`
 
-    const result = await pool.query(query, [now])
+    const result = await pool.query(query, [
+      oneMinuteAgo.format(),
+      now.format(),
+    ])
     console.log(result)
     // Si hay recordatorios para la fecha actual, enviamos correos
     for (const reminder of result.rows) {
@@ -116,8 +145,9 @@ async function checkAndSendReminders() {
       // Enviar notificación Web Push si existe una suscripción
       if (subscription) {
         const payload = JSON.stringify({
-          title: "Recordatorio",
-          message: `Tienes un evento: ${reminder_name} programado para ahora.`,
+          title: `${reminder_name}`,
+          message: `Este es un recordatorio de Focus`,
+          url: `localhost:5173/home/habits`,
         })
 
         try {
@@ -200,12 +230,13 @@ async function checkAndSendReminders() {
 // }
 
 async function deleteOldReminders(now) {
+  const oneMinuteAgo = now.subtract(1, "minute")
   try {
     const deleteQuery = `
       DELETE FROM "Reminders"
       WHERE date < $1
     `
-    const result = await pool.query(deleteQuery, [now])
+    const result = await pool.query(deleteQuery, [oneMinuteAgo.format()])
     console.log(`Se eliminaron ${result.rowCount} recordatorios antiguos.`)
   } catch (error) {
     console.error("Error al eliminar recordatorios antiguos:", error)
@@ -672,10 +703,10 @@ app.post("/api/post/events", async (req, res) => {
     // Insertar el recordatorio si existe
     if (reminderDate) {
       const reminderResult = await client.query(
-        'INSERT INTO "Reminders" (date, user_id, mail) VALUES ($1, $2, $3) RETURNING reminder_id',
-        [reminderDate, userId, mail]
+        'INSERT INTO "Reminders" (name, date, user_id, mail) VALUES ($1, $2, $3, $4) RETURNING reminder_id',
+        [eventName, reminderDate, userId, mail]
       )
-
+      console.log("reminderDate, eventDate", reminderDate, eventDate)
       if (!reminderResult.rows || reminderResult.rows.length === 0) {
         throw new Error("Error al insertar el recordatorio")
       }
