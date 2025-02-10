@@ -138,7 +138,7 @@ async function checkAndSendReminders() {
       now.format(),
     ])
     console.log(result)
-    // Si hay recordatorios para la fecha actual, enviamos correos
+    // Si hay recordatorios para la fecha actual, se envía un correo
     for (const reminder of result.rows) {
       const { reminder_name, email, subscription } = reminder
 
@@ -230,13 +230,13 @@ async function checkAndSendReminders() {
 // }
 
 async function deleteOldReminders(now) {
-  const oneMinuteAgo = now.subtract(1, "minute")
+  // const oneMinuteAgo = now.subtract(1, "minute")
   try {
     const deleteQuery = `
       DELETE FROM "Reminders"
       WHERE date < $1
     `
-    const result = await pool.query(deleteQuery, [oneMinuteAgo.format()])
+    const result = await pool.query(deleteQuery, [now.format()])
     console.log(`Se eliminaron ${result.rowCount} recordatorios antiguos.`)
   } catch (error) {
     console.error("Error al eliminar recordatorios antiguos:", error)

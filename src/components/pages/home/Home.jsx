@@ -53,7 +53,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      <button onClick={subscription}>NOTIFICAR</button>
+      {/* <button onClick={subscription}>NOTIFICAR</button> */}
       {/* <Header /> */}
       <main className="container static flex h-full min-h-screen w-full max-w-full bg-white dark:bg-bg-main-color">
         <Panel
