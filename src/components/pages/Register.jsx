@@ -190,7 +190,7 @@ export default function Register() {
         {/* <!-- Right: Login Form --> */}
         <section className="lg:px-32 md:px-44 sm:px-10 p-10 w-full lg:w-1/2 items-center flex flex-col lg:h-screen h-fit overflow-y-scroll">
           <h2 className="mb-4 text-center">Registrarse con Google</h2>
-          <div className="border-b pb-8 w-full justify-center flex">
+          <div className="border-b pb-8 w-96 justify-center flex">
             <GoogleLogin
               onSuccess={googleResponseMessage}
               onError={googleErrorMessage}
@@ -199,7 +199,7 @@ export default function Register() {
               }}
             />
           </div>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-80">
             {/* <!-- Email Input --> */}
             <div className="mb-4">
               <label
@@ -330,7 +330,7 @@ export default function Register() {
           </form>
           {/* <!-- Login  Link --> */}
           <div className="mt-6 text-blue-500 text-center">
-            <p className="text-white">¿Ya tienes cuenta?</p>
+            <p className="dark:text-white text-black">¿Ya tienes cuenta?</p>
             <Link to="/login" className="hover:underline">
               Iniciar Sesión
             </Link>

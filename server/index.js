@@ -1244,11 +1244,16 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
 
       if (!eventReminderId && eventReminderDate) {
         const insertReminderQuery = `
-        INSERT INTO "Reminders" ("date", "mail", "user_id")
-        VALUES ($1, $2, $3)
+        INSERT INTO "Reminders" ("name", "date", "mail", "user_id")
+        VALUES ($1, $2, $3, $4)
         RETURNING "reminder_id";
       `
-        const insertReminderValues = [eventReminderDate, eventMail, userId]
+        const insertReminderValues = [
+          eventName,
+          eventReminderDate,
+          eventMail,
+          userId,
+        ]
         const reminderResult = await client.query(
           insertReminderQuery,
           insertReminderValues
@@ -1268,11 +1273,16 @@ app.patch("/api/event/update", authenticateToken, async (req, res) => {
         await client.query(deleteReminderQuery, [eventReminderId])
 
         const insertReminderQuery = `
-        INSERT INTO "Reminders" ("date", "mail", "user_id")
-        VALUES ($1, $2, $3)
+        INSERT INTO "Reminders" ("name", "date", "mail", "user_id")
+        VALUES ($1, $2, $3, $4)
         RETURNING "reminder_id";
       `
-        const insertReminderValues = [eventReminderDate, eventMail, userId]
+        const insertReminderValues = [
+          eventName,
+          eventReminderDate,
+          eventMail,
+          userId,
+        ]
 
         const reminderResult = await client.query(
           insertReminderQuery,
