@@ -162,7 +162,7 @@ export default function Settings() {
             Personalización
           </div>
         </button>
-        <button
+        {/* <button
           onClick={() => handleButtonClick("datos")}
           className={`h-14 flex items-center transition-all duration-300 rounded-2xl ${
             activeSection === "datos" ? wtActiveLinks : wtInactiveLinks
@@ -178,7 +178,7 @@ export default function Settings() {
             }`}>
             Exportación de Datos
           </div>
-        </button>
+        </button> */}
       </nav>
       <div className="w-full overflow-y-auto p-6 bg-gray-100 dark:bg-bg-main-color">
         {activeSection === "general" && (

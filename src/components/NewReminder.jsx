@@ -14,6 +14,7 @@ export default function NewReminder({
 
   const [reminderName, setReminderName] = useState("")
   const [reminderDate, setReminderDate] = useState("")
+  const [reminderEmail, setReminderEmail] = useState(false)
   const today = dayjs().format("YYYY-MM-DD HH:MM")
 
   const toggleNewReminder = () => {
@@ -34,6 +35,10 @@ export default function NewReminder({
   const reset = () => {
     setReminderName("")
     setReminderDate("")
+  }
+
+  const handleEmailNotification = () => {
+    setReminderEmail(!reminderEmail)
   }
 
   // const sendEmail = async (formData) => {
@@ -58,7 +63,7 @@ export default function NewReminder({
       name: reminderName,
       userId: user.user_id,
       reminderDate,
-      reminderMail: true,
+      reminderMail: reminderEmail,
       reminderName,
     }
 
@@ -69,15 +74,6 @@ export default function NewReminder({
         formData,
         { withCredentials: true }
       )
-      // if (response.status === 201) {
-      //   // Llama a sendEmail para enviar el correo
-      //   await sendEmail({
-      //     name: "Focus", // O el nombre del usuario que envía
-      //     email: user.email, // Dirección del remitente (usuario que está creando el recordatorio)
-      //     message: `Tienes un nuevo recordatorio:
-      //     ${reminderName} para el ${reminderDate}.`,
-      //   })
-      // } //REMOVER ANTES DEL PRÓXIMO PULL REQUEST
 
       reset()
       toggleNewReminder()
@@ -128,6 +124,18 @@ export default function NewReminder({
               onChange={(e) => setReminderDate(e.target.value)}
               required
             />
+            <div className="flex ">
+              <label
+                htmlFor="reminderEmail"
+                className="block text-white text-left mb-1">
+                Notificación por correo
+              </label>
+              <input
+                type="checkbox"
+                name="reminderEmail"
+                onClick={handleEmailNotification}
+              />
+            </div>
             <div className="flex justify-around mt-4">
               <button
                 type="reset"

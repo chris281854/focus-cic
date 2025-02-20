@@ -103,7 +103,7 @@ export default function Login() {
         {/* <!-- Right: Login Form --> */}
         <div className="lg:px-32 md:px-44 sm:px-10 p-10 w-full lg:w-1/2 items-center flex flex-col lg:h-screen h-fit overflow-scroll">
           <h2 className="mb-4">Inicio de Sesión</h2>
-          <div className="border-b pb-8 w-full justify-center flex">
+          <div className="border-b pb-8 w-96 justify-center flex">
             <GoogleLogin
               onSuccess={googleResponseMessage}
               onError={googleErrorMessage}
@@ -112,7 +112,7 @@ export default function Login() {
               }}
             />
           </div>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-80">
             {/* <!-- Username Input --> */}
             <div className="">
               <label

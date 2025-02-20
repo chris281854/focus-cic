@@ -25,8 +25,10 @@ export default function EditItem({
   )
   const [eventDescription, setEventDescription] = useState(event?.description)
   const [category, setCategory] = useState(0) //task - event
-  const [addEventReminder, setAddEventReminder] = useState(false)
-  const [eventMail, setEventMail] = useState(event?.reminder_id ? true : false)
+  const [addEventReminder, setAddEventReminder] = useState(
+    event?.reminder_id ? true : false
+  )
+  const [eventMail, setEventMail] = useState(null)
   const [eventReminderId, setEventReminderId] = useState(event?.reminder_id)
   const [eventLifeArea, setEventLifeArea] = useState(event?.life_areas)
   const [selectedAreas, setSelectedAreas] = useState(
@@ -36,7 +38,7 @@ export default function EditItem({
   )
   const [diasSemanales, setDiasSemanales] = useState([]) // Para la recurrencia semanal
   const [recurrence, setRecurrence] = useState() // Tipo de recurrencia: "semanal", "mensual", "anual"
-
+  console.log("event :>> ", event)
   useEffect(() => {
     if (event.recurrency_type === "month") {
       setRecurrence("month")
@@ -52,7 +54,7 @@ export default function EditItem({
   console.log("diasSemanales", diasSemanales)
 
   const [eventReminderDate, setEventReminderDate] = useState(
-    event?.reminder_date || undefined
+    event?.reminder_date ? event.reminder_date : undefined
   )
 
   const toggleEditVisibility = () => {
